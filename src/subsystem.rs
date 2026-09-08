@@ -14,7 +14,7 @@ use crate::{Context, Result, error::Error};
 ///
 /// ```rust
 /// use std::mem::ManuallyDrop;
-/// use halcyon::{Context, subsystem::Video};
+/// use sandlot::{Context, subsystem::Video};
 ///
 /// let ctx = Context::new();
 ///

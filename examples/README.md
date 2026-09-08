@@ -1,6 +1,6 @@
-# halcyon-rs examples
+# sandlot examples
 
-A showcase of the usage & capabilities of certain SDL features, and how halcyon-rs
+A showcase of the usage & capabilities of certain SDL features, and how sandlot
 wraps them in an intuitive interface.
 
 # Important

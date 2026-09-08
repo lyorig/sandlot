@@ -1,7 +1,7 @@
 use rustest::test;
 use sdl3_sys::events::*;
 
-use halcyon::{
+use sandlot::{
     Context,
     event::{Event, EventIter},
     subsystem::Events,
@@ -11,7 +11,7 @@ use halcyon::{
 #[test]
 fn event_sdl_to_hal() {
     // Manually set the timestamp for testing purposes.
-    let ticks = halcyon::ticks_ns();
+    let ticks = sandlot::ticks_ns();
 
     let hal = Event::from(&SDL_Event {
         clipboard: SDL_ClipboardEvent {
@@ -34,7 +34,7 @@ fn event_hal_to_sdl() {
     let mut sdl = SDL_Event::from(&Event::Quit);
 
     // Manually set the timestamp for testing purposes.
-    let ticks = halcyon::ticks_ns();
+    let ticks = sandlot::ticks_ns();
     sdl.quit.timestamp = ticks;
 
     assert!(unsafe { sdl.quit.r#type } == SDL_EVENT_QUIT);
@@ -47,7 +47,7 @@ fn event_hal_to_sdl() {
 #[test]
 fn event_timestamp() {
     let mut evt = Event::Quit;
-    let ticks = halcyon::ticks_ns();
+    let ticks = sandlot::ticks_ns();
     evt.set_timestamp(ticks);
 
     let sdl = SDL_Event::from(&evt);

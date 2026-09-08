@@ -4,7 +4,7 @@
     After running this script, `cargo build --example` should succeed on Windows.
 
     .DESCRIPTION
-    Compiles HLSL shaders for use with halcyon-rs' GPU examples on Windows.
+    Compiles HLSL shaders for use with sandlot's GPU examples on Windows.
     Requires the Visual Studio Build Tools, and a `dxc[.exe]` that can be located by the script.
     To find where `dxc` is on your system, open the Native Tools (or Developer) Command Prompt, and run `which dxc`.
 #>

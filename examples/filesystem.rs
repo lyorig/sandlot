@@ -5,18 +5,18 @@ use std::{
     process::ExitCode,
 };
 
-use halcyon::{Result, fs};
+use sandlot::{Result, fs};
 
 fn run(path: &CStr) -> Result<()> {
     fs::enumerate_directory(path, |dir, file| {
-        halcyon::log!("{} -> {}", dir.to_string_lossy(), file.to_string_lossy());
+        sandlot::log!("{} -> {}", dir.to_string_lossy(), file.to_string_lossy());
         fs::EnumerationResult::Continue
     })
 }
 
 fn main() -> ExitCode {
     let Some(arg) = std::env::args().nth(1) else {
-        halcyon::log!("No path specified.");
+        sandlot::log!("No path specified.");
         return ExitCode::FAILURE;
     };
 
@@ -24,7 +24,7 @@ fn main() -> ExitCode {
     let path = unsafe { CString::from_vec_unchecked(arg.into_bytes()) };
 
     if let Err(e) = run(&path) {
-        halcyon::log!("An error occurred: {e}");
+        sandlot::log!("An error occurred: {e}");
         return ExitCode::FAILURE;
     }
 

@@ -2,7 +2,7 @@ use std::mem::ManuallyDrop;
 
 use rustest::{Result, main, test};
 
-use halcyon::{
+use sandlot::{
     Context,
     pixels::PixelFormat,
     properties::Properties,

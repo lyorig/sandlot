@@ -9,13 +9,13 @@
 //!
 //! # Builders
 //! Since each [`Properties`]-constructible SDL object has a finite well-documented set of properties,
-//! Halcyon exposes an intuitive builder for each such object via the associated `builder()` function.
+//! sandlot exposes an intuitive builder for each such object via the associated `builder()` function.
 //! Each builder "attaches" to an existing property group, enabling efficient memory usage.
 //!
 //! For example:
 //!
 //! ```rust
-//! use halcyon::{window::Window, rect::Point, resource::Resource, properties::Properties};
+//! use sandlot::{window::Window, rect::Point, resource::Resource, properties::Properties};
 //!
 //! // you can also obtain a 'static reference to an existing
 //! // global property group via `Properties::global()`

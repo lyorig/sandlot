@@ -1,5 +1,5 @@
-use halcyon::{Result, error::Error};
 use rustest::test;
+use sandlot::{Result, error::Error};
 use sdl3_sys::error::{SDL_ClearError, SDL_SetError};
 
 /// [`Error::current()`] reads the current SDL error string.

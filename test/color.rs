@@ -1,7 +1,7 @@
 use std::mem::size_of;
 
-use halcyon::color::{OpacityBounds, RgbF32, RgbU8, RgbaF32, RgbaU8};
 use rustest::test;
+use sandlot::color::{OpacityBounds, RgbF32, RgbU8, RgbaF32, RgbaU8};
 use sdl3_sys::pixels::SDL_Color;
 
 #[test]

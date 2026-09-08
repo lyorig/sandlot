@@ -2,7 +2,7 @@
 
 #![windows_subsystem = "windows"]
 
-use halcyon::{
+use sandlot::{
     Context, Result, gpu::*, properties::Properties, resource::Resource, subsystem::Video,
 };
 
@@ -79,6 +79,6 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        halcyon::log_error!("An unexpected error occurred: {e}");
+        sandlot::log_error!("An unexpected error occurred: {e}");
     }
 }

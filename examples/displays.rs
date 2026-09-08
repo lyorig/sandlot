@@ -1,4 +1,4 @@
-use halcyon::{Context, Result, display::Display, subsystem::Video};
+use sandlot::{Context, Result, display::Display, subsystem::Video};
 
 fn run() -> Result<()> {
     let ctx = Context::new();

@@ -1,4 +1,5 @@
-use halcyon::{
+use rustest::{Result, test};
+use sandlot::{
     Context,
     pixels::PixelFormat,
     properties::Properties,
@@ -8,7 +9,6 @@ use halcyon::{
     texture::{Texture, TextureAccess},
     window::Window,
 };
-use rustest::{Result, test};
 use sdl3_sys::render::SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER;
 
 /// `Texture::builder` with `SDL_CreateTextureWithProperties`.

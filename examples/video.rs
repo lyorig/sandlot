@@ -2,7 +2,7 @@
 
 use std::mem::ManuallyDrop;
 
-use halcyon::{
+use sandlot::{
     Context, Result,
     color::Rgba,
     event::{Event, EventIter},
@@ -15,11 +15,11 @@ use halcyon::{
 };
 
 fn print_properties(props: RendererProperties) {
-    halcyon::log!("Renderer name: \"{}\"", props.name());
-    halcyon::log!("HDR enabled: {}", props.hdr_enabled());
-    halcyon::log!("HDR headroom: {}", props.hdr_headroom());
-    halcyon::log!("Max texture size: {} px", props.max_texture_size());
-    halcyon::log!("# of texture formats: {}", props.texture_formats().len());
+    sandlot::log!("Renderer name: \"{}\"", props.name());
+    sandlot::log!("HDR enabled: {}", props.hdr_enabled());
+    sandlot::log!("HDR headroom: {}", props.hdr_headroom());
+    sandlot::log!("Max texture size: {} px", props.max_texture_size());
+    sandlot::log!("# of texture formats: {}", props.texture_formats().len());
 }
 
 fn run() -> Result<()> {
@@ -30,7 +30,7 @@ fn run() -> Result<()> {
 
     let wnd = Window::builder(props)
         .position(Point::new(Window::POS_CENTERED, Window::POS_CENTERED))
-        .title(c"Halcyon Example")
+        .title(c"sandlot Example")
         .size(Point::new(640, 480))
         .build_cleanup()?;
 
@@ -45,7 +45,7 @@ fn run() -> Result<()> {
 
     print_properties(rnd.properties());
 
-    halcyon::log!("Platform = {}", halcyon::platform());
+    sandlot::log!("Platform = {}", sandlot::platform());
 
     rnd.set_draw_color_f32(Rgba::rgb(1., 1., 1.));
     rnd.draw_line(Point::new(10., 10.), Point::new(128., 64.))?;
@@ -76,6 +76,6 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        halcyon::log_error!("An error occurred: {e}");
+        sandlot::log_error!("An error occurred: {e}");
     }
 }

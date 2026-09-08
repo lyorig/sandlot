@@ -1,10 +1,10 @@
 [package]
-name = "halcyon"
+name = "sandlot"
 version = "0.1.0"
 edition = "2024"
 authors = ["Petr Šácha <petrsacha@proton.me>"]
 description = "SDL3 wrapper with QoL additions"
-repository = "https://github.com/lyorig/halcyon-rs"
+repository = "https://github.com/lyorig/sandlot"
 license = "MIT"
 keywords = ["gamedev", "sdl", "graphics"]
 categories = ["graphics", "gui", "api-bindings", "rendering"]

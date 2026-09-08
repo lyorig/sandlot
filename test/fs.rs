@@ -5,7 +5,7 @@ use std::{
     sync::atomic::{AtomicU32, Ordering},
 };
 
-use halcyon::{
+use sandlot::{
     Context, fs,
     fs::{EnumerationResult, Folder, GlobFlags, PathType},
     util::c_ptr_to_str,
@@ -19,7 +19,7 @@ fn scratch_dir(name: &str) -> PathBuf {
     static COUNTER: AtomicU32 = AtomicU32::new(0);
 
     let id = COUNTER.fetch_add(1, Ordering::Relaxed);
-    let dir = std::env::temp_dir().join(format!("halcyon-fs-test-{name}-{id}"));
+    let dir = std::env::temp_dir().join(format!("sandlot-fs-test-{name}-{id}"));
 
     // Reruns of a failing test can leave leftovers behind.
     let _ = std_fs::remove_dir_all(&dir);
@@ -41,7 +41,7 @@ fn fs_base_path_ends_with_separator() {
 
 #[test]
 fn fs_pref_path_ends_with_separator() -> rustest::Result {
-    let path = fs::pref_path(c"halcyon", c"fs-test")?;
+    let path = fs::pref_path(c"sandlot", c"fs-test")?;
     let path = path.to_str();
 
     assert!(path.ends_with('/') || path.ends_with('\\'));

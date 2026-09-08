@@ -4,7 +4,7 @@
 
 use std::mem::ManuallyDrop;
 
-use halcyon::{
+use sandlot::{
     Context, Result,
     color::{RgbaF32, RgbaU8},
     event::{Event, EventIter},
@@ -213,10 +213,10 @@ fn run() -> Result<()> {
         .shaders_spirv(true)
         .build_cleanup()?;
 
-    halcyon::log!("Driver = {}", device.driver().unwrap_or("[unknown]"));
+    sandlot::log!("Driver = {}", device.driver().unwrap_or("[unknown]"));
 
     let wnd = Window::builder(props)
-        .title(c"halcyon-rs Teapot Example")
+        .title(c"sandlot Teapot Example")
         .size(Point::new(1280, 720))
         .build_cleanup()?;
 
@@ -224,7 +224,7 @@ fn run() -> Result<()> {
     device.set_swapchain_parameters(wnd.as_ref(), SwapchainComposition::Sdr, PresentMode::Vsync)?;
 
     let mesh = load_teapot();
-    halcyon::log!(
+    sandlot::log!(
         "Teapot: {} verts, {} tris",
         mesh.vertices.len() / 6,
         mesh.indices.len() / 3
@@ -329,7 +329,7 @@ fn run() -> Result<()> {
 
     // The depth texture and the pipeline must use the same, device-supported format.
     let depth_format = pick_depth_format(device.as_ref());
-    halcyon::log!(
+    sandlot::log!(
         "Depth format: {}",
         match depth_format {
             TextureFormat::D16Unorm => "D16Unorm",
@@ -500,6 +500,6 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        halcyon::log_error!("An unexpected error occurred: {e}");
+        sandlot::log_error!("An unexpected error occurred: {e}");
     }
 }

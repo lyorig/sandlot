@@ -4,7 +4,7 @@
 
 use std::mem::ManuallyDrop;
 
-use halcyon::{
+use sandlot::{
     Context, Result,
     color::RgbaF32,
     event::{Event, EventIter},
@@ -39,10 +39,10 @@ fn print_properties(props: DeviceProperties) {
         o.unwrap_or("N/A")
     }
 
-    halcyon::log!("Device name: {}", f(props.device_name()));
-    halcyon::log!("Driver name: {}", f(props.driver_name()));
-    halcyon::log!("Driver info: {}", f(props.driver_info()));
-    halcyon::log!("Driver version: {}", f(props.driver_version()));
+    sandlot::log!("Device name: {}", f(props.device_name()));
+    sandlot::log!("Driver name: {}", f(props.driver_name()));
+    sandlot::log!("Driver info: {}", f(props.driver_info()));
+    sandlot::log!("Driver version: {}", f(props.driver_version()));
 }
 
 fn run() -> Result<()> {
@@ -60,7 +60,7 @@ fn run() -> Result<()> {
         .build_cleanup()?;
 
     let wnd = Window::builder(props)
-        .title(c"Halcyon GPU")
+        .title(c"sandlot GPU")
         .size(Point::new(720, 480))
         .build_cleanup()?;
 
@@ -136,7 +136,7 @@ fn run() -> Result<()> {
         if let Some(tex) = cmdbuf
             .wait_for_swapchain_texture(wnd.as_ref(), (Some(&mut width), Some(&mut height)))?
         {
-            halcyon::log!("Swapchain texture dimensions = {width}x{height}");
+            sandlot::log!("Swapchain texture dimensions = {width}x{height}");
             let color_target = ColorTargetInfo::new(
                 tex,
                 0,
@@ -190,6 +190,6 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        halcyon::log_error!("An unexpected error occurred: {e}");
+        sandlot::log_error!("An unexpected error occurred: {e}");
     }
 }

@@ -1,4 +1,4 @@
-use halcyon::cpu;
+use sandlot::cpu;
 
 fn main() {
     println!("Cache line size: {} B", cpu::cache_line_size());

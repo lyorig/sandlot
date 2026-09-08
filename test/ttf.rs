@@ -1,5 +1,5 @@
-use halcyon::ttf::RtStr;
 use rustest::test;
+use sandlot::ttf::RtStr;
 
 #[test]
 fn ttf_rt_str_new() {

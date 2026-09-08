@@ -1,6 +1,6 @@
-# halcyon-rs scripts
+# sandlot scripts
 
-Shell scripts used to simplify & automate development of halcyon-rs.
+Shell scripts used to simplify & automate development of sandlot.
 Currently split into three directories:
 - `unix` (applicable to any Unix-like system)
 - `macos` (macOS-specific)

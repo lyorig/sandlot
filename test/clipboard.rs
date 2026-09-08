@@ -1,6 +1,6 @@
 use std::assert_matches;
 
-use halcyon::{
+use sandlot::{
     Context,
     clipboard::{has_text, set_text, text},
     subsystem::Video,

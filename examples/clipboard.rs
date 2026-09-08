@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use halcyon::{Context, Result, clipboard, subsystem::Video};
+use sandlot::{Context, Result, clipboard, subsystem::Video};
 
 const DESIRED_MIME: &CStr = c"image/png";
 

@@ -2,7 +2,7 @@ use rustest::{Result, test};
 
 #[test]
 fn string_into_boxed_str() -> Result {
-    let pp = halcyon::fs::pref_path(c"Foo", c"Bar")?;
+    let pp = sandlot::fs::pref_path(c"Foo", c"Bar")?;
     let s = pp.into_boxed_str();
     let s_copy = s.to_owned();
 
