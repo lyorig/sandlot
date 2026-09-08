@@ -1,6 +1,6 @@
-# sandlot examples
+# Sandlot examples
 
-A showcase of the usage & capabilities of certain SDL features, and how sandlot
+A showcase of the usage & capabilities of certain SDL features, and how Sandlot
 wraps them in an intuitive interface.
 
 # Important

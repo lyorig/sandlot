@@ -1,6 +1,6 @@
 # SDL documentation import
 
-Your task is to add SDL's documentation to sandlot wrappers in a manner that "maps" it to Rust terms while preserving *what the SDL function does*.
+Your task is to add SDL's documentation to Sandlot wrappers in a manner that "maps" it to Rust terms while preserving *what the SDL function does*.
 Specifically, for each function/method with a `#[doc(alias = ...)]` attribute, its docblock should contain _relevant_ documentation from the SDL wiki.
 This operation should only affect docblocks of the items mentioned below; if any further modifications are necessary, ask for permission first.
 
@@ -46,7 +46,7 @@ For SDL_ttf: https://wiki.libsdl.org/SDL3_ttf/{item}/raw
 
 ## Style rules
 - Convert wiki links to plain-code formatting, so as to prevent `rustdoc::broken_intra_doc_links`.
-- If a docblock references another SDL function, change it to the sandlot equivalent.
+- If a docblock references another SDL function, change it to the Sandlot equivalent.
   - For example, `SDL_WaitAndAcquireGPUSwapchainTexture` would become `CommandBufferHandle::wait_for_swapchain_texture`.
 - Use intra-doc links wherever possible. If the name isn't imported, import it with an `#[allow(dead_code)]` attribute.
 

@@ -1,4 +1,4 @@
-# sandlot
+# Sandlot
 
 An SDL & SDL_ttf (3.x) wrapper. Aims for as close to 100% API coverage, while making it neater & safer to use via various Rust mechanisms (see _Enhancements_).
 As I'm primarily a C++ developer, this library is probably unsound in various places. These ought to be weeded out over time after reaching full API coverage.
@@ -23,7 +23,7 @@ of relevant objects etc.
 
 ### Objects
 
-SDL works with raw pointers and ownership rules are mostly described via function documentation. sandlot aims
+SDL works with raw pointers and ownership rules are mostly described via function documentation. Sandlot aims
 to disambiguate with _handles_, _owned objects_ and _references_. For an arbitrary type `Foo`:
 - `FooHandle` is where the API is actually implemented. Since it isn't tied to anything, it's usually unsafe to use.
 - `Foo` is an owned object containing a handle, being responsible for `Drop`ping it.
@@ -36,7 +36,7 @@ These might not have exact 1:1 semantics with their Rust counterparts; check doc
 ## Enhancements
 
 In an attempt to justify the time spent on this project, here is a list of things that,
-in my eyes, make sandlot much neater to use over raw SDL bindings:
+in my eyes, make Sandlot much neater to use over raw SDL bindings:
 
 - `Drop` impl'd where applicable[^1]
 - `Ref` for borrowing opaque handles without extra indirection

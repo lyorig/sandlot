@@ -1,6 +1,6 @@
-# sandlot scripts
+# Sandlot scripts
 
-Shell scripts used to simplify & automate development of sandlot.
+Shell scripts used to simplify & automate development of Sandlot.
 Currently split into three directories:
 - `unix` (applicable to any Unix-like system)
 - `macos` (macOS-specific)
