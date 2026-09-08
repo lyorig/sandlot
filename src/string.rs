@@ -1,3 +1,5 @@
+//! [`String`](std::string::String), but using SDL's memory allocation API.
+
 use std::{
     ffi::{CStr, c_char},
     fmt::Display,

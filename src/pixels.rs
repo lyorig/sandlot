@@ -1,3 +1,5 @@
+//! Various enums related to pixels and/or graphics.
+
 use sdl3_sys::{
     blendmode::SDL_BlendMode,
     pixels::{SDL_Colorspace, SDL_PixelFormat},

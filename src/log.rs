@@ -1,3 +1,8 @@
+//! Logging facilities.
+//!
+//! Enables logging with various priorities and categories. Sends output via the OS'
+//! native logging API, ensuring output happens, for example, even on Windows when not using the `CONSOLE` subsystem.
+//!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryLog)):
 //! - [x] SDL_GetLogPriority
 //! - [x] SDL_Log

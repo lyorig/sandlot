@@ -1,3 +1,5 @@
+//! Filesystem functions. Functionally overlaps with [`std::fs`].
+//!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryFilesystem)):
 //! - [x] SDL_CopyFile
 //! - [x] SDL_CreateDirectory

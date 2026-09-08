@@ -1,3 +1,5 @@
+//! [`Box`](std::boxed::Box), but using SDL's memory allocation API.
+//!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryStdinc)):
 //! - [x] SDL_free
 //! - [x] SDL_malloc

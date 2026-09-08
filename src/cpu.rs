@@ -1,3 +1,5 @@
+//! CPU capability detection functions.
+//!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryCPUInfo)):
 //! - [x] SDL_GetCPUCacheLineSize
 //! - [x] SDL_GetNumLogicalCPUCores

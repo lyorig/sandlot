@@ -1,3 +1,5 @@
+//! Wrapper for [`SDL_GetError`], suitable for usage in [`Result`].
+
 use std::ffi::{CStr, CString};
 
 use sdl3_sys::error::SDL_GetError;
