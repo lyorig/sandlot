@@ -32,6 +32,6 @@ codegen-units = 1
 strip = true
 
 [[test]]
-name = "haltest"
+name = "sandlot-tests"
 path = "test/main.rs"
 harness = false
