@@ -23,9 +23,9 @@ of relevant objects etc.
 
 ### Objects
 
-SDL works with raw pointers and ownership rules are mostly described via function documentation. Sandlot aims
-to disambiguate with _handles_, _owned objects_ and _references_. For an arbitrary type `Foo`:
-- `FooHandle` is where the API is actually implemented. Since it isn't tied to anything, it's usually unsafe to use.
+SDL works with raw pointers and ownership rules are mostly described via function documentation.
+Sandlot maps this to Rust terms with _handles_, _owned objects_ and _references_. For an arbitrary type `Foo`:
+- `FooHandle` is where the API is actually implemented. Since it isn't tied to anything, it's usually unsafe to obtain and use.
 - `Foo` is an owned object containing a handle, being responsible for `Drop`ping it.
 - `Ref<'a, Foo>` and `RefMut<'a, Foo>` contain a handle, are lifetime-bound to an owned object, and don't drop anything.
   - The only difference between these two is that `Ref` only implements `Deref` for its handle, while `RefMut` also implements `DerefMut`.

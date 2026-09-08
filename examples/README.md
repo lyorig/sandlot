@@ -9,6 +9,6 @@ GPU examples will not compile by default, since the repository only contains sha
 not their compiled IR. To fix that, run one of the following platform-specific scripts:
 
 - `scripts/windows/compile-hlsl-shaders.ps1`
+- `scripts/windows/compile-spirv-shaders.ps1`
 - `scripts/macos/compile-metal-shaders.sh`
-
-Linux isn't supported yet (because I don't have an installation to test on right now).
+- `scripts/unix/compile-spirv-shaders.sh`
