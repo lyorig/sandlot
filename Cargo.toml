@@ -2,6 +2,12 @@
 name = "halcyon"
 version = "0.1.0"
 edition = "2024"
+authors = ["Petr Šácha <petrsacha@proton.me>"]
+description = "SDL3 wrapper with QoL additions"
+repository = "https://github.com/lyorig/halcyon-rs"
+license = "MIT"
+keywords = ["gamedev", "sdl", "graphics"]
+categories = ["graphics", "gui", "api-bindings", "rendering"]
 
 # Disables testing `src/lib.rs`, since there are no tests there.
 # The actual tests are located in `test/` (see [[test]] below).
