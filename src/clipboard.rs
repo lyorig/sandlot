@@ -1,3 +1,5 @@
+//! System clipboard introspection and manipulation.
+//!
 //! API checklist ([source](https://wiki.libsdl.org/SDL3/CategoryRender)):
 //! - [x] SDL_ClearClipboardData
 //! - [x] SDL_GetClipboardData

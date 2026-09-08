@@ -1,5 +1,6 @@
-//! SDL_CategoryKeyboard:
+//! Keyboard shenanigans.
 //!
+//! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryKeyboard)):
 //! - [ ] SDL_ClearComposition
 //! - [ ] SDL_GetKeyboardFocus
 //! - [ ] SDL_GetKeyboardNameForID
