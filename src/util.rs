@@ -2,6 +2,8 @@ use std::ffi::{CStr, c_char};
 
 use crate::{Result, error::Error};
 
+/// Analogous to C's `sizeof`. Can be used with a type or expression,
+/// delegating to [`size_of`] or [`size_of_val`] appropriately.
 #[macro_export]
 macro_rules! size_of {
     ($t:ty) => {
@@ -20,6 +22,9 @@ macro_rules! mod_reexport {
     };
 }
 
+/// Define an enum with two variants, `No` and `Yes`.
+///
+/// Interconvertible with `bool` via `From`.
 #[macro_export]
 macro_rules! boolenum {
     ($name:ident) => {
@@ -35,10 +40,18 @@ macro_rules! boolenum {
                 unsafe { ::std::mem::transmute(value) }
             }
         }
+
+        impl From<bool> for $name {
+            fn from(value: bool) -> Self {
+                unsafe { ::std::mem::transmute(value) }
+            }
+        }
     };
 }
 
-/// Implement bidirectional [`From`] for two enums, along with two `const fn`s:
+/// Implement bidirectional [`From`] for two enums.
+///
+/// Also defines two `const fn`s:
 /// - `$wrap::from_sdl($sdl)`
 /// - `$wrap::to_sdl(self)`
 ///
