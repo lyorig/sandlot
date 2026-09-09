@@ -1,4 +1,20 @@
-//! Filesystem functions. Functionally overlaps with [`std::fs`].
+//! SDL offers an API for examining and manipulating the system's filesystem.
+//! This covers most things one would need to do with directories, except for
+//! actual file I/O (which is covered by [CategoryIOStream](https://wiki.libsdl.org/SDL3/CategoryIOStream)
+//! and [CategoryAsyncIO](https://wiki.libsdl.org/SDL3/CategoryAsyncIO) instead).
+//!
+//! There are functions to answer necessary path questions:
+//!
+//! - Where is my app's data? [`Context::base_path`](crate::Context::base_path).
+//! - Where can I safely write files? [`fs::pref_path`](pref_path).
+//! - Where are paths like Downloads, Desktop, Music? [`Context::user_folder`](crate::Context::user_folder).
+//! - What is this thing at this location? [`fs::path_info`](path_info).
+//! - What items live in this folder? [`fs::enumerate_directory`](enumerate_directory).
+//! - What items live in this folder by wildcard? [`fs::glob_directory`](glob_directory).
+//! - What is my current working directory? [`fs::current_directory`](current_directory).
+//!
+//! SDL also offers functions to manipulate the directory tree: renaming,
+//! removing, copying files.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryFilesystem)):
 //! - [x] SDL_CopyFile

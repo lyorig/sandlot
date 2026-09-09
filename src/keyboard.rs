@@ -1,4 +1,7 @@
-//! Keyboard state querying and manipulation.
+//! Keyboard management.
+//!
+//! Please refer to the [Best Keyboard Practices](https://wiki.libsdl.org/SDL3/BestKeyboardPractices)
+//! document for details on how best to accept keyboard input in various types of programs:
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryKeyboard)):
 //! - [ ] SDL_ClearComposition

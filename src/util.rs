@@ -14,6 +14,9 @@ macro_rules! size_of {
     }
 }
 
+/// Defines a private submodule and publicly re-exports everything within.
+/// Use when you want to compartmentalize things in a module, but also have
+/// everything available at the module level.
 #[macro_export]
 macro_rules! mod_reexport {
     ($name:ident) => {
@@ -132,6 +135,7 @@ pub fn opt2res_map<T, U, F: FnOnce(T) -> U>(opt: Option<T>, f: F) -> Result<U> {
     }
 }
 
+/// Returns `Ok(())` if `result`, otherwise `Err(Error::current())`.
 pub fn to_result(result: bool) -> Result<()> {
     if result {
         Ok(())
@@ -148,9 +152,9 @@ pub fn to_result(result: bool) -> Result<()> {
 /// - the string pointed to by `ptr` is valid UTF-8
 ///
 /// The returned value's lifetime is inferred from its usage (see [`CStr::from_ptr`]).
-///
 pub unsafe fn c_ptr_to_str<'a>(ptr: *const c_char) -> &'a str {
     unsafe { str::from_utf8_unchecked(CStr::from_ptr(ptr).to_bytes()) }
 }
 
+/// Marker trait for asserting that a type is `Copy`.
 pub(crate) trait IsCopy: Copy {}
