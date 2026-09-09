@@ -38,13 +38,19 @@ macro_rules! boolenum {
 
         impl From<$name> for bool {
             fn from(value: $name) -> Self {
-                unsafe { ::std::mem::transmute(value) }
+                match value {
+                    $name::No => false,
+                    $name::Yes => true,
+                }
             }
         }
 
         impl From<bool> for $name {
             fn from(value: bool) -> Self {
-                unsafe { ::std::mem::transmute(value) }
+                match value {
+                    false => Self::No,
+                    true => Self::Yes,
+                }
             }
         }
     };

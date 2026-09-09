@@ -80,13 +80,14 @@ resource_new!(SDL_Surface, Surface, SDL_DestroySurface);
 impl SurfaceHandle {
     /// Get the size of the surface.
     pub fn size(&self) -> PointI32 {
-        let ligma = unsafe { self.handle.as_ref() };
-        PointI32::new(ligma.w, ligma.h)
+        let surf = unsafe { self.handle.as_ref() };
+        PointI32::new(surf.w, surf.h)
     }
 
+    /// Get the pixel format of the surface.
     pub fn format(&self) -> PixelFormat {
-        let ligma = unsafe { self.handle.as_ref() };
-        ligma.format.into()
+        let surf = unsafe { self.handle.as_ref() };
+        surf.format.into()
     }
 
     /// Perform a fast fill of the entire surface with a specific color.

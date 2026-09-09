@@ -28,6 +28,7 @@ Sandlot maps this to Rust terms with _handles_, _owned objects_ and _references_
 - `FooHandle` is where the API is actually implemented. Since it isn't tied to anything, it's usually unsafe to obtain and use.
 - `Foo` is an owned object containing a handle, being responsible for `Drop`ping it.
 - `Ref<'a, Foo>` and `RefMut<'a, Foo>` contain a handle, are lifetime-bound to an owned object, and don't drop anything.
+  - These can be obtained from an owned object via the `as_ref()` method (requires the `sandlot::resource::Resource` trait to be in scope).
   - The only difference between these two is that `Ref` only implements `Deref` for its handle, while `RefMut` also implements `DerefMut`.
 
 Allocations originating from SDL are wrapped in a custom implementation of `Box` and `String`.

@@ -1,10 +1,6 @@
 //! Various enums related to pixels and/or graphics.
 
-use sdl3_sys::{
-    blendmode::SDL_BlendMode,
-    pixels::{SDL_Colorspace, SDL_PixelFormat},
-    surface::SDL_ScaleMode,
-};
+use sdl3_sys::{blendmode::*, pixels::*, surface::SDL_ScaleMode};
 
 use crate::impl_enum_transmute;
 
@@ -14,7 +10,9 @@ use crate::impl_enum_transmute;
 ///
 /// These predefined blend modes are supported everywhere.
 ///
-/// Additional values may be obtained from `SDL_ComposeCustomBlendMode`.
+/// Additional values may be obtained from [`SDL_ComposeCustomBlendMode`].
+/// However, these custom values aren't taken into account by Sandlot and
+/// would cause UB, so only set and query these using raw sdl3-sys bindings.
 #[repr(u32)]
 #[derive(Clone, Copy)]
 #[doc(alias = "SDL_BlendMode")]
