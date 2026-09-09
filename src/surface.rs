@@ -290,22 +290,22 @@ impl SurfaceHandle {
     /// The blit semantics for surfaces with and without blending and
     /// colorkey are as follows:
     ///
-    /// - `RGBA->RGB`: with [`BlendMode::Blend`], alpha-blend (using the
+    /// - `RGBA->RGB`: with [`BlendMode::BLEND`], alpha-blend (using the
     ///   source alpha-channel and per-surface alpha); with
-    ///   [`BlendMode::None`], copy RGB (if a color key is set, only copy the
+    ///   [`BlendMode::NONE`], copy RGB (if a color key is set, only copy the
     ///   pixels that do not match its RGB values, ignoring alpha in the
     ///   comparison).
-    /// - `RGB->RGBA`: with [`BlendMode::Blend`], alpha-blend (using the
-    ///   source per-surface alpha); with [`BlendMode::None`], copy RGB and
+    /// - `RGB->RGBA`: with [`BlendMode::BLEND`], alpha-blend (using the
+    ///   source per-surface alpha); with [`BlendMode::NONE`], copy RGB and
     ///   set destination alpha to the source per-surface alpha value (if a
     ///   color key is set, only copy the pixels that do not match it).
-    /// - `RGBA->RGBA`: with [`BlendMode::Blend`], alpha-blend (using the
+    /// - `RGBA->RGBA`: with [`BlendMode::BLEND`], alpha-blend (using the
     ///   source alpha-channel and per-surface alpha); with
-    ///   [`BlendMode::None`], copy all of RGBA to the destination (if a
+    ///   [`BlendMode::NONE`], copy all of RGBA to the destination (if a
     ///   color key is set, only copy the pixels that do not match its RGB
     ///   values, ignoring alpha in the comparison).
-    /// - `RGB->RGB`: with [`BlendMode::Blend`], alpha-blend (using the
-    ///   source per-surface alpha); with [`BlendMode::None`], copy RGB (if a
+    /// - `RGB->RGB`: with [`BlendMode::BLEND`], alpha-blend (using the
+    ///   source per-surface alpha); with [`BlendMode::NONE`], copy RGB (if a
     ///   color key is set, only copy the pixels that do not match it).
     #[doc(alias = "SDL_BlitSurface")]
     pub fn blit(
@@ -479,7 +479,7 @@ impl traits::BlendMode for SurfaceHandle {
     ///
     /// To copy a surface to another surface (or texture) without blending
     /// with the existing data, the blend mode of the SOURCE surface should
-    /// be set to [`BlendMode::None`].
+    /// be set to [`BlendMode::NONE`].
     #[doc(alias = "SDL_SetSurfaceBlendMode")]
     fn set_blend_mode(&self, bm: BlendMode) {
         unsafe {

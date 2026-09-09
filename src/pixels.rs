@@ -8,38 +8,175 @@ use crate::impl_enum_transmute;
 ///
 /// # Remarks
 ///
-/// These predefined blend modes are supported everywhere.
+/// Several predefined blend modes, exposed via associated `const` items, are supported everywhere.
 ///
-/// Additional values may be obtained from [`SDL_ComposeCustomBlendMode`].
-/// However, these custom values aren't taken into account by Sandlot and
-/// would cause UB, so only set and query these using raw sdl3-sys bindings.
-#[repr(u32)]
+/// Custom blend modes may be composed via [`BlendMode::compose`].
 #[derive(Clone, Copy)]
 #[doc(alias = "SDL_BlendMode")]
-pub enum BlendMode {
+pub struct BlendMode(SDL_BlendMode);
+
+impl BlendMode {
     /// No blending: `dstRGBA = srcRGBA`.
-    None = SDL_BlendMode::NONE.0,
+    pub const NONE: Self = Self(SDL_BlendMode::NONE);
+
     /// Alpha blending:
     /// `dstRGB = (srcRGB * srcA) + (dstRGB * (1-srcA))`,
     /// `dstA = srcA + (dstA * (1-srcA))`.
-    Blend = SDL_BlendMode::BLEND.0,
+    pub const BLEND: Self = Self(SDL_BlendMode::BLEND);
+
     /// Pre-multiplied alpha blending:
     /// `dstRGBA = srcRGBA + (dstRGBA * (1-srcA))`.
-    BlendPremultiplied = SDL_BlendMode::BLEND_PREMULTIPLIED.0,
+    pub const BLEND_PREMUL: Self = Self(SDL_BlendMode::BLEND_PREMULTIPLIED);
+
     /// Additive blending:
     /// `dstRGB = (srcRGB * srcA) + dstRGB`, `dstA = dstA`.
-    Add = SDL_BlendMode::ADD.0,
+    pub const ADD: Self = Self(SDL_BlendMode::ADD);
+
     /// Pre-multiplied additive blending:
     /// `dstRGB = srcRGB + dstRGB`, `dstA = dstA`.
-    AddPremultiplied = SDL_BlendMode::ADD_PREMULTIPLIED.0,
+    pub const ADD_PREMUL: Self = Self(SDL_BlendMode::ADD_PREMULTIPLIED);
+
     /// Color modulate: `dstRGB = srcRGB * dstRGB`, `dstA = dstA`.
-    Mod = SDL_BlendMode::MOD.0,
+    pub const MOD: Self = Self(SDL_BlendMode::MOD);
+
     /// Color multiply:
     /// `dstRGB = (srcRGB * dstRGB) + (dstRGB * (1-srcA))`, `dstA = dstA`.
-    Mul = SDL_BlendMode::MUL.0,
+    pub const MUL: Self = Self(SDL_BlendMode::MUL);
+
+    /// Compose a custom blend mode for renderers.
+    ///
+    /// * `src_color` is the factor applied to the red, green, and blue
+    ///   components of the source pixels.
+    /// * `dst_color` is the factor applied to the red, green, and blue
+    ///   components of the destination pixels.
+    /// * `color_op` is the operation used to combine the red, green, and blue
+    ///   components of the source and destination pixels.
+    /// * `src_alpha` is the factor applied to the alpha component of the source
+    ///   pixels.
+    /// * `dst_alpha` is the factor applied to the alpha component of the
+    ///   destination pixels.
+    /// * `alpha_op` is the operation used to combine the alpha component of the
+    ///   source and destination pixels.
+    ///
+    /// A blend mode controls how the pixels from a drawing operation (source)
+    /// get combined with the pixels from the render target (destination).
+    /// First, the components of the source and destination pixels get
+    /// multiplied with their blend factors. Then, the blend operation takes the
+    /// two products and calculates the result that will get stored in the
+    /// render target. Expressed in pseudocode:
+    ///
+    /// ```text
+    /// dstRGB = color_op(srcRGB * src_color, dstRGB * dst_color);
+    /// dstA = alpha_op(srcA * src_alpha, dstA * dst_alpha);
+    /// ```
+    ///
+    /// Where the operation functions can return `src + dst`, `src - dst`,
+    /// `dst - src`, `min(src, dst)`, or `max(src, dst)`.
+    ///
+    /// The red, green, and blue components are always multiplied with the
+    /// first, second, and third components of [`BlendFactor`], respectively;
+    /// the fourth component is not used. The alpha component is always
+    /// multiplied with the fourth component; the other components are not used
+    /// in the alpha calculation.
+    ///
+    /// Support for these blend modes varies for each renderer: pass the
+    /// returned mode to a blend-mode setter (e.g. for a texture or the draw
+    /// color) and treat an error there as "unsupported". All renderers support
+    /// the predefined modes above.
+    ///
+    /// Note that some renderers do not provide an alpha component for the
+    /// default render target; [`BlendFactor::DstAlpha`] and
+    /// [`BlendFactor::OneMinusDstAlpha`] have no effect in that case.
+    #[doc(alias = "SDL_ComposeCustomBlendMode")]
+    pub fn compose(
+        (src_color, dst_color): (BlendFactor, BlendFactor),
+        color_op: BlendOperation,
+        (src_alpha, dst_alpha): (BlendFactor, BlendFactor),
+        alpha_op: BlendOperation,
+    ) -> Self {
+        let bm = SDL_ComposeCustomBlendMode(
+            src_color.into(),
+            dst_color.into(),
+            color_op.into(),
+            src_alpha.into(),
+            dst_alpha.into(),
+            alpha_op.into(),
+        );
+
+        bm.into()
+    }
 }
 
 impl_enum_transmute!(SDL_BlendMode, BlendMode);
+
+/// The normalized factor used to multiply pixel components.
+///
+/// # Remarks
+///
+/// The blend factors are multiplied with the pixels from a drawing operation
+/// (src) and the pixels from the render target (dst) before the blend
+/// operation. The comma-separated factors listed in each variant are always
+/// applied in the component order red, green, blue, and alpha.
+#[repr(i32)]
+#[derive(Clone, Copy)]
+#[doc(alias = "SDL_BlendFactor")]
+pub enum BlendFactor {
+    /// `0, 0, 0, 0`.
+    Zero = SDL_BlendFactor::ZERO.0,
+
+    /// `1, 1, 1, 1`.
+    One = SDL_BlendFactor::ONE.0,
+
+    /// `srcR, srcG, srcB, srcA`.
+    SrcColor = SDL_BlendFactor::SRC_COLOR.0,
+
+    /// `1-srcR, 1-srcG, 1-srcB, 1-srcA`.
+    OneMinusSrcColor = SDL_BlendFactor::ONE_MINUS_SRC_COLOR.0,
+
+    /// `srcA, srcA, srcA, srcA`.
+    SrcAlpha = SDL_BlendFactor::SRC_ALPHA.0,
+
+    /// `1-srcA, 1-srcA, 1-srcA, 1-srcA`.
+    OneMinusSrcAlpha = SDL_BlendFactor::ONE_MINUS_SRC_ALPHA.0,
+
+    /// `dstR, dstG, dstB, dstA`.
+    DstColor = SDL_BlendFactor::DST_COLOR.0,
+
+    /// `1-dstR, 1-dstG, 1-dstB, 1-dstA`.
+    OneMinusDstColor = SDL_BlendFactor::ONE_MINUS_DST_COLOR.0,
+
+    /// `dstA, dstA, dstA, dstA`.
+    DstAlpha = SDL_BlendFactor::DST_ALPHA.0,
+
+    /// `1-dstA, 1-dstA, 1-dstA, 1-dstA`.
+    OneMinusDstAlpha = SDL_BlendFactor::ONE_MINUS_DST_ALPHA.0,
+}
+
+impl_enum_transmute!(SDL_BlendFactor, BlendFactor);
+
+/// The blend operation used when combining source and destination pixel
+/// components.
+#[repr(i32)]
+#[derive(Clone, Copy)]
+#[doc(alias = "SDL_BlendOperation")]
+pub enum BlendOperation {
+    /// `dst + src`: supported by all renderers.
+    Add = SDL_BlendOperation::ADD.0,
+
+    /// `src - dst`: supported by D3D, OpenGL, OpenGLES, and Vulkan.
+    Subtract = SDL_BlendOperation::SUBTRACT.0,
+
+    /// `dst - src`: supported by D3D, OpenGL, OpenGLES, and Vulkan.
+    RevSubtract = SDL_BlendOperation::REV_SUBTRACT.0,
+
+    /// `min(dst, src)`: supported by D3D, OpenGL, OpenGLES, and Vulkan.
+    Minimum = SDL_BlendOperation::MINIMUM.0,
+
+    /// `max(dst, src)`: supported by D3D, OpenGL, OpenGLES, and Vulkan.
+    Maximum = SDL_BlendOperation::MAXIMUM.0,
+}
+
+impl_enum_transmute!(SDL_BlendOperation, BlendOperation);
 
 /// The scaling mode.
 #[repr(i32)]
