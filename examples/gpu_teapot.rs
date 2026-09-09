@@ -156,8 +156,10 @@ fn load_teapot() -> MeshData {
 
     for (position, normal) in mesh
         .positions
-        .chunks_exact(3)
-        .zip(mesh.normals.chunks_exact(3))
+        .as_chunks::<3>()
+        .0
+        .iter()
+        .zip(mesh.normals.as_chunks::<3>().0.iter())
     {
         vertices.extend_from_slice(position);
         vertices.extend_from_slice(normal);
