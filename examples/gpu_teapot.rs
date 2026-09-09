@@ -339,9 +339,8 @@ fn run() -> Result<()> {
         }
     );
 
-    let pipeline = GraphicsPipeline::new(
-        device.as_ref(),
-        &GraphicsPipelineCreateInfo::new(
+    let pipeline = {
+        let create_info = GraphicsPipelineCreateInfo::new(
             vs.as_ref(),
             fs.as_ref(),
             VertexInputState::new(&vbd, &attrs),
@@ -368,8 +367,10 @@ fn run() -> Result<()> {
                 EnableStencilTest::No,
             ),
             GraphicsPipelineTargetInfo::new(&ctd, Some(depth_format)),
-        ),
-    )?;
+        );
+
+        GraphicsPipeline::new(device.as_ref(), &create_info)?
+    };
 
     // Assume the swapchain texture's dims are equal to the window's.
     let depth = {
@@ -385,7 +386,7 @@ fn run() -> Result<()> {
 
         Texture::builder(props)
             .name(c"Teapot Texture")
-            .build(device.as_ref(), tci)?
+            .build_cleanup(device.as_ref(), tci)?
     };
 
     let mut angle = 0.0f32;

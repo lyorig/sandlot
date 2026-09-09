@@ -12,7 +12,7 @@ use crate::{
     gpu::{ColorTargetDescription, VertexAttribute, VertexBufferDescription},
     impl_enum_transmute, mod_reexport,
     properties::Properties,
-    resource::Ref,
+    resource::{Ref, Resource},
     resource_new_no_drop,
 };
 
@@ -134,6 +134,24 @@ impl GraphicsPipeline {
         };
 
         Self::from_ptr(handle)
+    }
+
+    /// Convenience function that creates a [`GraphicsPipeline`],
+    /// does some work on it, then drops it.
+    ///
+    /// Propagates [`Err`] returned by:
+    /// - [`GraphicsPipeline::new`]
+    /// - `op`
+    pub fn with<F: FnOnce(Ref<Self>) -> Result<()>>(
+        device: Ref<Device>,
+        create_info: &GraphicsPipelineCreateInfo,
+        f: F,
+    ) -> Result<()> {
+        let gp = Self::new(device, create_info)?;
+        f(gp.as_ref())?;
+        gp.drop(device);
+
+        Ok(())
     }
 
     /// Release a graphics pipeline as soon as it is safe to do so.
