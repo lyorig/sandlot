@@ -528,7 +528,9 @@ impl PixelFormat {
         }
     }
 
-    /// Get the human-readable name of this pixel format.
+    /// Get the human-readable SDL enum variant name of this pixel format.
+    ///
+    /// For example, this returns "SDL_PIXELFORMAT_RGBA8888" for [`Self::Rgba8888`].
     /// The SDL function is documented to return "SDL_PIXELFORMAT_UNKNOWN"
     /// in case of an unknown variant, but that shouldn't happen.
     #[doc(alias = "SDL_GetPixelFormatName")]
