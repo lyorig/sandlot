@@ -44,6 +44,6 @@ fn run() -> Result<()> {
 
 fn main() {
     if let Err(e) = run() {
-        println!("Something went wrong: {e}");
+        sandlot::log_error!("Something went wrong: {e}");
     }
 }

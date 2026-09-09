@@ -160,15 +160,9 @@ fn run() -> Result<()> {
     })?;
 
     'frames: loop {
-        for event in Event::iter() {
-            if let Event::Quit = event {
-                break 'frames;
-            }
+        if let Event::Quit = Event::wait()? {
+            break 'frames;
         }
-
-        // Poor man's Vsync.
-        use std::{thread::sleep, time::Duration};
-        sleep(Duration::from_millis(10));
     }
 
     device.wait_idle()?;

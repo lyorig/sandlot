@@ -19,7 +19,13 @@ fn print_properties(props: RendererProperties) {
     sandlot::log!("HDR enabled: {}", props.hdr_enabled());
     sandlot::log!("HDR headroom: {}", props.hdr_headroom());
     sandlot::log!("Max texture size: {} px", props.max_texture_size());
-    sandlot::log!("# of texture formats: {}", props.texture_formats().len());
+
+    sandlot::log!("Supported texture formats:",);
+
+    props
+        .texture_formats()
+        .iter()
+        .for_each(|f| sandlot::log!("- {f}"));
 }
 
 fn run() -> Result<()> {
@@ -43,9 +49,8 @@ fn run() -> Result<()> {
 
     rnd.clear()?;
 
-    print_properties(rnd.properties());
-
     sandlot::log!("Platform = {}", sandlot::platform());
+    print_properties(rnd.properties());
 
     rnd.set_draw_color_f32(Rgba::rgb(1., 1., 1.));
     rnd.draw_line(Point::new(10., 10.), Point::new(128., 64.))?;
@@ -62,12 +67,8 @@ fn run() -> Result<()> {
     rnd.present()?;
 
     'main: loop {
-        rnd.clear()?;
-
-        for event in Event::iter() {
-            if let Event::Quit = event {
-                break 'main;
-            }
+        if let Event::Quit = Event::wait()? {
+            break 'main;
         }
     }
 

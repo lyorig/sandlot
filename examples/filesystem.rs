@@ -24,7 +24,7 @@ fn main() -> ExitCode {
     let path = unsafe { CString::from_vec_unchecked(arg.into_bytes()) };
 
     if let Err(e) = run(&path) {
-        sandlot::log!("An error occurred: {e}");
+        sandlot::log_error!("An error occurred: {e}");
         return ExitCode::FAILURE;
     }
 
