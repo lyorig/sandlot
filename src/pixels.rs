@@ -89,10 +89,8 @@ impl BlendMode {
     /// [`BlendFactor::OneMinusDstAlpha`] have no effect in that case.
     #[doc(alias = "SDL_ComposeCustomBlendMode")]
     pub fn compose(
-        (src_color, dst_color): (BlendFactor, BlendFactor),
-        color_op: BlendOperation,
-        (src_alpha, dst_alpha): (BlendFactor, BlendFactor),
-        alpha_op: BlendOperation,
+        (src_color, dst_color, color_op): (BlendFactor, BlendFactor, BlendOperation),
+        (src_alpha, dst_alpha, alpha_op): (BlendFactor, BlendFactor, BlendOperation),
     ) -> Self {
         let bm = SDL_ComposeCustomBlendMode(
             src_color.into(),
