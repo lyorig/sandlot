@@ -1,4 +1,8 @@
+use std::mem::MaybeUninit;
+
 use sdl3_sys::pixels::*;
+
+use crate::util::opt2ptr;
 
 /// "Sub-struct" of [`Rgba`], because some SDL functions only use
 /// the RGB components and don't require the alpha.
@@ -36,6 +40,64 @@ impl<T: OpacityBounds> Rgb<T> {
 
     pub const fn with_alpha(&self, a: T) -> Rgba<T> {
         Rgba { rgb: *self, a }
+    }
+}
+
+impl RgbU8 {
+    /// Get RGB values from a pixel in the specified format.
+    ///
+    /// # Remarks
+    ///
+    /// This function uses the entire 8-bit [0..255] range when converting
+    /// color components from pixel formats with less than 8-bits per RGB
+    /// component (e.g., a completely white pixel in 16-bit RGB565 format
+    /// would return [0xff, 0xff, 0xff] not [0xf8, 0xfc, 0xf8]).
+    #[doc(alias = "SDL_GetRGB")]
+    pub fn from_pixel(pixel: u32, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> Self {
+        let mut ret = MaybeUninit::<Self>::uninit();
+        let ptr = ret.as_mut_ptr();
+
+        unsafe {
+            SDL_GetRGB(
+                pixel,
+                std::ptr::from_ref(fmt),
+                opt2ptr(pal),
+                &raw mut (*ptr).r,
+                &raw mut (*ptr).g,
+                &raw mut (*ptr).b,
+            );
+
+            ret.assume_init()
+        }
+    }
+
+    /// Map an RGB triple to an opaque pixel value for a given pixel format.
+    ///
+    /// # Remarks
+    ///
+    /// This function maps the RGB color value to the specified pixel format
+    /// and returns the pixel value best approximating the given RGB color
+    /// value for the given pixel format.
+    ///
+    /// If the format has a palette (8-bit) the index of the closest matching
+    /// color in the palette will be returned.
+    ///
+    /// If the specified pixel format has an alpha component it will be
+    /// returned as all 1 bits (fully opaque).
+    ///
+    /// If the pixel format bpp (color depth) is less than 32-bpp then the
+    /// unused upper bits of the return value can safely be ignored.
+    #[doc(alias = "SDL_MapRGB")]
+    pub fn map(self, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> u32 {
+        unsafe {
+            SDL_MapRGB(
+                std::ptr::from_ref(fmt),
+                opt2ptr(pal),
+                self.r,
+                self.g,
+                self.b,
+            )
+        }
     }
 }
 
@@ -147,6 +209,67 @@ impl RgbaU8 {
             (val >> 8) as u8,
             val as u8,
         )
+    }
+
+    /// Get RGBA values from a pixel in the specified format.
+    ///
+    /// # Remarks
+    ///
+    /// This function uses the entire 8-bit [0..255] range when converting
+    /// color components from pixel formats with less than 8-bits per RGB
+    /// component (e.g., a completely white pixel in 16-bit RGB565 format
+    /// would return [0xff, 0xff, 0xff] not [0xf8, 0xfc, 0xf8]).
+    ///
+    /// If the format has no alpha component, the alpha will be returned as
+    /// 0xff (100% opaque).
+    #[doc(alias = "SDL_GetRGBA")]
+    pub fn from_pixel(pixel: u32, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> Self {
+        let mut ret = MaybeUninit::<Self>::uninit();
+        let ptr = ret.as_mut_ptr();
+
+        unsafe {
+            SDL_GetRGBA(
+                pixel,
+                std::ptr::from_ref(fmt),
+                opt2ptr(pal),
+                &raw mut (*ptr).rgb.r,
+                &raw mut (*ptr).rgb.g,
+                &raw mut (*ptr).rgb.b,
+                &raw mut (*ptr).a,
+            );
+
+            ret.assume_init()
+        }
+    }
+
+    /// Map an RGBA quadruple to a pixel value for a given pixel format.
+    ///
+    /// # Remarks
+    ///
+    /// This function maps the RGBA color value to the specified pixel format
+    /// and returns the pixel value best approximating the given RGBA color
+    /// value for the given pixel format.
+    ///
+    /// If the specified pixel format has no alpha component the alpha value
+    /// will be ignored (as it will be in formats with a palette).
+    ///
+    /// If the format has a palette (8-bit) the index of the closest matching
+    /// color in the palette will be returned.
+    ///
+    /// If the pixel format bpp (color depth) is less than 32-bpp then the
+    /// unused upper bits of the return value can safely be ignored.
+    #[doc(alias = "SDL_MapRGBA")]
+    pub fn map(self, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> u32 {
+        unsafe {
+            SDL_MapRGBA(
+                std::ptr::from_ref(fmt),
+                opt2ptr(pal),
+                self.rgb.r,
+                self.rgb.g,
+                self.rgb.b,
+                self.a,
+            )
+        }
     }
 }
 

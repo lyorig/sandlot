@@ -77,17 +77,16 @@
 //! - [ ] SDL_TransferCharacteristics
 //! - [ ] SDL_CreatePalette
 //! - [ ] SDL_DestroyPalette
-//! - [ ] SDL_GetMasksForPixelFormat
+//! - [x] SDL_GetMasksForPixelFormat
 //! - [ ] SDL_GetPixelFormatDetails
-//! - [ ] SDL_GetPixelFormatForMasks
-//! - [ ] SDL_GetPixelFormatName
-//! - [ ] SDL_GetRGB
-//! - [ ] SDL_GetRGBA
-//! - [ ] SDL_MapRGB
-//! - [ ] SDL_MapRGBA
-//!
-//! `SDL_MapSurfaceRGB` and `SDL_MapSurfaceRGBA` are covered by the
-//! [surface](crate::surface) module, and so is `SDL_ScaleMode`.
+//! - [x] SDL_GetPixelFormatForMasks
+//! - [x] SDL_GetPixelFormatName
+//! - [x] SDL_GetRGB (impl'd in [`RgbU8`](crate::color::RgbU8))
+//! - [x] SDL_GetRGBA (impl'd in [`RgbaU8`](crate::color::RgbaU8))
+//! - [x] SDL_MapRGB (impl'd in [`RgbU8`](crate::color::RgbU8))
+//! - [x] SDL_MapRGBA (impl'd in [`RgbaU8`](crate::color::RgbaU8))
+//! - [x] SDL_MapSurfaceRGB (impl'd in [`Surface`](crate::surface::Surface))
+//! - [x] SDL_MapSurfaceRGBA (impl'd in [`Surface`](crate::surface::Surface))
 //!
 //! From [CategoryBlendmode](https://wiki.libsdl.org/SDL3/CategoryBlendmode):
 //! - [x] SDL_BlendMode
@@ -95,9 +94,11 @@
 //! - [x] SDL_BlendOperation
 //! - [x] SDL_ComposeCustomBlendMode
 
+use std::mem::MaybeUninit;
+
 use sdl3_sys::{blendmode::*, pixels::*, surface::SDL_ScaleMode};
 
-use crate::impl_enum_transmute;
+use crate::{Result, error::Error, impl_enum_transmute, util::c_ptr_to_str};
 
 /// A set of blend modes used in drawing operations.
 ///
@@ -338,6 +339,27 @@ impl Colorspace {
 
 impl_enum_transmute!(SDL_Colorspace, Colorspace);
 
+/// Contains parameters for [`PixelFormat::from_mask`] and [`PixelFormat::mask`].
+#[derive(Clone, Copy)]
+pub struct PixelFormatMask {
+    /// Bits-per-pixel (usually 15, 16, or 32).
+    pub bpp: i32,
+    /// Red color mask.
+    pub r: u32,
+    /// Green color mask.
+    pub g: u32,
+    /// Blue color mask.
+    pub b: u32,
+    /// Alpha (opacity) mask.
+    pub a: u32,
+}
+
+impl PixelFormatMask {
+    pub fn new(bpp: i32, r: u32, g: u32, b: u32, a: u32) -> Self {
+        Self { bpp, r, g, b, a }
+    }
+}
+
 /// Pixel format.
 ///
 /// # Remarks
@@ -468,6 +490,62 @@ impl PixelFormat {
     /// Alias for the appropriate XBGR 8888 encoding of color data for the
     /// current platform's endianness.
     pub const XBGR32: Self = Self::from_sdl(SDL_PixelFormat::XBGR8888);
+
+    /// Convert a mask to an enumerated pixel format.
+    ///
+    /// Returns [`None`] if there isn't a match.
+    #[doc(alias = "SDL_GetPixelFormatForMasks")]
+    pub fn from_mask(mask: PixelFormatMask) -> Option<Self> {
+        let fmt = SDL_GetPixelFormatForMasks(mask.bpp, mask.r, mask.g, mask.b, mask.a);
+
+        if fmt == SDL_PixelFormat::UNKNOWN {
+            None
+        } else {
+            Some(fmt.into())
+        }
+    }
+
+    /// Extract [`PixelFormatMask`] data from this pixel format.
+    ///
+    /// Returns [`Err`] if the data cannot be extracted.
+    #[doc(alias = "SDL_GetMasksForPixelFormat")]
+    pub fn mask(self) -> Result<PixelFormatMask> {
+        let mut mask = MaybeUninit::<PixelFormatMask>::uninit();
+        let ptr = mask.as_mut_ptr();
+        unsafe {
+            if SDL_GetMasksForPixelFormat(
+                self.into(),
+                &raw mut (*ptr).bpp,
+                &raw mut (*ptr).r,
+                &raw mut (*ptr).g,
+                &raw mut (*ptr).b,
+                &raw mut (*ptr).a,
+            ) {
+                Ok(mask.assume_init())
+            } else {
+                Err(Error::current())
+            }
+        }
+    }
+
+    /// Get the human-readable name of this pixel format.
+    /// The SDL function is documented to return "SDL_PIXELFORMAT_UNKNOWN"
+    /// in case of an unknown variant, but that shouldn't happen.
+    #[doc(alias = "SDL_GetPixelFormatName")]
+    pub fn name(self) -> &'static str {
+        unsafe {
+            // SAFETY: The function below returns an UTF-8 string pointer,
+            // no matter what.
+            let ptr = SDL_GetPixelFormatName(self.into());
+            c_ptr_to_str(ptr)
+        }
+    }
+}
+
+impl std::fmt::Display for PixelFormat {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.name())
+    }
 }
 
 impl_enum_transmute!(SDL_PixelFormat, PixelFormat);
