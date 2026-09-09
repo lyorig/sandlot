@@ -27,9 +27,10 @@ macro_rules! mod_reexport {
 /// Interconvertible with `bool` via `From`.
 #[macro_export]
 macro_rules! boolenum {
-    ($name:ident) => {
+    ($name:ident, $doc:literal) => {
         #[repr(u8)]
         #[derive(Clone, Copy)]
+        #[doc = $doc]
         pub enum $name {
             No = false as _,
             Yes = true as _,
