@@ -271,7 +271,10 @@ impl WindowId {
     }
 }
 
-resource_new!(SDL_Window, Window, SDL_DestroyWindow);
+resource_new!(
+    /// The struct used as an opaque handle to a window.
+    SDL_Window, Window, SDL_DestroyWindow
+);
 
 /// Get the number of video drivers compiled into SDL.
 #[doc(alias = "SDL_GetNumVideoDrivers")]

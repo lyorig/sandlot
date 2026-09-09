@@ -1,4 +1,4 @@
-//! Events.
+//! Event polling, pushing, etc.
 //!
 //! Implementation checklist:
 //! - [x] SDL_PollEvent
@@ -20,6 +20,9 @@ use crate::{Result, resource::Ref, util::to_result, window::Window};
 
 /// NOTE: Documentation for variants is copied from SDL.
 /// It might not make sense in the context of this crate.
+///
+/// Furthermore, inner event structures ([`SDL_WindowEvent`] etc.)
+/// are currently not wrapped and exposed directly as-is.
 #[repr(C, u32)]
 #[doc(alias = "SDL_Event")]
 pub enum Event {

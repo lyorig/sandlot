@@ -106,7 +106,11 @@ impl<'s, 'd> BlitInfo<'s, 'd> {
     }
 }
 
-resource_new_no_drop!(SDL_GPUCommandBuffer, CommandBuffer);
+resource_new_no_drop!(
+    /// An opaque handle representing a command buffer.
+    /// Most state is managed via command buffers, and is local to each one.
+    SDL_GPUCommandBuffer, CommandBuffer
+);
 impl CommandBuffer {
     /// Acquire a command buffer from a GPU device.
     ///

@@ -8,7 +8,10 @@ use crate::{resource::Ref, resource_new_no_drop};
 
 use super::device::Device;
 
-resource_new_no_drop!(SDL_GPUFence, Fence);
+resource_new_no_drop!(
+    /// An opaque handle representing a fence.
+    SDL_GPUFence, Fence
+);
 impl Fence {
     /// Release a fence obtained from command-buffer submission.
     ///

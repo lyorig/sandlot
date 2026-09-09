@@ -65,7 +65,10 @@ pub enum TextureAccess {
 
 impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 
-resource_new!(SDL_Texture, Texture, SDL_DestroyTexture);
+resource_new!(
+    /// An efficient driver-specific representation of pixel data.
+    SDL_Texture, Texture, SDL_DestroyTexture
+);
 
 impl TextureHandle {
     /// Get the size of a texture, as floating point values.

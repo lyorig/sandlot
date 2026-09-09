@@ -103,7 +103,10 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
     }
 }
 
-resource_new_no_drop!(SDL_GPUShader, Shader);
+resource_new_no_drop!(
+    /// An opaque handle representing a compiled shader object.
+    SDL_GPUShader, Shader
+);
 impl Shader {
     /// Build a [`Shader`] with additional parameters not available in [`ShaderCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ShaderBuilder<'_> {

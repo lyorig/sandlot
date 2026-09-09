@@ -82,7 +82,11 @@ impl TransferBufferCreateInfo {
     }
 }
 
-resource_new_no_drop!(SDL_GPUTransferBuffer, TransferBuffer);
+resource_new_no_drop!(
+    /// An opaque handle representing a transfer buffer.
+    /// Used for transferring data to and from the GPU.
+    SDL_GPUTransferBuffer, TransferBuffer
+);
 impl TransferBuffer {
     /// Build a [`TransferBuffer`] with additional parameters not available in [`TransferBufferCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> TransferBufferBuilder<'_> {

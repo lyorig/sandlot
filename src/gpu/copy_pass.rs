@@ -15,7 +15,11 @@ use crate::{
 
 use super::{buffer::BufferLocation, command_buffer::CommandBuffer, texture::TextureLocation};
 
-resource_new!(SDL_GPUCopyPass, CopyPass, SDL_EndGPUCopyPass);
+resource_new!(
+    /// An opaque handle representing a copy pass.
+    /// Transient; invalid once the pass ends.
+    SDL_GPUCopyPass, CopyPass, SDL_EndGPUCopyPass
+);
 impl CopyPass {
     /// Begin a copy pass on a command buffer.
     ///

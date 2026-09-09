@@ -27,7 +27,11 @@ use super::{
 #[allow(unused_imports)]
 use super::texture::TextureUsageFlags;
 
-resource_new!(SDL_GPUComputePass, ComputePass, SDL_EndGPUComputePass);
+resource_new!(
+    /// An opaque handle representing a compute pass.
+    /// Transient; invalid once the pass ends.
+    SDL_GPUComputePass, ComputePass, SDL_EndGPUComputePass
+);
 
 /// Parameters of an indirect dispatch command.
 ///

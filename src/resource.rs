@@ -191,8 +191,11 @@ macro_rules! resource_new_impl {
 
 #[macro_export]
 macro_rules! resource_new_no_drop {
-    ($sdl:ident, $owned:ident) => {
+    ($(#[$meta:meta])* $sdl:ident, $owned:ident) => {
         paste::paste! {
+            $(#[$meta])*
+            ///
+            /// BEWARE: This struct has no automatic destructor, and must be manually dropped or otherwise consumed!
             #[must_use = "This struct has to be manually dropped via an associated `drop()` method."]
             #[doc(alias = "" $sdl "")]
             pub struct $owned {
@@ -207,8 +210,9 @@ macro_rules! resource_new_no_drop {
 /// Define a resource and implement shared traits and member functions.
 #[macro_export]
 macro_rules! resource_new {
-    ($sdl:ident, $owned:ident, $dtor:ident) => {
+    ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident) => {
         paste::paste! {
+            $(#[$meta])*
             #[doc(alias = "" $sdl "")]
             pub struct $owned {
                 pub(crate) inner: [<$owned Handle>],
@@ -230,8 +234,9 @@ macro_rules! resource_new {
 
 #[macro_export]
 macro_rules! resource_new_tied {
-    ($sdl:ident, $owned:ident, $dtor:ident, $tied:ident) => {
+    ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident, $tied:ident) => {
         paste::paste! {
+            $(#[$meta])*
             #[doc(alias = "" $sdl "")]
             pub struct $owned<'a> {
                 pub(crate) inner: [<$owned Handle>],

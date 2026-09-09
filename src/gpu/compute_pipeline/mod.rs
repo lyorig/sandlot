@@ -92,7 +92,11 @@ impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
     }
 }
 
-resource_new_no_drop!(SDL_GPUComputePipeline, ComputePipeline);
+resource_new_no_drop!(
+    /// An opaque handle representing a compute pipeline.
+    /// Used during compute passes.
+    SDL_GPUComputePipeline, ComputePipeline
+);
 impl ComputePipeline {
     /// Build a [`ComputePipeline`] with additional parameters not available in [`ComputePipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ComputePipelineBuilder<'_> {

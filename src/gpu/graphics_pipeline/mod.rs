@@ -113,7 +113,11 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd> GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 
     }
 }
 
-resource_new_no_drop!(SDL_GPUGraphicsPipeline, GraphicsPipeline);
+resource_new_no_drop!(
+    /// An opaque handle representing a graphics pipeline.
+    /// Used during render passes.
+    SDL_GPUGraphicsPipeline, GraphicsPipeline
+);
 impl GraphicsPipeline {
     /// Build a [`GraphicsPipeline`] with additional parameters not available in [`GraphicsPipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> GraphicsPipelineBuilder<'_> {

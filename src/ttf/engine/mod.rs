@@ -31,7 +31,10 @@ pub enum Winding {
 
 impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding);
 
-resource_new!(TTF_TextEngine, GpuEngine, TTF_DestroyGPUTextEngine);
+resource_new!(
+    /// A text engine that draws text objects with the SDL GPU API.
+    TTF_TextEngine, GpuEngine, TTF_DestroyGPUTextEngine
+);
 
 impl GpuEngine {
     /// Create a text engine for drawing text with the SDL GPU API.
@@ -73,7 +76,10 @@ impl GpuEngineHandle {
     }
 }
 
-resource_new!(TTF_TextEngine, SurfaceEngine, TTF_DestroySurfaceTextEngine);
+resource_new!(
+    /// A text engine that draws text objects to an `SDL_Surface`.
+    TTF_TextEngine, SurfaceEngine, TTF_DestroySurfaceTextEngine
+);
 
 impl SurfaceEngine {
     /// Create a text engine for drawing text on SDL surfaces.
@@ -84,6 +90,7 @@ impl SurfaceEngine {
 }
 
 resource_new!(
+    /// A text engine that draws text objects with an SDL 2D renderer.
     TTF_TextEngine,
     RendererEngine,
     TTF_DestroyRendererTextEngine

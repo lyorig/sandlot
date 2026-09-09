@@ -142,7 +142,10 @@ impl SamplerCreateInfo {
     }
 }
 
-resource_new_no_drop!(SDL_GPUSampler, Sampler);
+resource_new_no_drop!(
+    /// An opaque handle representing a sampler.
+    SDL_GPUSampler, Sampler
+);
 impl Sampler {
     /// Build a [`Sampler`] with additional parameters not available in [`SamplerCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> SamplerBuilder<'_> {

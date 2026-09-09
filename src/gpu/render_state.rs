@@ -52,7 +52,10 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b>
     }
 }
 
-resource_new!(SDL_GPURenderState, RenderState, SDL_DestroyGPURenderState);
+resource_new!(
+    /// A custom GPU render state.
+    SDL_GPURenderState, RenderState, SDL_DestroyGPURenderState
+);
 
 impl RenderStateHandle {
     /// Set fragment-shader uniform data in a custom GPU render state.

@@ -184,7 +184,12 @@ impl<'b> StorageBufferReadWriteBinding<'b> {
     }
 }
 
-resource_new_no_drop!(SDL_GPUBuffer, Buffer);
+resource_new_no_drop!(
+    /// Represents a GPU buffer.
+    /// Used for vertices, indices, indirect draw commands, and general compute data.
+    SDL_GPUBuffer, Buffer
+);
+
 impl Buffer {
     /// Build a [`Buffer`] with additional parameters not available in [`BufferCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> BufferBuilder<'_> {

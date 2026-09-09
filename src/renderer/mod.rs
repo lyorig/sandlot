@@ -93,7 +93,10 @@ use crate::{
 mod_reexport!(builder);
 mod_reexport!(properties);
 
-resource_new!(SDL_Renderer, Renderer, SDL_DestroyRenderer);
+resource_new!(
+    /// A structure representing rendering state.
+    SDL_Renderer, Renderer, SDL_DestroyRenderer
+);
 
 impl RendererHandle {
     /// Get the name of a renderer.

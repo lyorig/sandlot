@@ -593,7 +593,10 @@ impl<'t> BlitRegion<'t> {
     }
 }
 
-resource_new_no_drop!(SDL_GPUTexture, Texture);
+resource_new_no_drop!(
+    /// An opaque handle representing a texture.
+    SDL_GPUTexture, Texture
+);
 impl Texture {
     /// Build a [`Texture`] with additional parameters not available in [`TextureCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> TextureBuilder<'_> {

@@ -55,7 +55,10 @@ use crate::{
     util::{opt2res, to_result},
 };
 
-resource_new!(TTF_Text, Text, TTF_DestroyText);
+resource_new!(
+    /// Text created with `TTF_CreateText()`.
+    TTF_Text, Text, TTF_DestroyText
+);
 
 /// Text direction flags.
 ///
