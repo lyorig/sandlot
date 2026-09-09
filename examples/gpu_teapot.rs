@@ -7,7 +7,7 @@ use std::mem::ManuallyDrop;
 use sandlot::{
     Context, Result,
     color::{RgbaF32, RgbaU8},
-    event::{Event, EventIter},
+    event::Event,
     gpu::*,
     properties::Properties,
     rect::Point,
@@ -396,7 +396,7 @@ fn run() -> Result<()> {
     let trans = Mat4::translate(-mesh.center[0], -mesh.center[1], -mesh.center[2]);
 
     'frames: loop {
-        for event in EventIter::new() {
+        for event in Event::iter() {
             if let Event::Quit = event {
                 break 'frames;
             }

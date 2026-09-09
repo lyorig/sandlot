@@ -5,15 +5,8 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Context, Result,
-    color::RgbaF32,
-    event::{Event, EventIter},
-    gpu::*,
-    properties::Properties,
-    rect::Point,
-    resource::Resource,
-    subsystem::Video,
-    window::Window,
+    Context, Result, color::RgbaF32, event::Event, gpu::*, properties::Properties, rect::Point,
+    resource::Resource, subsystem::Video, window::Window,
 };
 
 cfg_select! {
@@ -167,7 +160,7 @@ fn run() -> Result<()> {
     })?;
 
     'frames: loop {
-        for event in EventIter::new() {
+        for event in Event::iter() {
             if let Event::Quit = event {
                 break 'frames;
             }

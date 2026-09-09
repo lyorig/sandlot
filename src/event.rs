@@ -1,13 +1,49 @@
-//! Event polling, pushing, etc.
+//! Event queue management.
 //!
-//! Implementation checklist:
+//! It's extremely common—often required—that an app deal with SDL's event
+//! queue. Almost all useful information about interactions with the real
+//! world flow through here: the user interacting with the computer and app,
+//! hardware coming and going, the system changing in some way, etc.
+//!
+//! An app generally takes a moment, perhaps at the start of a new frame, to
+//! examine any events that have occurred since the last time and process or
+//! ignore them. This is generally done by polling in a loop via [`EventIter`]
+//! until it returns [`None`]. (If using the main callbacks, events are provided
+//! one at a time in calls to `SDL_AppEvent` before the next call to
+//! `SDL_AppIterate`; in this scenario, the app does not poll at all.)
+//!
+//! There are other forms of control, too: `SDL_PeepEvents` has more
+//! functionality at the cost of more complexity, and `SDL_WaitEvent` can block
+//! the process until something interesting happens, which might be beneficial
+//! for certain types of programs on low-power hardware. One may also call
+//! `SDL_AddEventWatch` to set a callback when new events arrive.
+//!
+//! The app is free to generate their own events, too: [`Event::push`] allows
+//! the app to put events onto the queue for later retrieval;
+//! `SDL_RegisterEvents` can guarantee that these events have a type that isn't
+//! in use by other parts of the system.
+//!
+//! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryEvents)):
+//! - [ ] SDL_AddEventWatch
+//! - [ ] SDL_EventEnabled
+//! - [ ] SDL_FilterEvents
+//! - [ ] SDL_FlushEvent
+//! - [ ] SDL_FlushEvents
+//! - [ ] SDL_GetEventDescription
+//! - [ ] SDL_GetEventFilter
+//! - [ ] SDL_GetWindowFromEvent
+//! - [ ] SDL_HasEvent
+//! - [ ] SDL_HasEvents
+//! - [ ] SDL_PeepEvents
 //! - [x] SDL_PollEvent
+//! - [x] SDL_PumpEvents
 //! - [x] SDL_PushEvent
-//! - [x] SDL_StartTextInput
-//! - [ ] SDL_StartTextInputWithProperties
-//! - [x] SDL_StopTextInput
-//! - [x] SDL_TextInputActive
-//! - [ ] SDL_SetTextInputArea
+//! - [ ] SDL_RegisterEvents
+//! - [ ] SDL_RemoveEventWatch
+//! - [ ] SDL_SetEventEnabled
+//! - [ ] SDL_SetEventFilter
+//! - [x] SDL_WaitEvent
+//! - [ ] SDL_WaitEventTimeout
 
 use std::{iter::FusedIterator, mem::MaybeUninit, ptr};
 
@@ -16,7 +52,7 @@ use sdl3_sys::{
     keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
 };
 
-use crate::{Result, resource::Ref, util::to_result, window::Window};
+use crate::{Result, error::Error, resource::Ref, util::to_result, window::Window};
 
 /// NOTE: Documentation for variants is copied from SDL.
 /// It might not make sense in the context of this crate.
@@ -370,6 +406,12 @@ pub enum Event {
 }
 
 impl Event {
+    /// Returns an iterator over all [`Event`]s acquired since the last call
+    /// (implicit or explicit) to [`Event::pump`].
+    pub fn iter() -> EventIter {
+        EventIter::new()
+    }
+
     /// Add an event to the event queue.
     ///
     /// The event is copied into the queue.
@@ -409,6 +451,44 @@ impl Event {
         let common = unsafe { ptr.as_mut_unchecked() };
 
         common.timestamp = ts;
+    }
+
+    /// Pump the event loop, gathering events from the input devices.
+    ///
+    /// # Remarks
+    ///
+    /// This function updates the event queue and internal input device state.
+    ///
+    /// This function gathers all the pending input information from devices
+    /// and places it in the event queue. Without calls to this function no
+    /// events would ever be placed on the queue. Usually the need for calls
+    /// to it is hidden, since polling via [`EventIter`] or waiting via
+    /// [`Self::wait`] implicitly pump the event loop. However, if you are not
+    /// polling or waiting for events (e.g. you are filtering them), then you
+    /// must call this function to force an event queue update.
+    #[doc(alias = "SDL_PumpEvents")]
+    pub fn pump() {
+        unsafe { SDL_PumpEvents() };
+    }
+
+    /// Wait indefinitely for the next available event.
+    ///
+    /// Returns [`Err`] if there was an error while waiting for events.
+    ///
+    /// # Remarks
+    ///
+    /// This function may implicitly pump the event loop (see [`Self::pump`]).
+    #[doc(alias = "SDL_WaitEvent")]
+    pub fn wait() -> Result<Self> {
+        let mut e = MaybeUninit::<SDL_Event>::uninit();
+
+        if unsafe { SDL_WaitEvent(e.as_mut_ptr()) } {
+            // SAFETY: SDL fully initializes the event on success.
+            // The layouts of both types match.
+            Ok(unsafe { e.assume_init_ref() }.into())
+        } else {
+            Err(Error::current())
+        }
     }
 
     /// Start accepting Unicode text input events in a window.
@@ -490,11 +570,13 @@ impl From<&Event> for SDL_Event {
     }
 }
 
-pub struct EventIter;
+pub struct EventIter {
+    _private: (),
+}
 
 impl EventIter {
-    pub fn new() -> Self {
-        Self {}
+    fn new() -> Self {
+        Self { _private: () }
     }
 }
 

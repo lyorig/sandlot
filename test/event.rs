@@ -1,11 +1,7 @@
 use rustest::test;
 use sdl3_sys::events::*;
 
-use sandlot::{
-    Context,
-    event::{Event, EventIter},
-    subsystem::Events,
-};
+use sandlot::{Context, event::Event, subsystem::Events};
 
 /// [`SDL_Event`] -> [`Event`] conversion.
 #[test]
@@ -67,7 +63,7 @@ fn event_push() {
     // Should work now.
     Event::Quit.push().unwrap();
 
-    let evt = EventIter::new().next().unwrap();
+    let evt = Event::iter().next().unwrap();
     let Event::Quit = evt else {
         panic!("Expected quit event");
     };

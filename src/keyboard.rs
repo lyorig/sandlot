@@ -20,6 +20,13 @@
 //! - [ ] SDL_ScreenKeyboardShown
 //! - [ ] SDL_SetModState
 //! - [ ] SDL_SetScancodeName
+//!
+//! Text input, technically belonging to this module but implemented in [`Event`](crate::event::Event):
+//! - [x] SDL_StartTextInput
+//! - [ ] SDL_StartTextInputWithProperties
+//! - [x] SDL_StopTextInput
+//! - [x] SDL_TextInputActive
+//! - [ ] SDL_SetTextInputArea
 
 use std::ffi::CStr;
 

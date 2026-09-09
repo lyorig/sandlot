@@ -5,7 +5,7 @@ use std::mem::ManuallyDrop;
 use sandlot::{
     Context, Result,
     color::Rgba,
-    event::{Event, EventIter},
+    event::Event,
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
@@ -64,7 +64,7 @@ fn run() -> Result<()> {
     'main: loop {
         rnd.clear()?;
 
-        for event in EventIter::new() {
+        for event in Event::iter() {
             if let Event::Quit = event {
                 break 'main;
             }
