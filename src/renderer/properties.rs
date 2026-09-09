@@ -10,6 +10,7 @@ use sdl3_sys::{
 
 use crate::{
     gpu::{Device, DeviceHandle},
+    pixels::PixelFormat,
     properties::{Properties, PropertiesHandle},
     resource::Ref,
     surface::{Surface, SurfaceHandle},
@@ -81,7 +82,7 @@ impl<'a> RendererProperties<'a> {
         }
     }
 
-    pub fn texture_formats(&self) -> &[SDL_PixelFormat] {
+    pub fn texture_formats(&self) -> &[PixelFormat] {
         let begin = unsafe {
             self.inner.pointer(
                 SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER,
@@ -94,7 +95,7 @@ impl<'a> RendererProperties<'a> {
         while unsafe { begin.add(len).read() } != SDL_PixelFormat::UNKNOWN {
             len += 1;
         }
-        unsafe { std::slice::from_raw_parts(begin, len) }
+        unsafe { std::slice::from_raw_parts(begin.cast::<PixelFormat>(), len) }
     }
 
     pub fn texture_wrapping(&self) -> bool {
