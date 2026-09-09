@@ -1,8 +1,22 @@
+//! Events.
+//!
+//! Implementation checklist:
+//! - [x] SDL_PollEvent
+//! - [x] SDL_PushEvent
+//! - [x] SDL_StartTextInput
+//! - [ ] SDL_StartTextInputWithProperties
+//! - [x] SDL_StopTextInput
+//! - [x] SDL_TextInputActive
+//! - [ ] SDL_SetTextInputArea
+
 use std::{iter::FusedIterator, mem::MaybeUninit, ptr};
 
-use sdl3_sys::events::*;
+use sdl3_sys::{
+    events::*,
+    keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
+};
 
-use crate::{Result, util::to_result};
+use crate::{Result, resource::Ref, util::to_result, window::Window};
 
 /// NOTE: Documentation for variants is copied from SDL.
 /// It might not make sense in the context of this crate.
@@ -392,6 +406,41 @@ impl Event {
         let common = unsafe { ptr.as_mut_unchecked() };
 
         common.timestamp = ts;
+    }
+
+    /// Start accepting Unicode text input events in a window.
+    ///
+    /// # Remarks
+    ///
+    /// This function will enable text input ([`Event::TextInput`] and
+    /// [`Event::TextEditing`] events) in the specified window. Please use
+    /// this function paired with [`Event::disable_text_input`].
+    ///
+    /// Text input events are not received by default.
+    ///
+    /// On some platforms using this function shows the screen keyboard and/or
+    /// activates an IME, which can prevent some key press events from being
+    /// passed through.
+    #[doc(alias = "SDL_StartTextInput")]
+    pub fn enable_text_input(wnd: Ref<Window>) -> Result<()> {
+        to_result(unsafe { SDL_StartTextInput(wnd.handle.as_ptr()) })
+    }
+
+    /// Stop receiving any text input events in a window.
+    ///
+    /// # Remarks
+    ///
+    /// If [`Event::enable_text_input`] showed the screen keyboard,
+    /// this function will hide it.
+    #[doc(alias = "SDL_StopTextInput")]
+    pub fn disable_text_input(wnd: Ref<Window>) -> Result<()> {
+        to_result(unsafe { SDL_StopTextInput(wnd.handle.as_ptr()) })
+    }
+
+    /// Check whether or not Unicode text input events are enabled for a window.
+    #[doc(alias = "SDL_TextInputActive")]
+    pub fn is_text_input_enabled(wnd: Ref<Window>) -> bool {
+        unsafe { SDL_TextInputActive(wnd.handle.as_ptr()) }
     }
 }
 

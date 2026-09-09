@@ -1,4 +1,4 @@
-//! Keyboard shenanigans.
+//! Keyboard state querying and manipulation.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryKeyboard)):
 //! - [ ] SDL_ClearComposition
@@ -20,11 +20,6 @@
 //! - [ ] SDL_ScreenKeyboardShown
 //! - [ ] SDL_SetModState
 //! - [ ] SDL_SetScancodeName
-//! - [ ] SDL_SetTextInputArea
-//! - [x] SDL_StartTextInput
-//! - [ ] SDL_StartTextInputWithProperties
-//! - [x] SDL_StopTextInput
-//! - [x] SDL_TextInputActive
 
 use std::ffi::CStr;
 
@@ -33,12 +28,6 @@ use sdl3_sys::{
     keycode::{SDL_Keycode, SDL_Keymod},
     scancode::{SDL_SCANCODE_COUNT, SDL_Scancode},
 };
-
-// doc-only
-#[allow(unused_imports)]
-use crate::event::Event;
-
-use crate::{Result, resource::Ref, util::to_result, window::Window};
 
 const NUM_SCANCODES: usize = SDL_SCANCODE_COUNT.0 as usize;
 
@@ -113,39 +102,4 @@ pub fn keyboard_state() -> &'static [bool; NUM_SCANCODES] {
 #[doc(alias = "SDL_GetModState")]
 pub fn mod_state() -> SDL_Keymod {
     unsafe { SDL_GetModState() }
-}
-
-/// Start accepting Unicode text input events in a window.
-///
-/// # Remarks
-///
-/// This function will enable text input ([`Event::TextInput`] and
-/// [`Event::TextEditing`] events) in the specified window. Please use
-/// this function paired with [`text_input_stop`].
-///
-/// Text input events are not received by default.
-///
-/// On some platforms using this function shows the screen keyboard and/or
-/// activates an IME, which can prevent some key press events from being
-/// passed through.
-#[doc(alias = "SDL_StartTextInput")]
-pub fn text_input_start(wnd: Ref<Window>) -> Result<()> {
-    to_result(unsafe { SDL_StartTextInput(wnd.handle.as_ptr()) })
-}
-
-/// Stop receiving any text input events in a window.
-///
-/// # Remarks
-///
-/// If [`text_input_start`] showed the screen keyboard, this function will
-/// hide it.
-#[doc(alias = "SDL_StopTextInput")]
-pub fn text_input_stop(wnd: Ref<Window>) -> Result<()> {
-    to_result(unsafe { SDL_StopTextInput(wnd.handle.as_ptr()) })
-}
-
-/// Check whether or not Unicode text input events are enabled for a window.
-#[doc(alias = "SDL_TextInputActive")]
-pub fn is_text_input_active(wnd: Ref<Window>) -> bool {
-    unsafe { SDL_TextInputActive(wnd.handle.as_ptr()) }
 }
