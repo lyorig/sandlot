@@ -81,12 +81,12 @@
 //! - [ ] SDL_GetPixelFormatDetails
 //! - [x] SDL_GetPixelFormatForMasks
 //! - [x] SDL_GetPixelFormatName
-//! - [x] SDL_GetRGB (impl'd in [`RgbU8`](crate::color::RgbU8))
-//! - [x] SDL_GetRGBA (impl'd in [`RgbaU8`](crate::color::RgbaU8))
-//! - [x] SDL_MapRGB (impl'd in [`RgbU8`](crate::color::RgbU8))
-//! - [x] SDL_MapRGBA (impl'd in [`RgbaU8`](crate::color::RgbaU8))
-//! - [x] SDL_MapSurfaceRGB (impl'd in [`Surface`](crate::surface::Surface))
-//! - [x] SDL_MapSurfaceRGBA (impl'd in [`Surface`](crate::surface::Surface))
+//! - [x] SDL_GetRGB (impl'd as [`RgbU8::from_pixel`](crate::color::RgbU8::from_pixel))
+//! - [x] SDL_GetRGBA (impl'd as [`RgbaU8::from_pixel`](crate::color::RgbaU8::from_pixel))
+//! - [x] SDL_MapRGB (impl'd as [`RgbU8::map`](crate::color::RgbU8::map))
+//! - [x] SDL_MapRGBA (impl'd as [`RgbaU8::map`](crate::color::RgbaU8::map))
+//! - [x] SDL_MapSurfaceRGB (impl'd as [`SurfaceHandle::map_rgb`](crate::surface::SurfaceHandle::map_rgb))
+//! - [x] SDL_MapSurfaceRGBA (impl'd as [`SurfaceHandle::map_rgba`](crate::surface::SurfaceHandle::map_rgba))
 //!
 //! From [CategoryBlendmode](https://wiki.libsdl.org/SDL3/CategoryBlendmode):
 //! - [x] SDL_BlendMode
