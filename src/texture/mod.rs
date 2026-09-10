@@ -1,4 +1,4 @@
-//! SDL's 2D texture API wrapper.
+//! GPU textures residing in VRAM.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryRender)):
 //! - [x] SDL_CreateTexture

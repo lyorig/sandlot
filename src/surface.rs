@@ -1,4 +1,4 @@
-//! A 2D image stored in system RAM and directly accessible via the CPU.
+//! CPU textures residing in RAM.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategorySurface)):
 //! - [ ] SDL_AddSurfaceAlternateImage

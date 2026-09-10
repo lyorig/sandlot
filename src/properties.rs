@@ -12,7 +12,7 @@
 //!
 //! # Builders
 //! Since each [`Properties`]-constructible SDL object has a finite well-documented set of properties,
-//! sandlot exposes an intuitive builder for each such object via the associated `builder()` function.
+//! Sandlot exposes an intuitive builder for each such object via the associated `builder()` function.
 //! Each builder "attaches" to an existing property group, enabling efficient memory usage.
 //!
 //! For example:
@@ -43,27 +43,18 @@
 //!
 //! Many objects in the GPU submodule use a separate structure in place of constructor arguments,
 //! e.g. [`Texture`](crate::gpu::Texture) uses [`TextureCreateInfo`](crate::gpu::TextureCreateInfo).
-//! These contain the required creation fields, while a resource builder attaches a property group
-//! for setting further options (SDL calls them "extensions"). GPU builders are created from the
-//! object being built, rather than from its `CreateInfo` struct. Two build options are provided:
+//! These internally contain the property ID field to construct with (SDL calls them "extensions"),
+//! so some shenanigans had to be done in order to do maintain the "typical" builder API you'd see
+//! for non-GPU structs.
 //!
-//! ```rust,ignore
-//! fn build(&self, device: Ref<Device>, ci: FooCreateInfo) -> Result<Foo>;
-//! fn build_cleanup(&self, device: Ref<Device>, ci: FooCreateInfo) -> Result<Foo>;
-//! ```
-//!
-//! First create a `CreateInfo` with its associated `new` function, then pass it to the resource
-//! builder. `build` attaches the builder's properties and creates the object. `build_cleanup` does
-//! the same, then clears the creation properties from the builder's property group.
+//! That is, the `CreateInfo` value is passed by value because the builder adds the property group
+//! just before creation.
 //!
 //! ```rust,ignore
 //! let create_info = TextureCreateInfo::new(/* required fields */);
-//! let texture = Texture::builder(props.as_ref()).build(device.as_ref(), create_info)?;
+//! let texture = Texture::builder(props.as_ref())
+//!     .build(device.as_ref(), create_info)?;
 //! ```
-//!
-//! The `CreateInfo` value is passed by value because the builder adds the property group just before
-//! creation. Its lifetime parameters therefore describe only other borrowed creation data, not the
-//! properties group.
 //!
 //! # API checklist ([source](https://wiki.libsdl.org/SDL3/CategoryProperties))
 //! - [x] SDL_ClearProperty

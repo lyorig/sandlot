@@ -1,15 +1,24 @@
 # Sandlot
 
-An SDL & SDL_ttf (3.x) wrapper. Aims for as close to 100% API coverage, while making it neater & safer to use via various Rust mechanisms (see _Enhancements_).
-As I'm primarily a C++ developer, this library is probably unsound in various places. These ought to be weeded out over time after reaching full API coverage.
+An SDL (3.4) & SDL_ttf (3.2) Rust wrapper.
+
+## How much of a wrapper is it really?
+
+It's somewhere between raw sdl3-sys bindings, and a higher-level graphics framework with a radically different API.
+The general plan is:
+1. expose the functionality of SDL,
+2. minimize ways to shoot yourself in the foot.
+
+So it's definitely quite a [leaky abstraction](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/).
 
 > [!IMPORTANT]
-> This is purely an API wrapper. It isn't concerned with how you find, and link with,
-> SDL and its satellite libraries on your system; these topics are covered by the
+> This crate isn't concerned with how you find, and link with, SDL and its
+> satellite libraries on your system; these topics are covered by the
 > [sdl3-sys docs](https://docs.rs/sdl3-sys/latest/sdl3_sys/).
 
 > [!NOTE]
 > Functions and methods usually map 1:1 to their SDL counterparts in terms of functionality.
+> In such cases, there is always a corresponding `#[doc(alias = "...")]` attribute.
 > There is an effort to "pluck" documentation from the SDL wiki and map it to Rust abstractions,
 > while preserving the meaning. The first pass has been done via LLMs, so there may be some slop.
 
