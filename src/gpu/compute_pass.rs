@@ -23,8 +23,8 @@ use super::{
     texture::{StorageTextureReadWriteBinding, Texture, TextureSamplerBinding},
 };
 
-// For docblocks.
-#[allow(unused_imports)]
+// doc-only
+#[expect(unused_imports)]
 use super::texture::TextureUsageFlags;
 
 resource_new!(

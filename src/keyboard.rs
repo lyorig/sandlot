@@ -23,12 +23,10 @@
 //! - [ ] SDL_ScreenKeyboardShown
 //! - [ ] SDL_SetModState
 //! - [ ] SDL_SetScancodeName
-//!
-//! Text input, technically belonging to this module but implemented in [`Event`](crate::event::Event):
-//! - [x] SDL_StartTextInput
+//! - [x] SDL_StartTextInput (impl'd as [`Event::enable_text_input`])
 //! - [ ] SDL_StartTextInputWithProperties
-//! - [x] SDL_StopTextInput
-//! - [x] SDL_TextInputActive
+//! - [x] SDL_StopTextInput (impl'd as [`Event::disable_text_input`])
+//! - [x] SDL_TextInputActive (impl'd as [`Event::is_text_input_enabled`])
 //! - [ ] SDL_SetTextInputArea
 
 use std::ffi::CStr;
@@ -38,6 +36,10 @@ use sdl3_sys::{
     keycode::{SDL_Keycode, SDL_Keymod},
     scancode::{SDL_SCANCODE_COUNT, SDL_Scancode},
 };
+
+// doc-only
+#[expect(unused_imports)]
+use crate::event::Event;
 
 const NUM_SCANCODES: usize = SDL_SCANCODE_COUNT.0 as usize;
 

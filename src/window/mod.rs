@@ -121,7 +121,7 @@ use crate::{
 };
 
 // doc-only
-#[allow(unused_imports)]
+#[expect(unused_imports)]
 use crate::event::Event;
 
 use bitflags::bitflags;
