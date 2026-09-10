@@ -30,8 +30,8 @@ use sdl3_sys::video::*;
 use std::{ffi::CStr, mem::MaybeUninit, num::NonZero, ptr::NonNull};
 
 boolenum!(
-    IncludeHighDensityModes,
-    "Whether to include high-density display modes in enumeration."
+    /// Whether to include high-density display modes in enumeration.
+    IncludeHighDensityModes
 );
 
 /// Display orientation values; the way a display is rotated.

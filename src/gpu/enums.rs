@@ -3,35 +3,62 @@
 
 use crate::boolenum;
 
-boolenum!(Cycle, "Whether to cycle resources.");
-boolenum!(CycleResolveTexture, "Whether to cycle resolve textures.");
 boolenum!(
-    EnableAlphaToCoverage,
-    "Whether to enable the alpha-to-coverage feature."
-);
-boolenum!(EnableAnisotropy, "Whether to enable anisotropic filtering.");
-boolenum!(EnableBlend, "Whether to enable blending.");
-boolenum!(
-    EnableColorWriteMask,
-    "Whether to enable the color write mask."
+    /// Whether to cycle resources.
+    ///
+    /// ## Resources
+    /// [SDL GPU API Concepts: Data Transfer and Cycling](https://moonside.games/posts/sdl-gpu-concepts-cycling/)
+    Cycle
 );
 boolenum!(
-    EnableCompare,
-    "Whether to enable comparison against a reference value."
+    /// Whether to cycle resolve textures.
+    CycleResolveTexture
 );
 boolenum!(
-    EnableDebug,
-    "Whether to enable debug mode properties and validations."
+    /// Whether to enable the [alpha-to-coverage](https://en.wikipedia.org/wiki/Alpha_to_coverage) feature.
+    EnableAlphaToCoverage
 );
-boolenum!(EnableDepthBias, "Whether to bias fragment depth values.");
 boolenum!(
-    EnableDepthClip,
-    "Whether to enable depth clipping instead of depth clamping."
+    /// Whether to enable anisotropic filtering.
+    EnableAnisotropy
 );
-boolenum!(EnableDepthTest, "Whether to enable the depth test.");
-boolenum!(EnableDepthWrite, "Whether to enable depth writes.");
-boolenum!(EnableStencilTest, "Whether to enable the stencil test.");
 boolenum!(
-    WaitAll,
-    "Whether to wait for all fences, instead of any fence."
+    /// Whether to enable blending.
+    EnableBlend
+);
+boolenum!(
+    /// Whether to enable the color write mask.
+    EnableColorWriteMask
+);
+boolenum!(
+    /// Whether to enable comparison against a reference value.
+    EnableCompare
+);
+boolenum!(
+    /// Whether to enable debug mode properties and validations.
+    EnableDebug
+);
+boolenum!(
+    /// Whether to bias fragment depth values.
+    EnableDepthBias
+);
+boolenum!(
+    /// Whether to enable depth clipping instead of depth clamping.
+    EnableDepthClip
+);
+boolenum!(
+    /// Whether to enable the depth test.
+    EnableDepthTest
+);
+boolenum!(
+    /// Whether to enable depth writes.
+    EnableDepthWrite
+);
+boolenum!(
+    /// Whether to enable the stencil test.
+    EnableStencilTest
+);
+boolenum!(
+    /// Whether to wait for all fences, instead of any fence.
+    WaitAll
 );
