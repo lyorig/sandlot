@@ -46,18 +46,26 @@ impl<'a> TextureProperties<'a> {
     }
 
     pub fn colorspace(&self) -> Colorspace {
-        SDL_Colorspace(unsafe { self.inner.number(SDL_PROP_TEXTURE_COLORSPACE_NUMBER, 0) as u32 })
-            .into()
+        unsafe {
+            let cs =
+                SDL_Colorspace(self.inner.number(SDL_PROP_TEXTURE_COLORSPACE_NUMBER, 0) as u32);
+            Colorspace::from_sdl(cs)
+        }
     }
 
     pub fn format(&self) -> PixelFormat {
-        SDL_PixelFormat(unsafe { self.inner.number(SDL_PROP_TEXTURE_FORMAT_NUMBER, 0) as c_int })
-            .into()
+        unsafe {
+            let pf = SDL_PixelFormat(self.inner.number(SDL_PROP_TEXTURE_FORMAT_NUMBER, 0) as c_int);
+            PixelFormat::from_sdl(pf)
+        }
     }
 
     pub fn access(&self) -> TextureAccess {
-        SDL_TextureAccess(unsafe { self.inner.number(SDL_PROP_TEXTURE_ACCESS_NUMBER, 0) as c_int })
-            .into()
+        unsafe {
+            let ta =
+                SDL_TextureAccess(self.inner.number(SDL_PROP_TEXTURE_ACCESS_NUMBER, 0) as c_int);
+            TextureAccess::from_sdl(ta)
+        }
     }
 
     pub fn width(&self) -> i64 {

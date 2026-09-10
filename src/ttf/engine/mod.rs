@@ -59,7 +59,8 @@ impl GpuEngineHandle {
         if wind == TTF_GPUTextEngineWinding::INVALID {
             Err(Error::current())
         } else {
-            Ok(Winding::from_sdl(wind))
+            // SAFETY: Checked above that `wind` is not `INVALID`.
+            Ok(unsafe { Winding::from_sdl(wind) })
         }
     }
 

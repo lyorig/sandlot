@@ -499,7 +499,7 @@ impl WindowHandle {
     /// Returns a mask of the [`WindowFlags`] associated with this window.
     #[doc(alias = "SDL_GetWindowFlags")]
     pub fn flags(&self) -> WindowFlags {
-        unsafe { SDL_GetWindowFlags(self.handle.as_ptr()) }.into()
+        unsafe { WindowFlags::from_sdl(SDL_GetWindowFlags(self.handle.as_ptr())) }
     }
 
     /// Get the renderer associated with a window.

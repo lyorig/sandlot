@@ -889,7 +889,7 @@ impl traits::BlendMode for RendererHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetRenderDrawBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            ret.assume_init().into()
+            BlendMode::from_sdl(ret.assume_init())
         }
     }
 

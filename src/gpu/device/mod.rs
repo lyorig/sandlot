@@ -239,10 +239,11 @@ impl DeviceHandle {
     /// swapchain parameters change.
     #[doc(alias = "SDL_GetGPUSwapchainTextureFormat")]
     pub fn swapchain_texture_format(&self, window: Ref<Window>) -> TextureFormat {
-        let fmt = unsafe {
-            SDL_GetGPUSwapchainTextureFormat(self.handle.as_ptr(), window.handle.as_ptr())
-        };
-        fmt.into()
+        unsafe {
+            let fmt =
+                SDL_GetGPUSwapchainTextureFormat(self.handle.as_ptr(), window.handle.as_ptr());
+            TextureFormat::from_sdl(fmt)
+        }
     }
 
     /// Determine whether a texture format is supported for a type and usage.

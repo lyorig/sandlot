@@ -271,7 +271,12 @@ pub fn set_priorities(priority: Priority) {
 /// Get the priority of a particular log category.
 #[doc(alias = "SDL_GetLogPriority")]
 pub fn priority(category: Category) -> Priority {
-    unsafe { SDL_GetLogPriority(category as _) }.into()
+    unsafe {
+        let p = SDL_GetLogPriority(category as _);
+
+        // SAFETY: Sandlot doesn't expose ways to create custom categories/priorities.
+        Priority::from_sdl(p)
+    }
 }
 
 /// Reset all priorities to default.

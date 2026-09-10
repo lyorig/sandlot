@@ -59,18 +59,20 @@ macro_rules! boolenum {
     };
 }
 
-/// Implement bidirectional [`From`] for two enums.
+/// Implement bidirectional [`From`] for two enums using [`std::mem::transmute`].
 ///
-/// Also defines two `const fn`s:
-/// - `$wrap::from_sdl($sdl)`
-/// - `$wrap::to_sdl(self)`
+/// Intended for use with Sandlot's SDL enum wrappers.
+///
+/// Defines two `const fn`s:
+/// - `$wrap::from_sdl(self)`, which is `unsafe` since SDL often has "invalid" enum variants (i.e. `SDL_SCALEMODE_INVALID`)
+///   for marking error states in functions etc. Sandlot leaves these out, instead opting to use [`None`] or [`Err`] to indicate errors.
+/// - `$wrap::to_sdl($sdl)`, which is infallible since Sandlot enums are always a subset of their SDL counterparts.
 ///
 /// The macro ensures the following pre-requisites at compile-time:
-/// - the two types have equal size ([`std::mem::size_of`])
+/// - the two types have equal size (via [`std::mem::size_of`])
 /// - both types implement [`Copy`]
 ///
-/// The conversion is done via [`std::mem::transmute`].
-/// It is your responsibility to ensure its use for converting between both types is sound.
+/// It is otherwise your responsibility to ensure transmuting between both types is sound.
 #[macro_export]
 macro_rules! impl_enum_transmute {
     ($sdl:ident, $wrap:ident) => {
@@ -80,18 +82,20 @@ macro_rules! impl_enum_transmute {
         impl $crate::util::IsCopy for $wrap {}
 
         impl $wrap {
-            const fn from_sdl(value: $sdl) -> Self {
+            /// Construct this enum from its SDL equivalent.
+            ///
+            /// # Safety
+            /// The caller must ensure that `value` is a valid enum variant of [`Self`],
+            /// e.g. `ScaleMode` cannot be constructed from `SDL_SCALEMODE_INVALID`.
+            pub const unsafe fn from_sdl(value: $sdl) -> Self {
                 unsafe { ::std::mem::transmute(value) }
             }
 
-            const fn to_sdl(self) -> $sdl {
+            /// Convert this enum to its SDL equivalent.
+            /// This is the inverse of [`Self::from_sdl`], and is infallible, owing to [`Self`] being a subset
+            /// of the enum it's wrapping.
+            pub const fn to_sdl(self) -> $sdl {
                 unsafe { ::std::mem::transmute(self) }
-            }
-        }
-
-        impl From<$sdl> for $wrap {
-            fn from(value: $sdl) -> Self {
-                Self::from_sdl(value)
             }
         }
 

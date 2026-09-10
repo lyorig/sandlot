@@ -88,7 +88,7 @@ impl TextureHandle {
         // SAFETY: This function only reads struct fields.
         unsafe {
             SDL_GetTextureScaleMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            ret.assume_init().into()
+            ScaleMode::from_sdl(ret.assume_init())
         }
     }
 
@@ -123,7 +123,7 @@ impl traits::BlendMode for TextureHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetTextureBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            ret.assume_init().into()
+            BlendMode::from_sdl(ret.assume_init())
         }
     }
 

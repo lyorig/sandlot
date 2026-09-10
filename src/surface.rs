@@ -87,7 +87,7 @@ impl SurfaceHandle {
     /// Get the pixel format of the surface.
     pub fn format(&self) -> PixelFormat {
         let surf = unsafe { self.handle.as_ref() };
-        surf.format.into()
+        unsafe { PixelFormat::from_sdl(surf.format) }
     }
 
     /// Perform a fast fill of the entire surface with a specific color.
@@ -469,7 +469,7 @@ impl traits::BlendMode for SurfaceHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetSurfaceBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            ret.assume_init().into()
+            BlendMode::from_sdl(ret.assume_init())
         }
     }
 

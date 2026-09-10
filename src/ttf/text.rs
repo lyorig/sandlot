@@ -253,7 +253,7 @@ impl TextHandle {
     /// This defaults to the direction of the font used by the text object.
     #[doc(alias = "TTF_GetTextDirection")]
     pub fn direction(&self) -> Direction {
-        Direction::from_sdl(unsafe { TTF_GetTextDirection(self.as_ptr()) })
+        unsafe { Direction::from_sdl(TTF_GetTextDirection(self.as_ptr())) }
     }
 
     /// Set the direction to be used for text shaping a text object.

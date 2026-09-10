@@ -165,7 +165,7 @@ pub fn texture_format_from_pixel_format(pixel_format: SDL_PixelFormat) -> Option
     if fmt == SDL_GPUTextureFormat::INVALID {
         None
     } else {
-        Some(fmt.into())
+        Some(unsafe { TextureFormat::from_sdl(fmt) })
     }
 }
 
@@ -179,7 +179,7 @@ pub fn pixel_format_from_texture_format(format: TextureFormat) -> Option<PixelFo
     if fmt == SDL_PixelFormat::UNKNOWN {
         None
     } else {
-        Some(fmt.into())
+        Some(unsafe { PixelFormat::from_sdl(fmt) })
     }
 }
 
