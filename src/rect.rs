@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::Mul};
+use std::{fmt::Display, ops::Mul, ptr};
 
 use sdl3_sys::rect::*;
 
@@ -29,7 +29,7 @@ impl PointI32 {
     }
 
     pub const fn as_sdl_ptr(&self) -> *const SDL_Point {
-        std::ptr::from_ref(self).cast()
+        ptr::from_ref(self).cast()
     }
 
     pub const fn from_sdl(rect: SDL_Point) -> Self {
@@ -46,7 +46,7 @@ impl PointF32 {
     }
 
     pub const fn as_sdl_ptr(&self) -> *const SDL_FPoint {
-        std::ptr::from_ref(self).cast()
+        ptr::from_ref(self).cast()
     }
 
     pub const fn from_sdl(rect: SDL_FPoint) -> Self {
@@ -124,7 +124,7 @@ impl RectI32 {
     }
 
     pub const fn as_sdl_ptr(&self) -> *const SDL_Rect {
-        std::ptr::from_ref(self).cast()
+        ptr::from_ref(self).cast()
     }
 
     pub const fn from_sdl(rect: SDL_Rect) -> Self {
@@ -141,7 +141,7 @@ impl RectF32 {
     }
 
     pub const fn as_sdl_ptr(&self) -> *const SDL_FRect {
-        std::ptr::from_ref(self).cast()
+        ptr::from_ref(self).cast()
     }
 
     pub const fn from_sdl(rect: SDL_FRect) -> Self {

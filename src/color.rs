@@ -1,4 +1,4 @@
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, ptr};
 
 use sdl3_sys::pixels::*;
 
@@ -60,7 +60,7 @@ impl RgbU8 {
         unsafe {
             SDL_GetRGB(
                 pixel,
-                std::ptr::from_ref(fmt),
+                ptr::from_ref(fmt),
                 opt2ptr(pal),
                 &raw mut (*ptr).r,
                 &raw mut (*ptr).g,
@@ -89,15 +89,7 @@ impl RgbU8 {
     /// unused upper bits of the return value can safely be ignored.
     #[doc(alias = "SDL_MapRGB")]
     pub fn map(self, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> u32 {
-        unsafe {
-            SDL_MapRGB(
-                std::ptr::from_ref(fmt),
-                opt2ptr(pal),
-                self.r,
-                self.g,
-                self.b,
-            )
-        }
+        unsafe { SDL_MapRGB(ptr::from_ref(fmt), opt2ptr(pal), self.r, self.g, self.b) }
     }
 }
 
@@ -230,7 +222,7 @@ impl RgbaU8 {
         unsafe {
             SDL_GetRGBA(
                 pixel,
-                std::ptr::from_ref(fmt),
+                ptr::from_ref(fmt),
                 opt2ptr(pal),
                 &raw mut (*ptr).rgb.r,
                 &raw mut (*ptr).rgb.g,
@@ -262,7 +254,7 @@ impl RgbaU8 {
     pub fn map(self, fmt: &SDL_PixelFormatDetails, pal: Option<&SDL_Palette>) -> u32 {
         unsafe {
             SDL_MapRGBA(
-                std::ptr::from_ref(fmt),
+                ptr::from_ref(fmt),
                 opt2ptr(pal),
                 self.rgb.r,
                 self.rgb.g,

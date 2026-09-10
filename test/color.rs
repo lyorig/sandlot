@@ -209,7 +209,7 @@ fn color_rgba_layout_matches_sdl_color() {
     let rgba = RgbaU8::new(1, 2, 3, 4);
     let sdl: SDL_Color = rgba.into();
 
-    let rgba_bytes = unsafe { &*(ptr::from_ref(&rgba) as *const [u8; 4]) };
-    let sdl_bytes = unsafe { &*(ptr::from_ref(&sdl) as *const [u8; 4]) };
+    let rgba_bytes = unsafe { ptr::from_ref(&rgba).cast::<[u8; 4]>().as_ref_unchecked() };
+    let sdl_bytes = unsafe { ptr::from_ref(&sdl).cast::<[u8; 4]>().as_ref_unchecked() };
     assert_eq!(rgba_bytes, sdl_bytes);
 }

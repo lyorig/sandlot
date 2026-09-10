@@ -1,6 +1,7 @@
 use std::{
     ffi::{CStr, c_char},
     marker::PhantomData,
+    ptr,
 };
 
 use sdl3_sys::gpu::*;
@@ -205,7 +206,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_GPU_DEVICE_CREATE_VULKAN_OPTIONS_POINTER,
-                std::ptr::from_ref(value) as _,
+                ptr::from_ref(value) as _,
             )
         };
         self
