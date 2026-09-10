@@ -24,7 +24,7 @@ sdl3-ttf-sys = "0.6.0"
 rustest = "0.3.1"
 tobj = "4.0.5"
 
-[profile.release-max]
+[profile.fast]
 inherits = "release"
 panic = "abort"
 lto = "fat"
