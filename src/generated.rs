@@ -316,7 +316,7 @@ resource_new!(
 );
 
 resource_new!(
-    /// A text engine that draws text objects to a [`Surface`](crate::Surface).
+    /// A text engine that draws text objects to a [`Surface`](crate::surface::Surface).
     TTF_TextEngine, SurfaceEngine, TTF_DestroySurfaceTextEngine
 );
 
