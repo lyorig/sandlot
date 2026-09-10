@@ -1,5 +1,5 @@
 use std::{
-    ffi::CString,
+    ffi::{CStr, CString},
     fs as std_fs,
     path::PathBuf,
     sync::atomic::{AtomicU32, Ordering},
@@ -8,7 +8,6 @@ use std::{
 use sandlot::{
     Context, fs,
     fs::{EnumerationResult, Folder, GlobFlags, PathType},
-    util::c_ptr_to_str,
 };
 
 use rustest::test;
@@ -93,8 +92,8 @@ fn fs_directory_roundtrip() -> rustest::Result {
     let results = fs::glob_directory(&cstr(&nested), Some(c"*.txt"), GlobFlags::empty())?;
     assert_eq!(results.len(), 1);
     // SAFETY: The array holds `len` valid, nul-terminated strings.
-    let entry = unsafe { c_ptr_to_str(results[0].as_ptr()) };
-    assert_eq!(entry, "file.txt");
+    let entry = unsafe { CStr::from_ptr(results[0].as_ptr()) };
+    assert_eq!(entry, c"file.txt");
     drop(results);
 
     // Path info reflects the file.
