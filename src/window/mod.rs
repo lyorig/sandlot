@@ -767,10 +767,8 @@ impl WindowHandle {
         if ps == SDL_ProgressState::INVALID {
             Err(Error::current())
         } else {
-            type Src = SDL_ProgressState;
-            type Dst = ProgressState;
-
-            Ok(unsafe { transmute::<Src, Dst>(ps) })
+            // SAFETY: Checked above that `ps` is not `INVALID`.
+            Ok(unsafe { ProgressState::from_sdl(ps) })
         }
     }
 

@@ -165,6 +165,7 @@ pub fn texture_format_from_pixel_format(pixel_format: SDL_PixelFormat) -> Option
     if fmt == SDL_GPUTextureFormat::INVALID {
         None
     } else {
+        // SAFETY: Checked above that `fmt` is not `INVALID`.
         Some(unsafe { TextureFormat::from_sdl(fmt) })
     }
 }
