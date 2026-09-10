@@ -9,36 +9,35 @@ The general plan is:
 1. expose the functionality of SDL,
 2. minimize ways to shoot yourself in the foot.
 
-So it's definitely quite a [leaky abstraction](https://www.joelonsoftware.com/2002/11/11/the-law-of-leaky-abstractions/).
-
 > [!IMPORTANT]
 > This crate isn't concerned with how you find, and link with, SDL and its
-> satellite libraries on your system; these topics are covered by the
+> satellite libraries on your system. These topics are better covered by the
 > [sdl3-sys docs](https://docs.rs/sdl3-sys/latest/sdl3_sys/).
 
 > [!NOTE]
-> Functions and methods usually map 1:1 to their SDL counterparts in terms of functionality.
-> In such cases, there is always a corresponding `#[doc(alias = "...")]` attribute.
+> Functions and methods usually map 1:1 to their SDL counterparts in terms of functionality
+> (in such cases, there is always a corresponding `#[doc(alias = "...")]` attribute).
 > There is an effort to "pluck" documentation from the SDL wiki and map it to Rust abstractions,
 > while preserving the meaning. The first pass has been done via LLMs, so there may be some slop.
 
-## Concepts
+## Usage
 
 ### Initialization
 
-As with many modern APIs, `sandlot::Context` is the first struct you'll want to create for a proper application.
-Afterwards, you can initialize subsystems (see the `sandlot::subsystem` module), whose existence permits creation
-of relevant objects etc.
+Most, but not all, functionality requires two things to be in scope:
+- `sandlot::Context`
+- a relevant subsystem (see `sandlot::subsystem`)
+  - for example, `Window::new` may return `Err` if `subsystem::Video` isn't in scope.
 
 ### Objects
 
-SDL works with raw pointers and ownership rules are mostly described via function documentation.
-Sandlot maps this to Rust terms with _handles_, _owned objects_ and _references_. For an arbitrary type `Foo`:
-- `FooHandle` is where the API is actually implemented. Since it isn't tied to anything, it's usually unsafe to obtain and use.
-- `Foo` is an owned object containing a handle, being responsible for `Drop`ping it.
-- `Ref<'a, Foo>` and `RefMut<'a, Foo>` contain a handle, are lifetime-bound to an owned object, and don't drop anything.
-  - These can be obtained from an owned object via the `as_ref()` method (requires the `sandlot::resource::Resource` trait to be in scope).
-  - The only difference between these two is that `Ref` only implements `Deref` for its handle, while `RefMut` also implements `DerefMut`.
+Since SDL works with opaque pointers, using Rust references would cause unnecessary double indirection.
+To avoid this, Sandlot uses custom types with matching properties. For example:
+- a `Texture` is an owned object which will `Drop` the underlying handle upon going out of scope
+- `Ref<'a, Texture>` and `RefMut<'a, Texture>` mimic `&Texture` and `&mut Texture`
+  - these can be obtained from an owned object via the `as_ref()` method (requires the `sandlot::resource::Resource` trait to be in scope)
+  - the only difference between these two is that `Ref` only implements `Deref` for its handle, while `RefMut` also implements `DerefMut`
+- a `TextureHandle` is analogous to a pointer. It exposes all methods, but is not lifetime-bound to anything
 
 Allocations originating from SDL are wrapped in a custom implementation of `Box` and `String`.
 These might not have exact 1:1 semantics with their Rust counterparts; check documentation for specifics.

@@ -7,7 +7,7 @@
 //!
 //! An app generally takes a moment, perhaps at the start of a new frame, to
 //! examine any events that have occurred since the last time and process or
-//! ignore them. This is generally done by polling in a loop via [`EventIter`]
+//! ignore them. This is generally done by polling in a loop via [`Event::iter`]
 //! until it returns [`None`]. (If using the main callbacks, events are provided
 //! one at a time in calls to `SDL_AppEvent` before the next call to
 //! `SDL_AppIterate`; in this scenario, the app does not poll at all.)
