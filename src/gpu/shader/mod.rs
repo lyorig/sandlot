@@ -6,7 +6,7 @@ use std::{ffi::CStr, marker::PhantomData};
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
-use crate::{Result, mod_reexport, properties::Properties, resource::Ref, resource_new_no_drop};
+use crate::{Result, mod_reexport, properties::Properties, resource::Ref};
 
 use super::{ShaderFormat, device::Device};
 
@@ -103,10 +103,7 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
     }
 }
 
-resource_new_no_drop!(
-    /// An opaque handle representing a compiled shader object.
-    SDL_GPUShader, Shader
-);
+pub use crate::generated::{Shader, ShaderHandle};
 impl Shader {
     /// Build a [`Shader`] with additional parameters not available in [`ShaderCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ShaderBuilder<'_> {

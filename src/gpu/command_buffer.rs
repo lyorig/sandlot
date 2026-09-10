@@ -24,7 +24,6 @@ use crate::{
     gpu::Cycle,
     impl_enum_transmute,
     resource::{Ref, Resource},
-    resource_new_no_drop,
     util::{opt2ptr_mut, to_result},
     window::Window,
 };
@@ -106,11 +105,8 @@ impl<'s, 'd> BlitInfo<'s, 'd> {
     }
 }
 
-resource_new_no_drop!(
-    /// An opaque handle representing a command buffer.
-    /// Most state is managed via command buffers, and is local to each one.
-    SDL_GPUCommandBuffer, CommandBuffer
-);
+pub use crate::generated::{CommandBuffer, CommandBufferHandle};
+
 impl CommandBuffer {
     /// Acquire a command buffer from a GPU device.
     ///

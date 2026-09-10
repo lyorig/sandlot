@@ -10,7 +10,7 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
     Result, error::Error, gpu::Cycle, impl_enum_transmute, mod_reexport, properties::Properties,
-    resource::Ref, resource_new_no_drop,
+    resource::Ref,
 };
 
 use super::device::Device;
@@ -82,11 +82,7 @@ impl TransferBufferCreateInfo {
     }
 }
 
-resource_new_no_drop!(
-    /// An opaque handle representing a transfer buffer.
-    /// Used for transferring data to and from the GPU.
-    SDL_GPUTransferBuffer, TransferBuffer
-);
+pub use crate::generated::{TransferBuffer, TransferBufferHandle};
 impl TransferBuffer {
     /// Build a [`TransferBuffer`] with additional parameters not available in [`TransferBufferCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> TransferBufferBuilder<'_> {

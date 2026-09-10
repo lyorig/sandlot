@@ -42,7 +42,6 @@ use crate::{
     rect::{PointF32, PointI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resource_new,
     surface::Surface,
     traits,
 };
@@ -65,10 +64,7 @@ pub enum TextureAccess {
 
 impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 
-resource_new!(
-    /// An efficient driver-specific representation of pixel data.
-    SDL_Texture, Texture, SDL_DestroyTexture
-);
+pub use crate::generated::{Texture, TextureHandle};
 
 impl TextureHandle {
     /// Get the size of a texture, as floating point values.

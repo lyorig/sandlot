@@ -13,7 +13,6 @@ use sdl3_sys::gpu::*;
 use crate::{
     Result,
     resource::{Ref, Resource},
-    resource_new,
 };
 
 use super::{
@@ -26,12 +25,6 @@ use super::{
 // doc-only
 #[expect(unused_imports)]
 use super::texture::TextureUsageFlags;
-
-resource_new!(
-    /// An opaque handle representing a compute pass.
-    /// Transient; invalid once the pass ends.
-    SDL_GPUComputePass, ComputePass, SDL_EndGPUComputePass
-);
 
 /// Parameters of an indirect dispatch command.
 ///
@@ -60,6 +53,9 @@ impl IndirectDispatchCommand {
         (c.groupcount_x, c.groupcount_y, c.groupcount_z)
     }
 }
+
+pub use crate::generated::{ComputePass, ComputePassHandle};
+
 impl ComputePass {
     /// Begin a compute pass on a command buffer.
     ///
@@ -89,6 +85,7 @@ impl ComputePass {
                 storage_buffer_bindings.len() as _,
             )
         };
+
         Self::from_ptr(handle)
     }
 

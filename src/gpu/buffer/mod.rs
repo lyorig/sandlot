@@ -12,7 +12,6 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
     Result, gpu::Cycle, impl_enum_transmute, mod_reexport, properties::Properties, resource::Ref,
-    resource_new_no_drop,
 };
 
 use super::{copy_pass::CopyPass, device::Device, transfer_buffer::TransferBufferLocation};
@@ -184,11 +183,7 @@ impl<'b> StorageBufferReadWriteBinding<'b> {
     }
 }
 
-resource_new_no_drop!(
-    /// Represents a GPU buffer.
-    /// Used for vertices, indices, indirect draw commands, and general compute data.
-    SDL_GPUBuffer, Buffer
-);
+pub use crate::generated::{Buffer, BufferHandle};
 
 impl Buffer {
     /// Build a [`Buffer`] with additional parameters not available in [`BufferCreateInfo`].

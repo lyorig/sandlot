@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 
 use sdl3_sys::{properties::SDL_PropertiesID, render::*};
 
-use crate::{Result, gpu::*, renderer::Renderer, resource::Ref, resource_new, util::to_result};
+use crate::{Result, gpu::*, renderer::Renderer, resource::Ref, util::to_result};
 
 /// Parameters for creating custom GPU render state.
 ///
@@ -52,10 +52,7 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b>
     }
 }
 
-resource_new!(
-    /// A custom GPU render state.
-    SDL_GPURenderState, RenderState, SDL_DestroyGPURenderState
-);
+pub use crate::generated::{RenderState, RenderStateHandle};
 
 impl RenderStateHandle {
     /// Set fragment-shader uniform data in a custom GPU render state.

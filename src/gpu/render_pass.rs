@@ -29,7 +29,6 @@ use crate::{
     impl_enum_transmute,
     rect::{PointF32, RectI32},
     resource::{Ref, Resource},
-    resource_new,
     util::opt2ptr,
 };
 
@@ -237,11 +236,7 @@ impl IndirectDrawCommand {
     }
 }
 
-resource_new!(
-    /// An opaque handle representing a render pass.
-    /// Transient; invalid once the pass ends.
-    SDL_GPURenderPass, RenderPass, SDL_EndGPURenderPass
-);
+pub use crate::generated::{RenderPass, RenderPassHandle};
 
 /// Parameters of an indirect indexed draw command.
 ///

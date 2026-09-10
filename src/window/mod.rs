@@ -115,7 +115,6 @@ use crate::{
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resource_new,
     surface::Surface,
     util::{c_ptr_to_str, opt2ptr, opt2res_map, to_result},
 };
@@ -271,10 +270,7 @@ impl WindowId {
     }
 }
 
-resource_new!(
-    /// The struct used as an opaque handle to a window.
-    SDL_Window, Window, SDL_DestroyWindow
-);
+pub use crate::generated::{Window, WindowHandle};
 
 /// Get the number of video drivers compiled into SDL.
 #[doc(alias = "SDL_GetNumVideoDrivers")]

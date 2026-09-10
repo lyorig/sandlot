@@ -82,7 +82,6 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectF32, RectI32},
     resource::Ref,
-    resource_new,
     surface::Surface,
     texture::{Texture, TextureHandle},
     traits,
@@ -93,10 +92,7 @@ use crate::{
 mod_reexport!(builder);
 mod_reexport!(properties);
 
-resource_new!(
-    /// A structure representing rendering state.
-    SDL_Renderer, Renderer, SDL_DestroyRenderer
-);
+pub use crate::generated::{Renderer, RendererHandle};
 
 impl RendererHandle {
     /// Get the name of a renderer.
