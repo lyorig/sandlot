@@ -36,6 +36,10 @@ use crate::{
     window::Window,
 };
 
+// doc-only
+#[expect(unused_imports)]
+use crate::Context;
+
 pub trait Subsystem: Sized {
     type Handle: Copy;
 
@@ -120,12 +124,28 @@ macro_rules! subsystem_new {
     ($(#[$meta:meta])* $name:ident, $flag:ident $(, $implied:ident => $accessor:ident)*) => {
         paste::paste! {
             #[derive(Clone, Copy)]
-            pub struct [<$name Handle>];
+            pub struct [<$name Handle>]<'ctx> {
+                $(pub $accessor: [<$implied Handle>]<'ctx>,)*
+                marker: ::std::marker::PhantomData<&'ctx $crate::Context>,
+            }
+
+            impl<'ctx> [<$name Handle>]<'ctx> {
+                $(
+                    #[doc = "Get a reference to the implicitly initialized [`" $implied "`] subsystem."]
+                    pub fn $accessor(&self) -> $crate::init::Ref<'_, $implied<'ctx>> {
+                        unsafe { $crate::init::Ref::from_handle(self.$accessor) }
+                    }
+
+                    #[doc = "Get a mutable reference to the implicitly initialized [`" $implied "`] subsystem."]
+                    pub fn [<$accessor _mut>](&mut self) -> $crate::init::RefMut<'_, $implied<'ctx>> {
+                        unsafe { $crate::init::RefMut::from_handle(self.$accessor) }
+                    }
+                )*
+            }
 
             $(#[$meta])*
             pub struct $name<'ctx> {
-                handle: [<$name Handle>],
-                marker: ::std::marker::PhantomData<&'ctx $crate::Context>,
+                handle: [<$name Handle>]<'ctx>,
             }
 
 
@@ -138,25 +158,19 @@ macro_rules! subsystem_new {
                 pub fn init(_ctx: &'ctx $crate::Context) -> $crate::Result<Self> {
                     if unsafe { ::sdl3_sys::init::SDL_InitSubSystem(::sdl3_sys::init::SDL_InitFlags::$flag) } {
                         Ok(Self {
-                            handle: [<$name Handle>],
-                            marker: ::std::marker::PhantomData,
+                            handle: [<$name Handle>] {
+                                $(
+                                    $accessor: [<$implied Handle>] {
+                                        marker: ::std::marker::PhantomData
+                                    },
+                                )*
+                                marker: ::std::marker::PhantomData
+                            },
                         })
                     } else {
                         Err($crate::error::Error::current())
                     }
                 }
-
-                $(
-                    #[doc = "Get a reference to the implicitly initialized [`" $implied "`] subsystem."]
-                    pub fn $accessor(&self) -> $crate::init::Ref<'_, $implied<'ctx>> {
-                        unsafe { $crate::init::Ref::from_handle([<$implied Handle>]) }
-                    }
-
-                    #[doc = "Get a mutable reference to the implicitly initialized [`" $implied "`] subsystem."]
-                    pub fn [<$accessor _mut>](&mut self) -> $crate::init::RefMut<'_, $implied<'ctx>> {
-                        unsafe { $crate::init::RefMut::from_handle([<$implied Handle>]) }
-                    }
-                )*
 
                 /// Get whether this subsystem is currently initialized.
                 #[doc(alias = "SDL_WasInit")]
@@ -166,16 +180,16 @@ macro_rules! subsystem_new {
                 }
             }
 
-            impl Subsystem for $name<'_> {
-                type Handle = [<$name Handle>];
+            impl<'ctx> Subsystem for $name<'ctx> {
+                type Handle = [<$name Handle>]<'ctx>;
 
                 unsafe fn as_handle(&self) -> Self::Handle {
                     self.handle
                 }
             }
 
-            impl ::std::ops::Deref for $name<'_> {
-                type Target = [<$name Handle>];
+            impl<'ctx> ::std::ops::Deref for $name<'ctx> {
+                type Target = [<$name Handle>]<'ctx>;
 
                 fn deref(&self) -> &Self::Target {
                     &self.handle
@@ -205,14 +219,14 @@ macro_rules! subsystem_new {
 
 subsystem_new!(
     /// The video subsystem provides access to the display and windowing system.
-    /// Also initializes the events subsystem, accessible via [`Video::events`].
+    /// Also initializes the events subsystem, accessible via [`VideoHandle::events`].
     Video, VIDEO, Events => events);
 
 subsystem_new!(
     /// The events subsystem provides access to the event queue.
     Events, EVENTS);
 
-impl EventsHandle {
+impl EventsHandle<'_> {
     /// Add an event to the event queue.
     ///
     /// The event is copied into the queue.
