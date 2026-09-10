@@ -7,7 +7,7 @@
 //!
 //! An app generally takes a moment, perhaps at the start of a new frame, to
 //! examine any events that have occurred since the last time and process or
-//! ignore them. This is generally done by polling in a loop via [`Event::iter`]
+//! ignore them. This is generally done by polling in a loop via [`EventsHandle::iter`]
 //! until it returns [`None`]. (If using the main callbacks, events are provided
 //! one at a time in calls to `SDL_AppEvent` before the next call to
 //! `SDL_AppIterate`; in this scenario, the app does not poll at all.)
@@ -18,7 +18,7 @@
 //! for certain types of programs on low-power hardware. One may also call
 //! `SDL_AddEventWatch` to set a callback when new events arrive.
 //!
-//! The app is free to generate their own events, too: [`Event::push`] allows
+//! The app is free to generate their own events, too: [`EventsHandle::push`] allows
 //! the app to put events onto the queue for later retrieval;
 //! `SDL_RegisterEvents` can guarantee that these events have a type that isn't
 //! in use by other parts of the system.
@@ -47,12 +47,10 @@
 
 use std::{iter::FusedIterator, mem::MaybeUninit, ptr};
 
-use sdl3_sys::{
-    events::*,
-    keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
-};
+use sdl3_sys::events::*;
 
-use crate::{Result, error::Error, resource::Ref, util::to_result, window::Window};
+#[expect(unused_imports)]
+use crate::init::EventsHandle;
 
 /// NOTE: Documentation for variants is copied from SDL.
 /// It might not make sense in the context of this crate.
@@ -406,43 +404,8 @@ pub enum Event {
 }
 
 impl Event {
-    /// Returns an iterator over all [`Event`]s acquired since the last call
-    /// (implicit or explicit) to [`Event::pump`].
-    pub fn iter() -> EventIter {
-        EventIter::new()
-    }
-
-    /// Add an event to the event queue.
-    ///
-    /// The event is copied into the queue.
-    ///
-    /// Returns [`Err`] if the event was filtered or on failure; a common
-    /// reason for error is the event queue being full.
-    ///
-    /// # Remarks
-    ///
-    /// The event queue can actually be used as a two way communication
-    /// channel. Not only can events be read from the queue, but the user can
-    /// also push their own events onto it.
-    ///
-    /// Note: Pushing device input events onto the queue doesn't modify the
-    /// state of the device within SDL.
-    ///
-    /// Note: Events pushed onto the queue get passed through the event
-    /// filter.
-    ///
-    /// For pushing application-specific events, please use
-    /// `SDL_RegisterEvents` to get an event type that does not conflict with
-    /// other code that also wants its own custom event types.
-    #[doc(alias = "SDL_PushEvent")]
-    pub fn push(&self) -> Result<()> {
-        // NOTE: The timestamp is set internally in `SDL_PushEvent()`.
-        let mut e = SDL_Event::from(self);
-        to_result(unsafe { SDL_PushEvent(&raw mut e) })
-    }
-
     /// Sets the event timestamp. SDL recommends obtaining the value via [`crate::ticks_ns`].
-    /// If you do not set the timestamp yourself, [`Self::push`] sets it internally to [`crate::ticks_ns`].
+    /// If you do not set the timestamp yourself, [`EventsHandle::push`] sets it internally to [`crate::ticks_ns`].
     pub fn set_timestamp(&mut self, ts: u64) {
         // The fields in `SDL_CommonEvent` are shared by all variants,
         // so it's always safe to read/write.
@@ -451,79 +414,6 @@ impl Event {
         let common = unsafe { ptr.as_mut_unchecked() };
 
         common.timestamp = ts;
-    }
-
-    /// Pump the event loop, gathering events from the input devices.
-    ///
-    /// # Remarks
-    ///
-    /// This function updates the event queue and internal input device state.
-    ///
-    /// This function gathers all the pending input information from devices
-    /// and places it in the event queue. Without calls to this function no
-    /// events would ever be placed on the queue. Usually the need for calls
-    /// to it is hidden, since polling via [`EventIter`] or waiting via
-    /// [`Self::wait`] implicitly pump the event loop. However, if you are not
-    /// polling or waiting for events (e.g. you are filtering them), then you
-    /// must call this function to force an event queue update.
-    #[doc(alias = "SDL_PumpEvents")]
-    pub fn pump() {
-        unsafe { SDL_PumpEvents() };
-    }
-
-    /// Wait indefinitely for the next available event.
-    ///
-    /// Returns [`Err`] if there was an error while waiting for events.
-    ///
-    /// # Remarks
-    ///
-    /// This function may implicitly pump the event loop (see [`Self::pump`]).
-    #[doc(alias = "SDL_WaitEvent")]
-    pub fn wait() -> Result<Self> {
-        let mut e = MaybeUninit::<SDL_Event>::uninit();
-
-        if unsafe { SDL_WaitEvent(e.as_mut_ptr()) } {
-            // SAFETY: SDL fully initializes the event on success.
-            // The layouts of both types match.
-            Ok(unsafe { e.assume_init_ref() }.into())
-        } else {
-            Err(Error::current())
-        }
-    }
-
-    /// Start accepting Unicode text input events in a window.
-    ///
-    /// # Remarks
-    ///
-    /// This function will enable text input ([`Event::TextInput`] and
-    /// [`Event::TextEditing`] events) in the specified window. Please use
-    /// this function paired with [`Event::disable_text_input`].
-    ///
-    /// Text input events are not received by default.
-    ///
-    /// On some platforms using this function shows the screen keyboard and/or
-    /// activates an IME, which can prevent some key press events from being
-    /// passed through.
-    #[doc(alias = "SDL_StartTextInput")]
-    pub fn enable_text_input(wnd: Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StartTextInput(wnd.handle.as_ptr()) })
-    }
-
-    /// Stop receiving any text input events in a window.
-    ///
-    /// # Remarks
-    ///
-    /// If [`Event::enable_text_input`] showed the screen keyboard,
-    /// this function will hide it.
-    #[doc(alias = "SDL_StopTextInput")]
-    pub fn disable_text_input(wnd: Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StopTextInput(wnd.handle.as_ptr()) })
-    }
-
-    /// Check whether or not Unicode text input events are enabled for a window.
-    #[doc(alias = "SDL_TextInputActive")]
-    pub fn is_text_input_enabled(wnd: Ref<Window>) -> bool {
-        unsafe { SDL_TextInputActive(wnd.handle.as_ptr()) }
     }
 }
 
@@ -575,7 +465,7 @@ pub struct EventIter {
 }
 
 impl EventIter {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self { _private: () }
     }
 }

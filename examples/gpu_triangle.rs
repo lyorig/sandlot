@@ -5,8 +5,8 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Context, Result, color::RgbaF32, event::Event, gpu::*, properties::Properties, rect::Point,
-    resource::Resource, subsystem::Video, window::Window,
+    Context, Result, color::RgbaF32, event::Event, gpu::*, init::Video, properties::Properties,
+    rect::Point, resource::Resource, window::Window,
 };
 
 cfg_select! {
@@ -40,7 +40,8 @@ fn print_properties(props: DeviceProperties) {
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _video = ManuallyDrop::new(Video::new(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(&ctx)?);
+    let events = video.events();
 
     // SDL provides an existing property set, which we can conveniently abuse.
     let props = Properties::global()?;
@@ -160,7 +161,7 @@ fn run() -> Result<()> {
     })?;
 
     'frames: loop {
-        if let Event::Quit = Event::wait()? {
+        if let Event::Quit = events.wait()? {
             break 'frames;
         }
     }

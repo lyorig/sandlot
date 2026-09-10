@@ -20,7 +20,7 @@ pub trait Resource: Sized {
     /// Return the raw underlying handle of this object.
     ///
     /// # Safety
-    /// This of this function as returning a pointer to `self`.
+    /// Think of this function as returning a pointer to `self`.
     /// Handles are only valid as long as their owning objects.
     unsafe fn as_handle(&self) -> Self::Handle;
 

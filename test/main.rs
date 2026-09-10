@@ -4,12 +4,12 @@ use rustest::{Result, main, test};
 
 use sandlot::{
     Context,
+    init::Video,
     pixels::PixelFormat,
     properties::Properties,
     rect::{Point, PointI32},
     renderer::Renderer,
     resource::Resource,
-    subsystem::Video,
     texture::{Texture, TextureAccess},
     window::Window,
 };
@@ -60,7 +60,7 @@ fn main_subsystems() {
     let ctx = Context::new();
 
     {
-        let _vid = Video::new(&ctx).unwrap();
+        let _vid = Video::init(&ctx).unwrap();
         assert!(Video::is_init());
     }
 
@@ -73,7 +73,7 @@ fn main_manually_drop() {
         let ctx = Context::new();
 
         {
-            let _vid = ManuallyDrop::new(Video::new(&ctx).unwrap());
+            let _vid = ManuallyDrop::new(Video::init(&ctx).unwrap());
             assert!(Video::is_init());
         }
 

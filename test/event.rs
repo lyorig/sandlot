@@ -1,7 +1,7 @@
 use rustest::test;
 use sdl3_sys::events::*;
 
-use sandlot::{Context, event::Event, subsystem::Events};
+use sandlot::{Context, event::Event, init::Events};
 
 /// [`SDL_Event`] -> [`Event`] conversion.
 #[test]
@@ -50,20 +50,17 @@ fn event_timestamp() {
     assert_eq!(unsafe { sdl.common }.timestamp, ticks);
 }
 
-/// [`Event::push`] testing.
+/// [`EventsHandle::push`] testing.
 #[test]
 fn event_push() {
-    // Should fail, since events aren't initialized.
-    Event::Quit.push().unwrap_err();
-
     // Initialize events.
     let ctx = Context::new();
-    let _evts = Events::new(&ctx);
+    let evts = Events::init(&ctx).unwrap();
 
     // Should work now.
-    Event::Quit.push().unwrap();
+    evts.push(&Event::Quit).unwrap();
 
-    let evt = Event::iter().next().unwrap();
+    let evt = evts.iter().next().unwrap();
     let Event::Quit = evt else {
         panic!("Expected quit event");
     };

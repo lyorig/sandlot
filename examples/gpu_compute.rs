@@ -2,9 +2,7 @@
 
 #![windows_subsystem = "windows"]
 
-use sandlot::{
-    Context, Result, gpu::*, properties::Properties, resource::Resource, subsystem::Video,
-};
+use sandlot::{Context, Result, gpu::*, init::Video, properties::Properties, resource::Resource};
 
 cfg_select! {
     target_os = "macos" => {
@@ -23,7 +21,7 @@ cfg_select! {
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _vid = Video::new(&ctx)?;
+    let _vid = Video::init(&ctx)?;
 
     let props = Properties::global()?;
 

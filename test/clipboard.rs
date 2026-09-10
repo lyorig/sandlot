@@ -3,7 +3,7 @@ use std::assert_matches;
 use sandlot::{
     Context,
     clipboard::{has_text, set_text, text},
-    subsystem::Video,
+    init::Video,
 };
 
 use rustest::test;
@@ -18,7 +18,7 @@ fn clipboard_set_text_fails_before_video_init() {
 #[test]
 fn clipboard_set_text_succeeds_after_video_init() {
     let ctx = Context::new();
-    let _video = Video::new(&ctx).unwrap();
+    let _video = Video::init(&ctx).unwrap();
 
     set_text(c"clipboard test payload").unwrap();
 
@@ -30,7 +30,7 @@ fn clipboard_set_text_succeeds_after_video_init() {
 #[test]
 fn clipboard_has_text_after_video_init() {
     let ctx = Context::new();
-    let _video = Video::new(&ctx).unwrap();
+    let _video = Video::init(&ctx).unwrap();
 
     set_text(c"exists").unwrap();
     assert!(has_text());

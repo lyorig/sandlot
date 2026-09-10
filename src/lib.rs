@@ -25,6 +25,7 @@ pub mod error;
 pub mod event;
 pub mod fs;
 pub mod gpu;
+pub mod init;
 pub mod keyboard;
 pub mod log;
 pub mod msgbox;
@@ -34,7 +35,6 @@ pub mod rect;
 pub mod renderer;
 pub mod resource;
 pub mod string;
-pub mod subsystem;
 pub mod surface;
 pub mod texture;
 pub mod traits;
@@ -57,7 +57,7 @@ impl Context {
         Self {}
     }
 
-    /// Create a new context.
+    /// Create a new context, enabling you to initialize individual subsystems.
     ///
     /// # Panics
     /// Panics if this function is not called on the main thread.

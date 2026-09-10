@@ -9,10 +9,10 @@ use sandlot::{
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
+    init::Video,
     properties::Properties,
     rect::Point,
     resource::{Ref, Resource},
-    subsystem::Video,
     window::Window,
 };
 
@@ -203,7 +203,7 @@ fn pick_depth_format(device: Ref<Device>) -> TextureFormat {
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _video = ManuallyDrop::new(Video::new(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(&ctx)?);
 
     // SDL provides an existing property set, which we can conveniently abuse.
     let props = Properties::global()?;
@@ -398,7 +398,7 @@ fn run() -> Result<()> {
     let trans = Mat4::translate(-mesh.center[0], -mesh.center[1], -mesh.center[2]);
 
     'frames: loop {
-        for event in Event::iter() {
+        for event in video.events().iter() {
             if let Event::Quit = event {
                 break 'frames;
             }

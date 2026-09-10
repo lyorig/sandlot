@@ -6,11 +6,11 @@ use sandlot::{
     Context, Result,
     color::Rgba,
     event::Event,
+    init::Video,
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
     resource::Resource,
-    subsystem::Video,
     window::Window,
 };
 
@@ -30,7 +30,8 @@ fn print_properties(props: RendererProperties) {
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _vid = ManuallyDrop::new(Video::new(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(&ctx)?);
+    let events = video.events();
 
     let props = Properties::global()?;
 
@@ -67,7 +68,7 @@ fn run() -> Result<()> {
     rnd.present()?;
 
     'main: loop {
-        if let Event::Quit = Event::wait()? {
+        if let Event::Quit = events.wait()? {
             break 'main;
         }
     }

@@ -1,12 +1,12 @@
 use std::ffi::CStr;
 
-use sandlot::{Context, Result, clipboard, subsystem::Video};
+use sandlot::{Context, Result, clipboard, init::Video};
 
 const DESIRED_MIME: &CStr = c"image/png";
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _vid = Video::new(&ctx)?;
+    let _vid = Video::init(&ctx)?;
 
     if clipboard::has_data(DESIRED_MIME) {
         println!("Clipboard has MIME data");
