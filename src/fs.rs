@@ -1,4 +1,5 @@
-//! SDL offers an API for examining and manipulating the system's filesystem.
+//! Examination and manipulation of the filesystem. Functionally overlaps with [`std::fs`].
+//!
 //! This covers most things one would need to do with directories, except for
 //! actual file I/O (which is covered by [CategoryIOStream](https://wiki.libsdl.org/SDL3/CategoryIOStream)
 //! and [CategoryAsyncIO](https://wiki.libsdl.org/SDL3/CategoryAsyncIO) instead).

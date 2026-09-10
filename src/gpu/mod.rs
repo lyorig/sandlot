@@ -1,4 +1,4 @@
-//! SDL_gpu wrapper.
+//! Low-level interface to GPU APIs such as DirectX, Vulkan and Metal.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryGPU)).
 //! Only free functions and functionality that fits no submodule belong here;

@@ -1,4 +1,4 @@
-//! SDL properties API wrapper.
+//! Property groups, used for configuring SDL objects.
 //!
 //! # What are properties?
 //!

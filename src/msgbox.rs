@@ -1,7 +1,7 @@
-//! SDL offers a simple message box API, which is useful for simple alerts,
-//! such as informing the user when something fatal happens at startup without
-//! the need to build a UI for it (or informing the user _before_ your UI is
-//! ready).
+//! A simple message box API.
+//!
+//! Useful for simple alerts, such as informing the user when something fatal happens at startup without
+//! the need to build a UI for it (or informing the user _before_ your UI is ready).
 //!
 //! These message boxes are native system dialogs where possible.
 //!

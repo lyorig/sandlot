@@ -1,8 +1,9 @@
-//! Simple log messages with priorities and categories. A message's [`Priority`]
-//! signifies how important the message is. A message's [`Category`] signifies
-//! from what domain it belongs to. Every category has a minimum priority
-//! specified: when a message belongs to that category, it will only be sent
-//! out if it has that minimum priority or higher.
+//! Simple log messages with priorities and categories.
+//!
+//! A message's [`Priority`] signifies how important the message is.
+//! A message's [`Category`] signifies from what domain it belongs to.
+//! Every category has a minimum priority specified: when a message belongs to that category,
+//! it will only be sent out if it has that minimum priority or higher.
 //!
 //! SDL's own logs are sent below the default priority threshold, so they are
 //! quiet by default.
@@ -124,6 +125,7 @@ const FMT: *const c_char = c"%s".as_ptr();
 macro_rules! log_for_priority {
     ($name:ident, $sdl:ident, $alias:literal) => {
         #[doc(alias = $alias)]
+        #[doc = concat!("Delegated to by [`log_", stringify!($name), "!`](crate::log_", stringify!($name), "!)")]
         pub fn $name(category: Category, args: Arguments) {
             let cs = args2cstr(args);
             unsafe { $sdl(category as _, FMT, cs.as_ptr()) };
@@ -139,12 +141,16 @@ log_for_priority!(warn, SDL_LogWarn, "SDL_LogWarn");
 log_for_priority!(error, SDL_LogError, "SDL_LogError");
 log_for_priority!(critical, SDL_LogCritical, "SDL_LogCritical");
 
+/// Logs a formatted string with [`Priority::Info`] and [`Category::Application`].
+///
+/// You should use [`log!`](crate::log!) instead, which delegates to this function.
 #[doc(alias = "SDL_Log")]
 pub fn log(args: Arguments) {
     let cs = args2cstr(args);
     unsafe { SDL_Log(FMT, cs.as_ptr()) };
 }
 
+/// Logs a formatted string with [`Priority::Info`] and [`Category::Application`].
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
@@ -152,6 +158,7 @@ macro_rules! log {
     };
 }
 
+/// Logs a formatted string with [`Priority::Trace`] and an optional category.
 #[macro_export]
 macro_rules! log_trace {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -165,6 +172,7 @@ macro_rules! log_trace {
     };
 }
 
+/// Logs a formatted string with [`Priority::Verbose`] and an optional category.
 #[macro_export]
 macro_rules! log_verbose {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -178,6 +186,7 @@ macro_rules! log_verbose {
     };
 }
 
+/// Logs a formatted string with [`Priority::Debug`] and an optional category.
 #[macro_export]
 macro_rules! log_debug {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -191,6 +200,7 @@ macro_rules! log_debug {
     };
 }
 
+/// Logs a formatted string with [`Priority::Info`] and an optional category.
 #[macro_export]
 macro_rules! log_info {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -204,6 +214,7 @@ macro_rules! log_info {
     };
 }
 
+/// Logs a formatted string with [`Priority::Warn`] and an optional category.
 #[macro_export]
 macro_rules! log_warn {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -217,6 +228,7 @@ macro_rules! log_warn {
     };
 }
 
+/// Logs a formatted string with [`Priority::Error`] and an optional category.
 #[macro_export]
 macro_rules! log_error {
     ($fmt:literal $(, $($arg:tt)*)?) => {
@@ -230,6 +242,7 @@ macro_rules! log_error {
     };
 }
 
+/// Logs a formatted string with [`Priority::Critical`] and an optional category.
 #[macro_export]
 macro_rules! log_critical {
     ($fmt:literal $(, $($arg:tt)*)?) => {

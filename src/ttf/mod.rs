@@ -1,4 +1,4 @@
-//! SDL_ttf wrapper.
+//! Loading and rendering using TrueType fonts.
 //!
 //! Implementation checklist:
 //! - [ ] TTF_AddFallbackFont

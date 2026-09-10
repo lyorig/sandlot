@@ -1,4 +1,4 @@
-//! SDL display API.
+//! Display manipulation, such as getting display modes and orientation.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryVideo)):
 //! - [x] SDL_GetClosestFullscreenDisplayMode

@@ -1,4 +1,4 @@
-//! SDL's window API wrapper.
+//! OS window management.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryVideo)):
 //! - [x] SDL_CreatePopupWindow

@@ -1,4 +1,4 @@
-//! SDL's 2D rendering API wrapper.
+//! Hardware-accelerated 2D rendering using textures, among other things.
 //!
 //! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryRender)):
 //! - [ ] SDL_AddVulkanRenderSemaphores

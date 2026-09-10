@@ -1,5 +1,6 @@
-//! SDL provides access to the system clipboard, both for reading information
-//! from other processes and publishing information of its own.
+//! Access to the system clipboard.
+//!
+//! Useful both for reading information from other processes and publishing information of its own.
 //!
 //! This is not just text! SDL apps can access and publish data by mimetype.
 //!
