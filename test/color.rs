@@ -1,4 +1,4 @@
-use std::mem::size_of;
+use std::{mem::size_of, ptr};
 
 use rustest::test;
 use sandlot::color::{OpacityBounds, RgbF32, RgbU8, RgbaF32, RgbaU8};
@@ -209,7 +209,7 @@ fn color_rgba_layout_matches_sdl_color() {
     let rgba = RgbaU8::new(1, 2, 3, 4);
     let sdl: SDL_Color = rgba.into();
 
-    let rgba_bytes = unsafe { &*(&rgba as *const RgbaU8 as *const [u8; 4]) };
-    let sdl_bytes = unsafe { &*(&sdl as *const SDL_Color as *const [u8; 4]) };
+    let rgba_bytes = unsafe { &*(ptr::from_ref(&rgba) as *const [u8; 4]) };
+    let sdl_bytes = unsafe { &*(ptr::from_ref(&sdl) as *const [u8; 4]) };
     assert_eq!(rgba_bytes, sdl_bytes);
 }
