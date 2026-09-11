@@ -4,7 +4,7 @@
 
 use sdl3_sys::gpu::*;
 
-use crate::{resource::Ref, util::resource_new_no_drop};
+use crate::{resource::Ref, resource::resource_new_no_drop};
 
 use super::device::Device;
 

@@ -12,7 +12,7 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
     Result, gpu::Cycle, properties::Properties, rect::Point, resource::Ref,
-    util::impl_enum_transmute, util::mod_reexport, util::resource_new_no_drop,
+    resource::resource_new_no_drop, util::impl_enum_transmute, util::mod_reexport,
 };
 
 use super::{

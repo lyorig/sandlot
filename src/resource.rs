@@ -200,7 +200,7 @@ macro_rules! resource_new_no_drop {
                 pub(crate) inner: [<$owned Handle>],
             }
 
-            $crate::util::resource_new_impl!($sdl, $owned);
+            $crate::resource::resource_new_impl!($sdl, $owned);
         }
     };
 }
@@ -217,7 +217,7 @@ macro_rules! resource_new {
         }
 
         paste::paste! {
-            $crate::util::resource_new_impl!($sdl, $owned);
+            $crate::resource::resource_new_impl!($sdl, $owned);
 
             impl Drop for $owned {
                 #[doc(alias = "" $sdl "")]
@@ -312,7 +312,4 @@ macro_rules! resource_new_tied {
     };
 }
 
-pub(crate) use resource_new;
-pub(crate) use resource_new_impl;
-pub(crate) use resource_new_no_drop;
-pub(crate) use resource_new_tied;
+pub(crate) use {resource_new, resource_new_impl, resource_new_no_drop, resource_new_tied};

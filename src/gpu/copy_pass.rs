@@ -9,8 +9,8 @@ use sdl3_sys::gpu::*;
 use crate::{
     Result,
     gpu::Cycle,
+    resource::resource_new,
     resource::{Ref, Resource},
-    util::resource_new,
 };
 
 use super::{buffer::BufferLocation, command_buffer::CommandBuffer, texture::TextureLocation};

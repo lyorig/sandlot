@@ -10,7 +10,7 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
     Result, error::Error, gpu::Cycle, properties::Properties, resource::Ref,
-    util::impl_enum_transmute, util::mod_reexport, util::resource_new_no_drop,
+    resource::resource_new_no_drop, util::impl_enum_transmute, util::mod_reexport,
 };
 
 use super::device::Device;

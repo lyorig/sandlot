@@ -40,7 +40,7 @@ impl Error {
         let str = unsafe { str::from_utf8_unchecked(cstr.to_bytes()) };
 
         // Speculatively reserve capacity for a null byte,
-        // in case Self::into_cstring() is called.
+        // in case `Self::into_cstring()` is called.
         let mut reason = String::with_capacity(str.len() + 1);
         reason.push_str(str);
 

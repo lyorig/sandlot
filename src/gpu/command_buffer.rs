@@ -22,9 +22,9 @@ use crate::{
     Result,
     color::RgbaF32,
     gpu::Cycle,
+    resource::resource_new_no_drop,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
-    util::resource_new_no_drop,
     util::{opt2ptr_mut, to_result},
     window::Window,
 };

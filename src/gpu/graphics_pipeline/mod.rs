@@ -11,10 +11,10 @@ use crate::{
     Result,
     gpu::{ColorTargetDescription, VertexAttribute, VertexBufferDescription},
     properties::Properties,
+    resource::resource_new_no_drop,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
     util::mod_reexport,
-    util::resource_new_no_drop,
 };
 
 use super::{

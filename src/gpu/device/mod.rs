@@ -28,9 +28,9 @@ use crate::{
     gpu::{EnableDebug, WaitAll},
     properties::{Properties, PropertiesHandle},
     resource::Ref,
+    resource::resource_new,
     util::impl_enum_transmute,
     util::mod_reexport,
-    util::resource_new,
     util::to_result,
     window::Window,
 };

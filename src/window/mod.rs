@@ -114,10 +114,10 @@ use crate::{
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
+    resource::resource_new,
     surface::Surface,
     util::impl_enum_transmute,
     util::mod_reexport,
-    util::resource_new,
     util::{c_ptr_to_str, opt2ptr, opt2res_map, to_result},
 };
 

@@ -41,11 +41,11 @@ use crate::{
     rect::{PointF32, PointI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
+    resource::resource_new,
     surface::Surface,
     traits,
     util::impl_enum_transmute,
     util::mod_reexport,
-    util::resource_new,
 };
 
 mod_reexport!(builder);

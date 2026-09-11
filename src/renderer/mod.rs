@@ -81,11 +81,11 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectF32, RectI32},
     resource::Ref,
+    resource::resource_new,
     surface::Surface,
     texture::{Texture, TextureHandle},
     traits,
     util::mod_reexport,
-    util::resource_new,
     util::{opt2ptr, to_result},
     window::{Window, WindowHandle},
 };

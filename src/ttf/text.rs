@@ -47,10 +47,11 @@ use crate::{
     error::Error,
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
+    resource::resource_new,
     resource::{Handle, Ref, Resource},
     surface::Surface,
     ttf::{Font, FontHandle, RtStr},
-    util::{impl_enum_transmute, opt2res, resource_new, to_result},
+    util::{impl_enum_transmute, opt2res, to_result},
 };
 
 resource_new!(

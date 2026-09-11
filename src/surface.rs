@@ -67,9 +67,9 @@ use crate::{
     color::{RgbU8, RgbaF32, RgbaU8},
     pixels::{BlendMode, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
-    resource::Ref,
+    resource::{Ref, resource_new},
     traits,
-    util::{opt2ptr, resource_new, to_result},
+    util::{opt2ptr, to_result},
 };
 
 use sdl3_sys::surface::*;

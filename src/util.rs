@@ -12,9 +12,6 @@ macro_rules! mod_reexport {
     };
 }
 
-pub(crate) use crate::resource::{
-    resource_new, resource_new_impl, resource_new_no_drop, resource_new_tied,
-};
 pub(crate) use mod_reexport;
 
 /// Define an enum with two variants, `No` and `Yes`.

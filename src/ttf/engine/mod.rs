@@ -12,8 +12,8 @@
 
 use sdl3_ttf_sys::ttf::*;
 
+use crate::resource::resource_new;
 use crate::util::impl_enum_transmute;
-use crate::util::resource_new;
 use crate::{
     Result, error::Error, gpu::Device, renderer::Renderer, resource::Ref, util::mod_reexport,
 };
