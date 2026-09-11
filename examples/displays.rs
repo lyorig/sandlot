@@ -1,4 +1,4 @@
-use sandlot::{Context, Result, display::Display, init::Video};
+use sandlot::{Result, display::Display, init::Context, init::Video};
 
 fn run() -> Result<()> {
     let ctx = Context::new();

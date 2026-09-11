@@ -5,8 +5,8 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Context, Result, color::RgbaF32, event::Event, gpu::*, init::Video, properties::Properties,
-    rect::Point, resource::Resource, window::Window,
+    Result, color::RgbaF32, event::Event, gpu::*, init::Context, init::Video,
+    properties::Properties, rect::Point, resource::Resource, window::Window,
 };
 
 cfg_select! {

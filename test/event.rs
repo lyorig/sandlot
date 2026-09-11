@@ -1,7 +1,7 @@
 use rustest::test;
 use sdl3_sys::events::*;
 
-use sandlot::{Context, event::Event, init::Events};
+use sandlot::{event::Event, init::Context, init::Events};
 
 /// [`SDL_Event`] -> [`Event`] conversion.
 #[test]

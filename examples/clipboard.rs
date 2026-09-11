@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use sandlot::{Context, Result, clipboard, init::Video};
+use sandlot::{Result, clipboard, init::Context, init::Video};
 
 const DESIRED_MIME: &CStr = c"image/png";
 

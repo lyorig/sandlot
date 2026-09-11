@@ -3,9 +3,10 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Context, Result,
+    Result,
     color::Rgba,
     event::Event,
+    init::Context,
     init::Video,
     properties::Properties,
     rect::{Point, Rect},

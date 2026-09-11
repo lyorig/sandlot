@@ -2,7 +2,9 @@
 
 #![windows_subsystem = "windows"]
 
-use sandlot::{Context, Result, gpu::*, init::Video, properties::Properties, resource::Resource};
+use sandlot::{
+    Result, gpu::*, init::Context, init::Video, properties::Properties, resource::Resource,
+};
 
 cfg_select! {
     target_os = "macos" => {

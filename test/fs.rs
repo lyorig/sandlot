@@ -6,8 +6,9 @@ use std::{
 };
 
 use sandlot::{
-    Context, fs,
+    fs,
     fs::{EnumerationResult, Folder, GlobFlags, PathType},
+    init::Context,
 };
 
 use rustest::test;

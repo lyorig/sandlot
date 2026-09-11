@@ -5,10 +5,11 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Context, Result,
+    Result,
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
+    init::Context,
     init::Video,
     properties::Properties,
     rect::Point,

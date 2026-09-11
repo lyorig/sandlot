@@ -1,6 +1,6 @@
 use rustest::{Result, test};
 use sandlot::{
-    Context,
+    init::Context,
     pixels::PixelFormat,
     properties::Properties,
     rect::Point,

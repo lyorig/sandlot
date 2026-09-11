@@ -6,9 +6,9 @@
 //!
 //! There are functions to answer necessary path questions:
 //!
-//! - Where is my app's data? [`Context::base_path`](crate::Context::base_path).
+//! - Where is my app's data? [`Context::base_path`].
 //! - Where can I safely write files? [`fs::pref_path`](pref_path).
-//! - Where are paths like Downloads, Desktop, Music? [`Context::user_folder`](crate::Context::user_folder).
+//! - Where are paths like Downloads, Desktop, Music? [`Context::user_folder`].
 //! - What is this thing at this location? [`fs::path_info`](path_info).
 //! - What items live in this folder? [`fs::enumerate_directory`](enumerate_directory).
 //! - What items live in this folder by wildcard? [`fs::glob_directory`](glob_directory).
@@ -21,11 +21,11 @@
 //! - [x] SDL_CopyFile
 //! - [x] SDL_CreateDirectory
 //! - [x] SDL_EnumerateDirectory
-//! - [x] SDL_GetBasePath (impl'd as [`Context::base_path`](crate::Context::base_path))
+//! - [x] SDL_GetBasePath (impl'd as [`Context::base_path`]
 //! - [x] SDL_GetCurrentDirectory
 //! - [x] SDL_GetPathInfo
 //! - [x] SDL_GetPrefPath
-//! - [x] SDL_GetUserFolder (impl'd as [`Context::user_folder`](crate::Context::user_folder))
+//! - [x] SDL_GetUserFolder (impl'd as [`Context::user_folder`]
 //! - [x] SDL_GlobDirectory
 //! - [x] SDL_RemovePath
 //! - [x] SDL_RenamePath
@@ -40,6 +40,9 @@ use bitflags::bitflags;
 use sdl3_sys::filesystem::*;
 
 use crate::{Result, boxed::Box, string::String, util::impl_enum_transmute, util::to_result};
+
+#[expect(unused_imports)]
+use crate::init::Context;
 
 /// The type of the OS-provided default folder for a specific purpose.
 ///
@@ -176,7 +179,7 @@ impl_enum_transmute!(SDL_EnumerationResult, EnumerationResult);
 /// Returns [`Err`] if the directory cannot be created or another problem occurs.
 ///
 /// This is the only safe location returned by SDL for application-managed files;
-/// [`crate::Context::base_path`] may not be writable.
+/// [`Context::base_path`] may not be writable.
 #[doc(alias = "SDL_GetPrefPath")]
 pub fn pref_path(org: &CStr, app: &CStr) -> Result<String> {
     unsafe {
