@@ -27,6 +27,7 @@ pub mod properties;
 pub mod rect;
 pub mod renderer;
 pub mod resource;
+pub mod resv2;
 pub mod string;
 pub mod surface;
 pub mod texture;
