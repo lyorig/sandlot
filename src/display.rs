@@ -21,8 +21,8 @@ use crate::{
     Result, boolenum,
     boxed::Box,
     error::Error,
-    impl_enum_transmute,
     rect::{PointI32, RectI32},
+    util::impl_enum_transmute,
     util::opt2res_map,
 };
 
@@ -50,23 +50,11 @@ pub enum DisplayOrientation {
     PortraitFlipped = SDL_DisplayOrientation::PORTRAIT_FLIPPED.0,
 }
 
-impl_enum_transmute!(SDL_DisplayOrientation, DisplayOrientation);
+impl_enum_transmute!(SDL_DisplayOrientation, DisplayOrientation, UNKNOWN);
 
 impl std::fmt::Display for DisplayOrientation {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         <Self as std::fmt::Debug>::fmt(self, f)
-    }
-}
-
-fn sdl2do(sdl: SDL_DisplayOrientation) -> Option<DisplayOrientation> {
-    if sdl == SDL_DisplayOrientation::UNKNOWN {
-        None
-    } else {
-        use std::mem::transmute;
-
-        type Src = SDL_DisplayOrientation;
-        type Dst = DisplayOrientation;
-        Some(unsafe { transmute::<Src, Dst>(sdl) })
     }
 }
 
@@ -279,7 +267,8 @@ impl Display {
     /// Returns [`None`] if the orientation isn't available.
     #[doc(alias = "SDL_GetCurrentDisplayOrientation")]
     pub fn current_orientation(&self) -> Option<DisplayOrientation> {
-        sdl2do(unsafe { SDL_GetCurrentDisplayOrientation(self.id()) })
+        let or = unsafe { SDL_GetCurrentDisplayOrientation(self.id()) };
+        DisplayOrientation::from_sdl(or)
     }
 
     /// Get the orientation of a display when it is unrotated.
@@ -287,7 +276,8 @@ impl Display {
     /// Returns [`None`] if the orientation isn't available.
     #[doc(alias = "SDL_GetNaturalDisplayOrientation")]
     pub fn natural_orientation(&self) -> Option<DisplayOrientation> {
-        sdl2do(unsafe { SDL_GetNaturalDisplayOrientation(self.id()) })
+        let or = unsafe { SDL_GetNaturalDisplayOrientation(self.id()) };
+        DisplayOrientation::from_sdl(or)
     }
 
     /// Get the closest match to the requested display mode.

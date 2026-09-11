@@ -94,11 +94,15 @@
 //! - [x] SDL_BlendOperation
 //! - [x] SDL_ComposeCustomBlendMode
 
-use std::mem::MaybeUninit;
+use std::mem::{self, MaybeUninit};
 
 use sdl3_sys::{blendmode::*, pixels::*, surface::SDL_ScaleMode};
 
-use crate::{Result, error::Error, impl_enum_transmute, util::c_ptr_to_str};
+use crate::{
+    Result,
+    error::Error,
+    util::{c_ptr_to_str, impl_enum_transmute},
+};
 
 /// A set of blend modes used in drawing operations.
 ///
@@ -197,11 +201,11 @@ impl BlendMode {
             alpha_op.into(),
         );
 
-        unsafe { BlendMode::from_sdl(bm) }
+        unsafe { BlendMode::from_sdl_unchecked(bm) }
     }
 }
 
-impl_enum_transmute!(SDL_BlendMode, BlendMode);
+impl_enum_transmute!(SDL_BlendMode, BlendMode, INVALID);
 
 /// The normalized factor used to multiply pixel components.
 ///
@@ -285,7 +289,7 @@ pub enum ScaleMode {
     PixelArt = SDL_ScaleMode::PIXELART.0,
 }
 
-impl_enum_transmute!(SDL_ScaleMode, ScaleMode);
+impl_enum_transmute!(SDL_ScaleMode, ScaleMode, INVALID);
 
 /// Colorspace definitions.
 ///
@@ -332,12 +336,12 @@ pub enum Colorspace {
 
 impl Colorspace {
     /// The default colorspace for RGB surfaces if no colorspace is specified.
-    pub const RGB_DEFAULT: Self = unsafe { Self::from_sdl(SDL_Colorspace::RGB_DEFAULT) };
+    pub const RGB_DEFAULT: Self = unsafe { mem::transmute(SDL_Colorspace::RGB_DEFAULT) };
     /// The default colorspace for YUV surfaces if no colorspace is specified.
-    pub const YUV_DEFAULT: Self = unsafe { Self::from_sdl(SDL_Colorspace::YUV_DEFAULT) };
+    pub const YUV_DEFAULT: Self = unsafe { mem::transmute(SDL_Colorspace::YUV_DEFAULT) };
 }
 
-impl_enum_transmute!(SDL_Colorspace, Colorspace);
+impl_enum_transmute!(SDL_Colorspace, Colorspace, UNKNOWN);
 
 /// Contains parameters for [`PixelFormat::from_mask`] and [`PixelFormat::mask`].
 #[derive(Clone, Copy)]
@@ -465,31 +469,33 @@ pub enum PixelFormat {
     Mjpg = SDL_PixelFormat::MJPG.0,
 }
 
+impl_enum_transmute!(SDL_PixelFormat, PixelFormat, UNKNOWN);
+
 impl PixelFormat {
     /// Alias for the appropriate RGBA 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const RGBA32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::RGBA8888) };
+    pub const RGBA32: Self = unsafe { mem::transmute(SDL_PixelFormat::RGBA8888) };
     /// Alias for the appropriate ARGB 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const ARGB32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::ARGB8888) };
+    pub const ARGB32: Self = unsafe { mem::transmute(SDL_PixelFormat::ARGB8888) };
     /// Alias for the appropriate BGRA 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const BGRA32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::BGRA8888) };
+    pub const BGRA32: Self = unsafe { mem::transmute(SDL_PixelFormat::BGRA8888) };
     /// Alias for the appropriate ABGR 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const ABGR32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::ABGR8888) };
+    pub const ABGR32: Self = unsafe { mem::transmute(SDL_PixelFormat::ABGR8888) };
     /// Alias for the appropriate RGBX 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const RGBX32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::RGBX8888) };
+    pub const RGBX32: Self = unsafe { mem::transmute(SDL_PixelFormat::RGBX8888) };
     /// Alias for the appropriate XRGB 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const XRGB32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::XRGB8888) };
+    pub const XRGB32: Self = unsafe { mem::transmute(SDL_PixelFormat::XRGB8888) };
     /// Alias for the appropriate BGRX 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const BGRX32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::BGRX8888) };
+    pub const BGRX32: Self = unsafe { mem::transmute(SDL_PixelFormat::BGRX8888) };
     /// Alias for the appropriate XBGR 8888 encoding of color data for the
     /// current platform's endianness.
-    pub const XBGR32: Self = unsafe { Self::from_sdl(SDL_PixelFormat::XBGR8888) };
+    pub const XBGR32: Self = unsafe { mem::transmute(SDL_PixelFormat::XBGR8888) };
 
     /// Convert a mask to an enumerated pixel format.
     ///
@@ -497,12 +503,7 @@ impl PixelFormat {
     #[doc(alias = "SDL_GetPixelFormatForMasks")]
     pub fn from_mask(mask: PixelFormatMask) -> Option<Self> {
         let fmt = SDL_GetPixelFormatForMasks(mask.bpp, mask.r, mask.g, mask.b, mask.a);
-
-        if fmt == SDL_PixelFormat::UNKNOWN {
-            None
-        } else {
-            Some(unsafe { Self::from_sdl(fmt) })
-        }
+        Self::from_sdl(fmt)
     }
 
     /// Extract [`PixelFormatMask`] data from this pixel format.
@@ -514,7 +515,7 @@ impl PixelFormat {
         let ptr = mask.as_mut_ptr();
         unsafe {
             if SDL_GetMasksForPixelFormat(
-                self.into(),
+                self.to_sdl(),
                 &raw mut (*ptr).bpp,
                 &raw mut (*ptr).r,
                 &raw mut (*ptr).g,
@@ -538,7 +539,7 @@ impl PixelFormat {
         unsafe {
             // SAFETY: The function below returns an UTF-8 string pointer,
             // no matter what.
-            let ptr = SDL_GetPixelFormatName(self.into());
+            let ptr = SDL_GetPixelFormatName(self.to_sdl());
             c_ptr_to_str(ptr)
         }
     }
@@ -549,5 +550,3 @@ impl std::fmt::Display for PixelFormat {
         f.write_str(self.name())
     }
 }
-
-impl_enum_transmute!(SDL_PixelFormat, PixelFormat);

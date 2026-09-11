@@ -110,12 +110,13 @@ use crate::{
     boxed::Box,
     display::Display,
     error::Error,
-    impl_enum_transmute, mod_reexport,
+    mod_reexport,
     properties::{Properties, PropertiesHandle},
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
     surface::Surface,
+    util::impl_enum_transmute,
     util::{c_ptr_to_str, opt2ptr, opt2res_map, to_result},
 };
 
@@ -211,21 +212,23 @@ bitflags! {
     }
 }
 
+impl_enum_transmute!(SDL_WindowFlags, WindowFlags);
+
 /// System theme.
 #[repr(i32)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SystemTheme {
-    /// Unknown system theme.
-    Unknown = SDL_SystemTheme::UNKNOWN.0,
     /// Light colored system theme.
     Light = SDL_SystemTheme::LIGHT.0,
     /// Dark colored system theme.
     Dark = SDL_SystemTheme::DARK.0,
 }
 
+impl_enum_transmute!(SDL_SystemTheme, SystemTheme, UNKNOWN);
+
 /// Window progress state.
 #[repr(i32)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub enum ProgressState {
     /// No progress bar is shown.
     None = SDL_ProgressState::NONE.0,
@@ -240,15 +243,7 @@ pub enum ProgressState {
     Error = SDL_ProgressState::ERROR.0,
 }
 
-impl_enum_transmute!(SDL_WindowFlags, WindowFlags);
-impl_enum_transmute!(SDL_SystemTheme, SystemTheme);
-impl_enum_transmute!(SDL_ProgressState, ProgressState);
-
-impl std::fmt::Display for SystemTheme {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        <Self as std::fmt::Debug>::fmt(self, f)
-    }
-}
+impl_enum_transmute!(SDL_ProgressState, ProgressState, INVALID);
 
 #[derive(Clone, Copy)]
 pub struct WindowId {
@@ -327,9 +322,9 @@ pub fn current_video_driver() -> Option<&'static str> {
 ///
 /// Returns the current system theme: light, dark, or unknown.
 #[doc(alias = "SDL_GetSystemTheme")]
-pub fn system_theme() -> SystemTheme {
-    // SAFETY: `SystemTheme` has the same representation as `SDL_SystemTheme`.
-    unsafe { transmute(SDL_GetSystemTheme()) }
+pub fn system_theme() -> Option<SystemTheme> {
+    let st = unsafe { SDL_GetSystemTheme() };
+    SystemTheme::from_sdl(st)
 }
 
 /// Get the window that currently has an input grab enabled.
@@ -499,7 +494,7 @@ impl WindowHandle {
     /// Returns a mask of the [`WindowFlags`] associated with this window.
     #[doc(alias = "SDL_GetWindowFlags")]
     pub fn flags(&self) -> WindowFlags {
-        unsafe { WindowFlags::from_sdl(SDL_GetWindowFlags(self.handle.as_ptr())) }
+        unsafe { WindowFlags::from_sdl_unchecked(SDL_GetWindowFlags(self.handle.as_ptr())) }
     }
 
     /// Get the renderer associated with a window.
@@ -764,12 +759,7 @@ impl WindowHandle {
     #[doc(alias = "SDL_GetWindowProgressState")]
     pub fn progress_state(&self) -> Result<ProgressState> {
         let ps = unsafe { SDL_GetWindowProgressState(self.as_ptr()) };
-        if ps == SDL_ProgressState::INVALID {
-            Err(Error::current())
-        } else {
-            // SAFETY: Checked above that `ps` is not `INVALID`.
-            Ok(unsafe { ProgressState::from_sdl(ps) })
-        }
+        ProgressState::from_sdl(ps).ok_or_else(Error::current)
     }
 
     /// Get the value of the progress bar for the given window's taskbar

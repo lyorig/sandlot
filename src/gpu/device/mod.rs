@@ -26,9 +26,10 @@ use crate::{
     Result,
     error::Error,
     gpu::{EnableDebug, WaitAll},
-    impl_enum_transmute, mod_reexport,
+    mod_reexport,
     properties::{Properties, PropertiesHandle},
     resource::Ref,
+    util::impl_enum_transmute,
     util::to_result,
     window::Window,
 };
@@ -242,7 +243,7 @@ impl DeviceHandle {
         unsafe {
             let fmt =
                 SDL_GetGPUSwapchainTextureFormat(self.handle.as_ptr(), window.handle.as_ptr());
-            TextureFormat::from_sdl(fmt)
+            TextureFormat::from_sdl_unchecked(fmt)
         }
     }
 

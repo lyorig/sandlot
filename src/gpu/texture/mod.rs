@@ -11,8 +11,8 @@ use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, impl_enum_transmute, mod_reexport, properties::Properties, rect::Point,
-    resource::Ref,
+    Result, gpu::Cycle, mod_reexport, properties::Properties, rect::Point, resource::Ref,
+    util::impl_enum_transmute,
 };
 
 use super::{
@@ -37,6 +37,8 @@ pub enum TextureType {
     /// An array of cube images.
     CubeArray = SDL_GPUTextureType::CUBE_ARRAY.0,
 }
+
+impl_enum_transmute!(SDL_GPUTextureType, TextureType);
 
 bitflags! {
     /// Specifies how a texture is intended to be used.
@@ -67,6 +69,8 @@ bitflags! {
     }
 }
 
+impl_enum_transmute!(SDL_GPUTextureUsageFlags, TextureUsageFlags);
+
 /// The number of samples per texel for a texture used as a render target.
 ///
 /// This enum implements [`TryFrom<u8>`] and [`Into<u8>`] for easy conversions
@@ -84,6 +88,8 @@ pub enum SampleCount {
     /// Eight-sample multisampling.
     Eight = SDL_GPUSampleCount::_8.0,
 }
+
+impl_enum_transmute!(SDL_GPUSampleCount, SampleCount);
 
 impl TryFrom<u8> for SampleCount {
     type Error = ();
@@ -337,10 +343,7 @@ pub enum TextureFormat {
     Astc12x12Float = SDL_GPUTextureFormat::ASTC_12x12_FLOAT.0,
 }
 
-impl_enum_transmute!(SDL_GPUTextureType, TextureType);
-impl_enum_transmute!(SDL_GPUTextureUsageFlags, TextureUsageFlags);
-impl_enum_transmute!(SDL_GPUSampleCount, SampleCount);
-impl_enum_transmute!(SDL_GPUTextureFormat, TextureFormat);
+impl_enum_transmute!(SDL_GPUTextureFormat, TextureFormat, INVALID);
 
 /// Parameters for creating a texture.
 ///

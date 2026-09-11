@@ -72,7 +72,7 @@ use std::{
 
 use sdl3_sys::log::*;
 
-use crate::impl_enum_transmute;
+use crate::util::impl_enum_transmute;
 
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -87,6 +87,8 @@ pub enum Priority {
     Error = SDL_LogPriority::ERROR.0,
     Critical = SDL_LogPriority::CRITICAL.0,
 }
+
+impl_enum_transmute!(SDL_LogPriority, Priority, INVALID);
 
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -112,7 +114,6 @@ pub enum Category {
     Gpu = SDL_LogCategory::GPU.0,
 }
 
-impl_enum_transmute!(SDL_LogPriority, Priority);
 impl_enum_transmute!(SDL_LogCategory, Category);
 
 fn args2cstr(args: Arguments) -> CString {
@@ -259,13 +260,13 @@ macro_rules! log_critical {
 /// Set the priority of a particular log category.
 #[doc(alias = "SDL_SetLogPriority")]
 pub fn set_priority(category: Category, priority: Priority) {
-    unsafe { SDL_SetLogPriority(category as _, priority.into()) }
+    unsafe { SDL_SetLogPriority(category as _, priority.to_sdl()) }
 }
 
 /// Set the priority of all log categories.
 #[doc(alias = "SDL_SetLogPriorities")]
 pub fn set_priorities(priority: Priority) {
-    unsafe { SDL_SetLogPriorities(priority.into()) }
+    unsafe { SDL_SetLogPriorities(priority.to_sdl()) }
 }
 
 /// Get the priority of a particular log category.
@@ -275,7 +276,7 @@ pub fn priority(category: Category) -> Priority {
         let p = SDL_GetLogPriority(category as _);
 
         // SAFETY: Sandlot doesn't expose ways to create custom categories/priorities.
-        Priority::from_sdl(p)
+        Priority::from_sdl_unchecked(p)
     }
 }
 

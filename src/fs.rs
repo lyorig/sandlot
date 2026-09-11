@@ -39,7 +39,7 @@ use std::{
 use bitflags::bitflags;
 use sdl3_sys::filesystem::*;
 
-use crate::{Result, boxed::Box, impl_enum_transmute, string::String, util::to_result};
+use crate::{Result, boxed::Box, string::String, util::impl_enum_transmute, util::to_result};
 
 /// The type of the OS-provided default folder for a specific purpose.
 ///

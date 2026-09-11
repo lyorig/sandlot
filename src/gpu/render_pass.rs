@@ -26,9 +26,9 @@ use crate::{
     Result,
     color::RgbaF32,
     gpu::{Buffer, Cycle, CycleResolveTexture},
-    impl_enum_transmute,
     rect::{PointF32, RectI32},
     resource::{Ref, Resource},
+    util::impl_enum_transmute,
     util::opt2ptr,
 };
 

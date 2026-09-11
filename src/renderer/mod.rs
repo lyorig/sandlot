@@ -889,7 +889,7 @@ impl traits::BlendMode for RendererHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetRenderDrawBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            BlendMode::from_sdl(ret.assume_init())
+            BlendMode::from_sdl_unchecked(ret.assume_init())
         }
     }
 
@@ -905,7 +905,7 @@ impl traits::BlendMode for RendererHandle {
     #[doc(alias = "SDL_SetRenderDrawBlendMode")]
     fn set_blend_mode(&self, bm: BlendMode) {
         unsafe {
-            SDL_SetRenderDrawBlendMode(self.handle.as_ptr(), bm.into());
+            SDL_SetRenderDrawBlendMode(self.handle.as_ptr(), bm.to_sdl());
         }
     }
 }

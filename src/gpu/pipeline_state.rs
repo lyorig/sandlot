@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 use bitflags::bitflags;
 use sdl3_sys::gpu::*;
 
-use crate::{gpu::enums::*, impl_enum_transmute};
+use crate::{gpu::enums::*, util::impl_enum_transmute};
 
 use super::{
     sampler::CompareOp,
@@ -51,6 +51,8 @@ pub enum VertexElementFormat {
     Half2 = SDL_GPUVertexElementFormat::HALF2.0,
     Half4 = SDL_GPUVertexElementFormat::HALF4.0,
 }
+
+impl_enum_transmute!(SDL_GPUVertexElementFormat, VertexElementFormat, INVALID);
 
 /// The rate at which vertex attributes are read from buffers.
 #[repr(i32)]
@@ -148,6 +150,8 @@ pub enum BlendOp {
     Max = SDL_GPUBlendOp::MAX.0,
 }
 
+impl_enum_transmute!(SDL_GPUBlendOp, BlendOp, INVALID);
+
 /// The operation applied to a stored stencil value.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -171,6 +175,8 @@ pub enum StencilOp {
     DecrementAndWrap = SDL_GPUStencilOp::DECREMENT_AND_WRAP.0,
 }
 
+impl_enum_transmute!(SDL_GPUStencilOp, StencilOp, INVALID);
+
 bitflags! {
     /// Selects the color components written by a graphics pipeline.
     #[derive(Clone, Copy)]
@@ -187,14 +193,11 @@ bitflags! {
     }
 }
 
-impl_enum_transmute!(SDL_GPUVertexElementFormat, VertexElementFormat);
 impl_enum_transmute!(SDL_GPUVertexInputRate, VertexInputRate);
 impl_enum_transmute!(SDL_GPUFillMode, FillMode);
 impl_enum_transmute!(SDL_GPUCullMode, CullMode);
 impl_enum_transmute!(SDL_GPUFrontFace, FrontFace);
 impl_enum_transmute!(SDL_GPUBlendFactor, BlendFactor);
-impl_enum_transmute!(SDL_GPUBlendOp, BlendOp);
-impl_enum_transmute!(SDL_GPUStencilOp, StencilOp);
 impl_enum_transmute!(SDL_GPUColorComponentFlags, ColorComponentFlags);
 
 /// Parameters for a vertex buffer used by a graphics pipeline.
@@ -438,7 +441,7 @@ impl<'ctd> GraphicsPipelineTargetInfo<'ctd> {
         depth_stencil_format: Option<TextureFormat>,
     ) -> Self {
         let (depth_stencil_format, has_depth_stencil_target) = match depth_stencil_format {
-            Some(dsf) => (dsf.into(), true),
+            Some(dsf) => (dsf.to_sdl(), true),
             None => (SDL_GPUTextureFormat::default(), false),
         };
 

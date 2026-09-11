@@ -22,8 +22,8 @@ use crate::{
     Result,
     color::RgbaF32,
     gpu::Cycle,
-    impl_enum_transmute,
     resource::{Ref, Resource},
+    util::impl_enum_transmute,
     util::{opt2ptr_mut, to_result},
     window::Window,
 };

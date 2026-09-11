@@ -49,14 +49,14 @@ impl<'a> TextureProperties<'a> {
         unsafe {
             let cs =
                 SDL_Colorspace(self.inner.number(SDL_PROP_TEXTURE_COLORSPACE_NUMBER, 0) as u32);
-            Colorspace::from_sdl(cs)
+            Colorspace::from_sdl_unchecked(cs)
         }
     }
 
     pub fn format(&self) -> PixelFormat {
         unsafe {
             let pf = SDL_PixelFormat(self.inner.number(SDL_PROP_TEXTURE_FORMAT_NUMBER, 0) as c_int);
-            PixelFormat::from_sdl(pf)
+            PixelFormat::from_sdl_unchecked(pf)
         }
     }
 
@@ -64,7 +64,7 @@ impl<'a> TextureProperties<'a> {
         unsafe {
             let ta =
                 SDL_TextureAccess(self.inner.number(SDL_PROP_TEXTURE_ACCESS_NUMBER, 0) as c_int);
-            TextureAccess::from_sdl(ta)
+            TextureAccess::from_sdl_unchecked(ta)
         }
     }
 

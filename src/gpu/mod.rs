@@ -35,8 +35,11 @@ use bitflags::bitflags;
 use sdl3_sys::{gpu::*, pixels::SDL_PixelFormat};
 
 use crate::{
-    impl_enum_transmute, mod_reexport, pixels::PixelFormat, properties::Properties, resource::Ref,
-    util::c_ptr_to_str,
+    mod_reexport,
+    pixels::PixelFormat,
+    properties::Properties,
+    resource::Ref,
+    util::{c_ptr_to_str, impl_enum_transmute},
 };
 
 /// Non-bitmask variant of `SDL_GPUShaderFormat`.
@@ -59,7 +62,7 @@ pub enum ShaderFormat {
 
 impl ShaderFormat {
     /// Returns [`ShaderFormats`] with only this bit set.
-    pub const fn as_mask(self) -> ShaderFormats {
+    pub const fn to_mask(self) -> ShaderFormats {
         ShaderFormats::from_bits_retain(self as u32)
     }
 }
@@ -82,11 +85,11 @@ bitflags! {
     }
 }
 
-impl_enum_transmute!(SDL_GPUShaderFormat, ShaderFormats);
+impl_enum_transmute!(SDL_GPUShaderFormat, ShaderFormat, INVALID);
 
 impl From<ShaderFormat> for ShaderFormats {
     fn from(value: ShaderFormat) -> Self {
-        value.as_mask()
+        value.to_mask()
     }
 }
 
@@ -162,12 +165,7 @@ pub fn texture_format_texel_block_size(format: TextureFormat) -> u32 {
 #[doc(alias = "SDL_GetGPUTextureFormatFromPixelFormat")]
 pub fn texture_format_from_pixel_format(pixel_format: SDL_PixelFormat) -> Option<TextureFormat> {
     let fmt = SDL_GetGPUTextureFormatFromPixelFormat(pixel_format);
-    if fmt == SDL_GPUTextureFormat::INVALID {
-        None
-    } else {
-        // SAFETY: Checked above that `fmt` is not `INVALID`.
-        Some(unsafe { TextureFormat::from_sdl(fmt) })
-    }
+    TextureFormat::from_sdl(fmt)
 }
 
 /// Convert a GPU texture format to the corresponding SDL pixel format.
@@ -177,11 +175,7 @@ pub fn texture_format_from_pixel_format(pixel_format: SDL_PixelFormat) -> Option
 #[doc(alias = "SDL_GetPixelFormatFromGPUTextureFormat")]
 pub fn pixel_format_from_texture_format(format: TextureFormat) -> Option<PixelFormat> {
     let fmt = SDL_GetPixelFormatFromGPUTextureFormat(SDL_GPUTextureFormat::new(format as _));
-    if fmt == SDL_PixelFormat::UNKNOWN {
-        None
-    } else {
-        Some(unsafe { PixelFormat::from_sdl(fmt) })
-    }
+    PixelFormat::from_sdl(fmt)
 }
 
 /// Check whether a GPU runtime supports a set of device properties.

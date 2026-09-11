@@ -73,7 +73,6 @@ macro_rules! boolenum {
 /// - both types implement [`Copy`]
 ///
 /// It is otherwise your responsibility to ensure transmuting between both types is sound.
-#[macro_export]
 macro_rules! impl_enum_transmute {
     ($sdl:ident, $wrap:ident) => {
         const _: () = assert!(::std::mem::size_of::<$sdl>() == ::std::mem::size_of::<$wrap>());
@@ -87,7 +86,7 @@ macro_rules! impl_enum_transmute {
             /// # Safety
             /// The caller must ensure that `value` is a valid enum variant of [`Self`],
             /// e.g. `ScaleMode` cannot be constructed from `SDL_SCALEMODE_INVALID`.
-            pub const unsafe fn from_sdl(value: $sdl) -> Self {
+            pub const unsafe fn from_sdl_unchecked(value: $sdl) -> Self {
                 unsafe { ::std::mem::transmute(value) }
             }
 
@@ -105,11 +104,31 @@ macro_rules! impl_enum_transmute {
             }
         }
     };
+
+    ($sdl:ident, $wrap:ident, $invalid:ident) => {
+        $crate::util::impl_enum_transmute!($sdl, $wrap);
+
+        impl $wrap {
+            /// Construct this enum from its SDL equivalent.
+            ///
+            /// Returns [`None`] if `value` is the "invalid" sentinel value
+            /// (e.g. `SDL_PixelFormat::UNKNOWN`).
+            pub fn from_sdl(value: $sdl) -> Option<Self> {
+                if value == $sdl::$invalid {
+                    None
+                } else {
+                    Some(unsafe { ::std::mem::transmute(value) })
+                }
+            }
+        }
+    };
 }
 
+pub(crate) use impl_enum_transmute;
+
 /// Converts an [`Option`] holding a reference to a pointer.
-/// As you would expect, `None` produces [`std::ptr::null`], while
-/// `Some` returns `&T` as a pointer.
+/// As you would expect, [`None`] produces [`std::ptr::null`], while
+/// [`Some`] returns `&T` as a pointer.
 ///
 /// This function's purpose is to facilitate interfacing with C FFI libraries.
 pub(crate) fn opt2ptr<T>(opt: Option<&T>) -> *const T {
@@ -121,8 +140,8 @@ pub(crate) fn opt2ptr_mut<T>(opt: Option<&mut T>) -> *mut T {
     opt.map_or(std::ptr::null_mut(), |s| s)
 }
 
-/// Convenience function that converts an `Option<T>` to
-/// a `Result`, getting the current error if it is `None`.
+/// Convenience function that converts an [`Option<T>`] to
+/// a [`Result`], getting the current error if it is [`None`].
 pub(crate) fn opt2res<T>(opt: Option<T>) -> Result<T> {
     match opt {
         Some(s) => Ok(s),
@@ -130,8 +149,8 @@ pub(crate) fn opt2res<T>(opt: Option<T>) -> Result<T> {
     }
 }
 
-/// Convenience function that converts an `Option<T>` to
-/// a `Result<U>`, getting the current error if it is `None`.
+/// Convenience function that converts an [`Option<T>`] to
+/// a [`Result<U>`], getting the current error if it is [`None`].
 pub(crate) fn opt2res_map<T, U, F: FnOnce(T) -> U>(opt: Option<T>, f: F) -> Result<U> {
     match opt {
         Some(s) => Ok(f(s)),
@@ -139,7 +158,7 @@ pub(crate) fn opt2res_map<T, U, F: FnOnce(T) -> U>(opt: Option<T>, f: F) -> Resu
     }
 }
 
-/// Returns `Ok(())` if `result`, otherwise `Err(Error::current())`.
+/// Returns [`Ok`] if `result`, otherwise [`Err`] with [`Error::current`].
 pub(crate) fn to_result(result: bool) -> Result<()> {
     if result {
         Ok(())
@@ -160,5 +179,5 @@ pub(crate) unsafe fn c_ptr_to_str<'a>(ptr: *const c_char) -> &'a str {
     unsafe { str::from_utf8_unchecked(CStr::from_ptr(ptr).to_bytes()) }
 }
 
-/// Marker trait for asserting that a type is `Copy`.
+/// Marker trait for asserting that a type is [`Copy`].
 pub(crate) trait IsCopy: Copy {}

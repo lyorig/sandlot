@@ -9,8 +9,8 @@ use std::{marker::PhantomData, ptr::NonNull};
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, error::Error, gpu::Cycle, impl_enum_transmute, mod_reexport, properties::Properties,
-    resource::Ref,
+    Result, error::Error, gpu::Cycle, mod_reexport, properties::Properties, resource::Ref,
+    util::impl_enum_transmute,
 };
 
 use super::device::Device;

@@ -45,13 +45,12 @@ use crate::{
     Result,
     color::{RgbaF32, RgbaU8},
     error::Error,
-    impl_enum_transmute,
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource},
     surface::Surface,
     ttf::{Font, FontHandle, RtStr},
-    util::{opt2res, to_result},
+    util::{impl_enum_transmute, opt2res, to_result},
 };
 
 pub use crate::generated::{Text, TextHandle};
@@ -75,7 +74,7 @@ pub enum Direction {
     BottomToTop = TTF_Direction::BTT.0,
 }
 
-impl_enum_transmute!(TTF_Direction, Direction);
+impl_enum_transmute!(TTF_Direction, Direction, INVALID);
 
 bitflags::bitflags! {
     /// Flags for a [`SubString`].
@@ -253,7 +252,8 @@ impl TextHandle {
     /// This defaults to the direction of the font used by the text object.
     #[doc(alias = "TTF_GetTextDirection")]
     pub fn direction(&self) -> Direction {
-        unsafe { Direction::from_sdl(TTF_GetTextDirection(self.as_ptr())) }
+        let dir = unsafe { TTF_GetTextDirection(self.as_ptr()) };
+        unsafe { Direction::from_sdl_unchecked(dir) }
     }
 
     /// Set the direction to be used for text shaping a text object.

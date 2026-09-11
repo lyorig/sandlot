@@ -10,9 +10,10 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 use crate::{
     Result,
     gpu::{ColorTargetDescription, VertexAttribute, VertexBufferDescription},
-    impl_enum_transmute, mod_reexport,
+    mod_reexport,
     properties::Properties,
     resource::{Ref, Resource},
+    util::impl_enum_transmute,
 };
 
 use super::{

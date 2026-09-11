@@ -7,9 +7,10 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 use crate::{
     Result,
     gpu::{EnableAnisotropy, EnableCompare},
-    impl_enum_transmute, mod_reexport,
+    mod_reexport,
     properties::Properties,
     resource::Ref,
+    util::impl_enum_transmute,
 };
 
 use super::device::Device;
@@ -27,6 +28,8 @@ pub enum Filter {
     Linear = SDL_GPUFilter::LINEAR.0,
 }
 
+impl_enum_transmute!(SDL_GPUFilter, Filter);
+
 /// A mipmap filtering mode used by a sampler.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -37,6 +40,8 @@ pub enum SamplerMipmapMode {
     /// Linear filtering between mipmap levels.
     Linear = SDL_GPUSamplerMipmapMode::LINEAR.0,
 }
+
+impl_enum_transmute!(SDL_GPUSamplerMipmapMode, SamplerMipmapMode);
 
 /// The behavior of texture sampling when coordinates exceed the `[0, 1)` range.
 #[repr(i32)]
@@ -50,6 +55,8 @@ pub enum SamplerAddressMode {
     /// Clamp coordinates to the `[0, 1)` range.
     ClampToEdge = SDL_GPUSamplerAddressMode::CLAMP_TO_EDGE.0,
 }
+
+impl_enum_transmute!(SDL_GPUSamplerAddressMode, SamplerAddressMode);
 
 /// A comparison operator for depth, stencil, and sampler operations.
 #[repr(i32)]
@@ -74,10 +81,7 @@ pub enum CompareOp {
     Always = SDL_GPUCompareOp::ALWAYS.0,
 }
 
-impl_enum_transmute!(SDL_GPUFilter, Filter);
-impl_enum_transmute!(SDL_GPUSamplerMipmapMode, SamplerMipmapMode);
-impl_enum_transmute!(SDL_GPUSamplerAddressMode, SamplerAddressMode);
-impl_enum_transmute!(SDL_GPUCompareOp, CompareOp);
+impl_enum_transmute!(SDL_GPUCompareOp, CompareOp, INVALID);
 
 /// Parameters for creating a sampler.
 ///

@@ -36,7 +36,7 @@ use sdl3_sys::{render::*, surface::SDL_ScaleMode};
 use crate::{
     Result,
     color::{RgbF32, RgbU8},
-    impl_enum_transmute, mod_reexport,
+    mod_reexport,
     pixels::{BlendMode, PixelFormat, ScaleMode},
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32},
@@ -44,6 +44,7 @@ use crate::{
     resource::Ref,
     surface::Surface,
     traits,
+    util::impl_enum_transmute,
 };
 
 mod_reexport!(builder);
@@ -88,7 +89,7 @@ impl TextureHandle {
         // SAFETY: This function only reads struct fields.
         unsafe {
             SDL_GetTextureScaleMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            ScaleMode::from_sdl(ret.assume_init())
+            ScaleMode::from_sdl_unchecked(ret.assume_init())
         }
     }
 
@@ -111,7 +112,7 @@ impl TextureHandle {
     #[doc(alias = "SDL_SetTextureScaleMode")]
     pub fn set_scale_mode(&mut self, sm: ScaleMode) {
         unsafe {
-            SDL_SetTextureScaleMode(self.handle.as_ptr(), sm.into());
+            SDL_SetTextureScaleMode(self.handle.as_ptr(), sm.to_sdl());
         }
     }
 }
@@ -123,7 +124,7 @@ impl traits::BlendMode for TextureHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetTextureBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            BlendMode::from_sdl(ret.assume_init())
+            BlendMode::from_sdl_unchecked(ret.assume_init())
         }
     }
 
@@ -137,7 +138,7 @@ impl traits::BlendMode for TextureHandle {
     #[doc(alias = "SDL_SetTextureBlendMode")]
     fn set_blend_mode(&self, bm: BlendMode) {
         unsafe {
-            SDL_SetTextureBlendMode(self.handle.as_ptr(), bm.into());
+            SDL_SetTextureBlendMode(self.handle.as_ptr(), bm.to_sdl());
         }
     }
 }
@@ -347,7 +348,7 @@ impl Texture {
         Self::from_ptr(unsafe {
             SDL_CreateTexture(
                 rnd.handle.as_ptr(),
-                fmt.into(),
+                fmt.to_sdl(),
                 access.into(),
                 size.x,
                 size.y,

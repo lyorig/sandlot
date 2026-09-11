@@ -12,10 +12,8 @@
 
 use sdl3_ttf_sys::ttf::*;
 
-use crate::{
-    Result, error::Error, gpu::Device, impl_enum_transmute, mod_reexport, renderer::Renderer,
-    resource::Ref,
-};
+use crate::util::impl_enum_transmute;
+use crate::{Result, error::Error, gpu::Device, mod_reexport, renderer::Renderer, resource::Ref};
 
 mod_reexport!(builder);
 
@@ -29,7 +27,7 @@ pub enum Winding {
     CounterClockwise = TTF_GPUTextEngineWinding::COUNTER_CLOCKWISE.0,
 }
 
-impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding);
+impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding, INVALID);
 
 pub use crate::generated::{GpuEngine, GpuEngineHandle};
 
@@ -56,12 +54,7 @@ impl GpuEngineHandle {
     #[doc(alias = "TTF_GetGPUTextEngineWinding")]
     pub fn winding(&self) -> Result<Winding> {
         let wind = unsafe { TTF_GetGPUTextEngineWinding(self.as_ptr()) };
-        if wind == TTF_GPUTextEngineWinding::INVALID {
-            Err(Error::current())
-        } else {
-            // SAFETY: Checked above that `wind` is not `INVALID`.
-            Ok(unsafe { Winding::from_sdl(wind) })
-        }
+        Winding::from_sdl(wind).ok_or_else(Error::current)
     }
 
     /// Set the winding order of the vertices returned by

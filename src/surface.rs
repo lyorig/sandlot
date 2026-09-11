@@ -65,8 +65,7 @@ use std::mem::MaybeUninit;
 use crate::{
     Result,
     color::{RgbU8, RgbaF32, RgbaU8},
-    pixels::PixelFormat,
-    pixels::{BlendMode, ScaleMode},
+    pixels::{BlendMode, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
     resource::Ref,
     traits,
@@ -87,7 +86,7 @@ impl SurfaceHandle {
     /// Get the pixel format of the surface.
     pub fn format(&self) -> PixelFormat {
         let surf = unsafe { self.handle.as_ref() };
-        unsafe { PixelFormat::from_sdl(surf.format) }
+        unsafe { PixelFormat::from_sdl_unchecked(surf.format) }
     }
 
     /// Perform a fast fill of the entire surface with a specific color.
@@ -183,7 +182,7 @@ impl SurfaceHandle {
     #[doc(alias = "SDL_ScaleSurface")]
     pub fn scale(&self, size: PointI32, sm: ScaleMode) -> Result<Surface> {
         Surface::from_ptr(unsafe {
-            SDL_ScaleSurface(self.handle.as_ptr(), size.x, size.y, sm.into())
+            SDL_ScaleSurface(self.handle.as_ptr(), size.x, size.y, sm.to_sdl())
         })
     }
 
@@ -271,7 +270,7 @@ impl SurfaceHandle {
                 opt2ptr(src).cast(),
                 target.handle.as_ptr(),
                 opt2ptr(dst).cast(),
-                scale_mode.into(),
+                scale_mode.to_sdl(),
             )
         })
     }
@@ -365,7 +364,7 @@ impl SurfaceHandle {
                 top_height,
                 bottom_height,
                 scale,
-                scale_mode.into(),
+                scale_mode.to_sdl(),
                 target.handle.as_ptr(),
                 opt2ptr(dst).cast(),
             )
@@ -392,7 +391,7 @@ impl SurfaceHandle {
                 opt2ptr(src).cast(),
                 target.handle.as_ptr(),
                 opt2ptr(dst).cast(),
-                scale_mode.into(),
+                scale_mode.to_sdl(),
             )
         })
     }
@@ -454,7 +453,7 @@ impl SurfaceHandle {
                 self.handle.as_ptr(),
                 opt2ptr(src).cast(),
                 scale,
-                scale_mode.into(),
+                scale_mode.to_sdl(),
                 target.handle.as_ptr(),
                 opt2ptr(dst).cast(),
             )
@@ -469,7 +468,7 @@ impl traits::BlendMode for SurfaceHandle {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetSurfaceBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
-            BlendMode::from_sdl(ret.assume_init())
+            BlendMode::from_sdl_unchecked(ret.assume_init())
         }
     }
 
@@ -483,7 +482,7 @@ impl traits::BlendMode for SurfaceHandle {
     #[doc(alias = "SDL_SetSurfaceBlendMode")]
     fn set_blend_mode(&self, bm: BlendMode) {
         unsafe {
-            SDL_SetSurfaceBlendMode(self.handle.as_ptr(), bm.into());
+            SDL_SetSurfaceBlendMode(self.handle.as_ptr(), bm.to_sdl());
         }
     }
 }
@@ -554,6 +553,6 @@ impl Surface {
     /// The pixels of the new surface are initialized to zero.
     #[doc(alias = "SDL_CreateSurface")]
     pub fn from_size_and_format(size: PointI32, format: PixelFormat) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateSurface(size.x, size.y, format.into()) })
+        Self::from_ptr(unsafe { SDL_CreateSurface(size.x, size.y, format.to_sdl()) })
     }
 }

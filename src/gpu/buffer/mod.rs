@@ -11,7 +11,8 @@ use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, impl_enum_transmute, mod_reexport, properties::Properties, resource::Ref,
+    Result, gpu::Cycle, mod_reexport, properties::Properties, resource::Ref,
+    util::impl_enum_transmute,
 };
 
 use super::{copy_pass::CopyPass, device::Device, transfer_buffer::TransferBufferLocation};
