@@ -24,10 +24,10 @@ The general plan is:
 
 ### Initialization
 
-Most, but not all, functionality requires two things to be in scope:
-- `sandlot::Context`
-- a relevant subsystem (see `sandlot::subsystem`)
-  - for example, `Window::new` may return `Err` if `subsystem::Video` isn't in scope.
+Most, but not all, functionality requires two things from the `init` module to be in scope:
+- `init::Context`
+- a relevant subsystem
+  - for example, `Window::new` may return `Err` if `init::Video` isn't in scope.
 
 ### Objects
 

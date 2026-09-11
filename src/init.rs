@@ -64,7 +64,7 @@ impl Context {
     /// TL;DR: It's less error-prone.
     /// Contexts are sometimes left unused, i.e.
     /// ```
-    /// use sandlot::Context;
+    /// use sandlot::init::Context;
     ///
     /// let _ctx = Context::new();
     /// ```
