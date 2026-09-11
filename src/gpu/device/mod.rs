@@ -26,11 +26,11 @@ use crate::{
     Result,
     error::Error,
     gpu::{EnableDebug, WaitAll},
-    mod_reexport,
     properties::{Properties, PropertiesHandle},
     resource::Ref,
     util::impl_enum_transmute,
-    resource_new,
+    util::mod_reexport,
+    util::resource_new,
     util::to_result,
     window::Window,
 };

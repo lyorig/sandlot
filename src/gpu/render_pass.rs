@@ -29,8 +29,8 @@ use crate::{
     rect::{PointF32, RectI32},
     resource::{Ref, Resource},
     util::impl_enum_transmute,
-    resource_new,
     util::opt2ptr,
+    util::resource_new,
 };
 
 use super::{

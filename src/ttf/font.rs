@@ -10,7 +10,7 @@ use crate::{
     util::c_ptr_to_str,
 };
 
-crate::resource_new_tied!(
+crate::util::resource_new_tied!(
     /// The internal structure containing font information.
     /// Opaque data.
     TTF_Font, Font, TTF_CloseFont, Context

@@ -7,11 +7,11 @@ use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 use crate::{
     Result,
     gpu::{EnableAnisotropy, EnableCompare},
-    mod_reexport,
     properties::Properties,
     resource::Ref,
-    resource_new_no_drop,
     util::impl_enum_transmute,
+    util::mod_reexport,
+    util::resource_new_no_drop,
 };
 
 use super::device::Device;

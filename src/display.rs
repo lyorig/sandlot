@@ -18,10 +18,11 @@
 //! - [x] SDL_GetPrimaryDisplay
 
 use crate::{
-    Result, boolenum,
+    Result,
     boxed::Box,
     error::Error,
     rect::{PointI32, RectI32},
+    util::boolenum,
     util::impl_enum_transmute,
     util::opt2res_map,
 };

@@ -13,7 +13,7 @@ use sdl3_sys::gpu::*;
 use crate::{
     Result,
     resource::{Ref, Resource},
-    resource_new,
+    util::resource_new,
 };
 
 use super::{

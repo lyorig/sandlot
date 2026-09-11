@@ -48,10 +48,9 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource},
-    resource_new,
     surface::Surface,
     ttf::{Font, FontHandle, RtStr},
-    util::{impl_enum_transmute, opt2res, to_result},
+    util::{impl_enum_transmute, opt2res, resource_new, to_result},
 };
 
 resource_new!(

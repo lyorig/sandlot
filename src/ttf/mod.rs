@@ -84,7 +84,7 @@ use std::ffi::CStr;
 
 use sdl3_ttf_sys::ttf::*;
 
-use crate::{Result, error::Error, mod_reexport};
+use crate::{Result, error::Error, util::mod_reexport};
 
 /// Check if SDL_ttf is initialized.
 ///

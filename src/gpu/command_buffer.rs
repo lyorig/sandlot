@@ -24,7 +24,7 @@ use crate::{
     gpu::Cycle,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
-    resource_new_no_drop,
+    util::resource_new_no_drop,
     util::{opt2ptr_mut, to_result},
     window::Window,
 };

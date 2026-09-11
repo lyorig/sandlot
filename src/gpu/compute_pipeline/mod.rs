@@ -6,7 +6,9 @@ use std::{ffi::CStr, marker::PhantomData};
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
-use crate::{Result, mod_reexport, properties::Properties, resource::Ref, resource_new_no_drop};
+use crate::{
+    Result, properties::Properties, resource::Ref, util::mod_reexport, util::resource_new_no_drop,
+};
 
 use super::{ShaderFormat, device::Device};
 

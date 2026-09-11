@@ -36,16 +36,16 @@ use sdl3_sys::{render::*, surface::SDL_ScaleMode};
 use crate::{
     Result,
     color::{RgbF32, RgbU8},
-    mod_reexport,
     pixels::{BlendMode, PixelFormat, ScaleMode},
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resource_new,
     surface::Surface,
     traits,
     util::impl_enum_transmute,
+    util::mod_reexport,
+    util::resource_new,
 };
 
 mod_reexport!(builder);

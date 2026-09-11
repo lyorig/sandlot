@@ -121,7 +121,6 @@ impl<T: Resource> DerefMut for RefMut<'_, T> {
     }
 }
 
-#[macro_export]
 macro_rules! resource_new_impl {
     ($sdl:ident, $owned:ident) => {
         paste::paste! {
@@ -189,7 +188,6 @@ macro_rules! resource_new_impl {
     };
 }
 
-#[macro_export]
 macro_rules! resource_new_no_drop {
     ($(#[$meta:meta])* $sdl:ident, $owned:ident) => {
         paste::paste! {
@@ -202,13 +200,12 @@ macro_rules! resource_new_no_drop {
                 pub(crate) inner: [<$owned Handle>],
             }
 
-            $crate::resource_new_impl!($sdl, $owned);
+            $crate::util::resource_new_impl!($sdl, $owned);
         }
     };
 }
 
 /// Define a resource and implement shared traits and member functions.
-#[macro_export]
 macro_rules! resource_new {
     ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident) => {
         paste::paste! {
@@ -220,7 +217,7 @@ macro_rules! resource_new {
         }
 
         paste::paste! {
-            $crate::resource_new_impl!($sdl, $owned);
+            $crate::util::resource_new_impl!($sdl, $owned);
 
             impl Drop for $owned {
                 #[doc(alias = "" $sdl "")]
@@ -232,7 +229,6 @@ macro_rules! resource_new {
     };
 }
 
-#[macro_export]
 macro_rules! resource_new_tied {
     ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident, $tied:ident) => {
         paste::paste! {
@@ -315,3 +311,8 @@ macro_rules! resource_new_tied {
         }
     };
 }
+
+pub(crate) use resource_new;
+pub(crate) use resource_new_impl;
+pub(crate) use resource_new_no_drop;
+pub(crate) use resource_new_tied;

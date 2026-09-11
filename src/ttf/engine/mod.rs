@@ -12,9 +12,11 @@
 
 use sdl3_ttf_sys::ttf::*;
 
-use crate::resource_new;
 use crate::util::impl_enum_transmute;
-use crate::{Result, error::Error, gpu::Device, mod_reexport, renderer::Renderer, resource::Ref};
+use crate::util::resource_new;
+use crate::{
+    Result, error::Error, gpu::Device, renderer::Renderer, resource::Ref, util::mod_reexport,
+};
 
 mod_reexport!(builder);
 

@@ -10,7 +10,7 @@ use crate::{
     Result,
     gpu::Cycle,
     resource::{Ref, Resource},
-    resource_new,
+    util::resource_new,
 };
 
 use super::{buffer::BufferLocation, command_buffer::CommandBuffer, texture::TextureLocation};

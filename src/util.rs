@@ -2,22 +2,9 @@ use std::ffi::{CStr, c_char};
 
 use crate::{Result, error::Error};
 
-/// Analogous to C's `sizeof`. Can be used with a type or expression,
-/// delegating to [`size_of`] or [`size_of_val`] appropriately.
-#[macro_export]
-macro_rules! size_of {
-    ($t:ty) => {
-        ::core::mem::size_of::<$t>()
-    };
-    ($e:expr) => {
-        ::core::mem::size_of_val(&$e)
-    }
-}
-
 /// Defines a private submodule and publicly re-exports everything within.
 /// Use when you want to compartmentalize things in a module, but also have
 /// everything available at the module level.
-#[macro_export]
 macro_rules! mod_reexport {
     ($name:ident) => {
         mod $name;
@@ -25,10 +12,14 @@ macro_rules! mod_reexport {
     };
 }
 
+pub(crate) use crate::resource::{
+    resource_new, resource_new_impl, resource_new_no_drop, resource_new_tied,
+};
+pub(crate) use mod_reexport;
+
 /// Define an enum with two variants, `No` and `Yes`.
 ///
 /// Interconvertible with `bool` via `From`.
-#[macro_export]
 macro_rules! boolenum {
     ($(#[$meta:meta])* $name:ident) => {
         #[repr(u8)]
@@ -58,6 +49,8 @@ macro_rules! boolenum {
         }
     };
 }
+
+pub(crate) use boolenum;
 
 /// Implement bidirectional [`From`] for two enums using [`std::mem::transmute`].
 ///
@@ -91,7 +84,7 @@ macro_rules! impl_enum_transmute {
             }
 
             /// Convert this enum to its SDL equivalent.
-            /// This is the inverse of [`Self::from_sdl`], and is infallible, owing to [`Self`] being a subset
+            /// This is the inverse of [`Self::from_sdl_unchecked`], and is infallible, owing to [`Self`] being a subset
             /// of the enum it's wrapping.
             pub const fn to_sdl(self) -> $sdl {
                 unsafe { ::std::mem::transmute(self) }
@@ -117,7 +110,7 @@ macro_rules! impl_enum_transmute {
                 if value == $sdl::$invalid {
                     None
                 } else {
-                    Some(unsafe { ::std::mem::transmute(value) })
+                    Some(unsafe { Self::from_sdl_unchecked(value) })
                 }
             }
         }

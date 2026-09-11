@@ -1,7 +1,7 @@
 //! There are a LOT of boolenums in the GPU module.
 //! This is a place to aggregate them all, since some are reusable.
 
-use crate::boolenum;
+use crate::util::boolenum;
 
 boolenum!(
     /// Whether to cycle resources.

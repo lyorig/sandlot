@@ -7,7 +7,9 @@ use std::marker::PhantomData;
 
 use sdl3_sys::{properties::SDL_PropertiesID, render::*};
 
-use crate::{Result, gpu::*, renderer::Renderer, resource::Ref, resource_new, util::to_result};
+use crate::{
+    Result, gpu::*, renderer::Renderer, resource::Ref, util::resource_new, util::to_result,
+};
 
 /// Parameters for creating custom GPU render state.
 ///
