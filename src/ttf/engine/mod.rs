@@ -12,6 +12,7 @@
 
 use sdl3_ttf_sys::ttf::*;
 
+use crate::resource_new;
 use crate::util::impl_enum_transmute;
 use crate::{Result, error::Error, gpu::Device, mod_reexport, renderer::Renderer, resource::Ref};
 
@@ -29,7 +30,10 @@ pub enum Winding {
 
 impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding, INVALID);
 
-pub use crate::generated::{GpuEngine, GpuEngineHandle};
+resource_new!(
+    /// A text engine that draws text objects with the SDL GPU API.
+    TTF_TextEngine, GpuEngine, TTF_DestroyGPUTextEngine
+);
 
 impl GpuEngine {
     /// Create a text engine for drawing text with the SDL GPU API.
@@ -67,7 +71,10 @@ impl GpuEngineHandle {
     }
 }
 
-pub use crate::generated::{SurfaceEngine, SurfaceEngineHandle};
+resource_new!(
+    /// A text engine that draws text objects to an `SDL_Surface`.
+    TTF_TextEngine, SurfaceEngine, TTF_DestroySurfaceTextEngine
+);
 
 impl SurfaceEngine {
     /// Create a text engine for drawing text on SDL surfaces.
@@ -77,7 +84,12 @@ impl SurfaceEngine {
     }
 }
 
-pub use crate::generated::{RendererEngine, RendererEngineHandle};
+resource_new!(
+    /// A text engine that draws text objects with an SDL 2D renderer.
+    TTF_TextEngine,
+    RendererEngine,
+    TTF_DestroyRendererTextEngine
+);
 
 impl RendererEngine {
     /// Create a text engine for drawing text on an SDL renderer.

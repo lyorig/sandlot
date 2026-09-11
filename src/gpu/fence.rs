@@ -4,12 +4,14 @@
 
 use sdl3_sys::gpu::*;
 
-use crate::resource::Ref;
+use crate::{resource::Ref, resource_new_no_drop};
 
 use super::device::Device;
 
-pub use crate::generated::{Fence, FenceHandle};
-
+resource_new_no_drop!(
+    /// An opaque handle representing a fence.
+    SDL_GPUFence, Fence
+);
 impl Fence {
     /// Release a fence obtained from command-buffer submission.
     ///

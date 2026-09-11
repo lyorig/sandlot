@@ -24,7 +24,6 @@ pub mod display;
 pub mod error;
 pub mod event;
 pub mod fs;
-pub(crate) mod generated;
 pub mod gpu;
 pub mod init;
 pub mod keyboard;

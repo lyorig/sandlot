@@ -48,12 +48,16 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource},
+    resource_new,
     surface::Surface,
     ttf::{Font, FontHandle, RtStr},
     util::{impl_enum_transmute, opt2res, to_result},
 };
 
-pub use crate::generated::{Text, TextHandle};
+resource_new!(
+    /// Text created with `TTF_CreateText()`.
+    TTF_Text, Text, TTF_DestroyText
+);
 
 /// Text direction flags.
 ///

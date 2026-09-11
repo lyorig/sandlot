@@ -14,6 +14,7 @@ use crate::{
     properties::Properties,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
+    resource_new_no_drop,
 };
 
 use super::{
@@ -113,7 +114,11 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd> GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 
     }
 }
 
-pub use crate::generated::{GraphicsPipeline, GraphicsPipelineHandle};
+resource_new_no_drop!(
+    /// An opaque handle representing a graphics pipeline.
+    /// Used during render passes.
+    SDL_GPUGraphicsPipeline, GraphicsPipeline
+);
 impl GraphicsPipeline {
     /// Build a [`GraphicsPipeline`] with additional parameters not available in [`GraphicsPipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> GraphicsPipelineBuilder<'_> {

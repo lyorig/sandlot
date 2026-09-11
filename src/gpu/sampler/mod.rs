@@ -10,6 +10,7 @@ use crate::{
     mod_reexport,
     properties::Properties,
     resource::Ref,
+    resource_new_no_drop,
     util::impl_enum_transmute,
 };
 
@@ -145,7 +146,10 @@ impl SamplerCreateInfo {
     }
 }
 
-pub use crate::generated::{Sampler, SamplerHandle};
+resource_new_no_drop!(
+    /// An opaque handle representing a sampler.
+    SDL_GPUSampler, Sampler
+);
 impl Sampler {
     /// Build a [`Sampler`] with additional parameters not available in [`SamplerCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> SamplerBuilder<'_> {

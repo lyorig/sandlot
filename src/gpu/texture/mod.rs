@@ -11,8 +11,7 @@ use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, mod_reexport, properties::Properties, rect::Point, resource::Ref,
-    util::impl_enum_transmute,
+    Result, gpu::Cycle, mod_reexport, properties::Properties, rect::Point, resource::Ref, resource_new_no_drop, util::impl_enum_transmute,
 };
 
 use super::{
@@ -596,7 +595,10 @@ impl<'t> BlitRegion<'t> {
     }
 }
 
-pub use crate::generated::{GpuTexture as Texture, GpuTextureHandle as TextureHandle};
+resource_new_no_drop!(
+    /// An opaque handle representing a texture.
+    SDL_GPUTexture, Texture
+);
 impl Texture {
     /// Build a [`Texture`] with additional parameters not available in [`TextureCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> TextureBuilder<'_> {

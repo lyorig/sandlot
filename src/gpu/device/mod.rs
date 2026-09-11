@@ -30,6 +30,7 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     resource::Ref,
     util::impl_enum_transmute,
+    resource_new,
     util::to_result,
     window::Window,
 };
@@ -86,8 +87,10 @@ pub enum SwapchainComposition {
 impl_enum_transmute!(SDL_GPUPresentMode, PresentMode);
 impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 
-pub use crate::generated::{Device, DeviceHandle};
-
+resource_new!(
+    /// An opaque handle representing the SDL_GPU context.
+    SDL_GPUDevice, Device, SDL_DestroyGPUDevice
+);
 impl Device {
     /// Create a GPU device.
     ///
