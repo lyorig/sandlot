@@ -111,7 +111,7 @@ impl TextureHandle {
     ///
     /// # Remarks
     ///
-    /// The default texture scale mode is `SDL_SCALEMODE_LINEAR`.
+    /// The default texture scale mode is [`ScaleMode::Linear`].
     ///
     /// If the scale mode is not supported, the closest supported mode is
     /// chosen.
@@ -302,9 +302,13 @@ impl TextureHandle {
     /// [`SDL_GetTextureProperties`](https://wiki.libsdl.org/SDL3/SDL_GetTextureProperties).
     ///
     /// Covers the generic properties plus the D3D11, D3D12, OpenGL, Vulkan
-    /// and GPU backends. Not covered: the Metal and OpenGLES2 backends, the
-    /// plane-specific texture pointers, the OpenGL texture target, and
-    /// `SDL_PROP_TEXTURE_OPENGL_TEX_W_FLOAT`/`TEX_H_FLOAT`.
+    /// and GPU backends.
+    ///
+    /// Not covered:
+    /// - the Metal and OpenGLES2 backends
+    /// - plane-specific texture pointers
+    /// - the OpenGL texture target
+    /// - `SDL_PROP_TEXTURE_OPENGL_TEX_{W,H}_FLOAT`
     #[doc(alias = "SDL_GetTextureProperties")]
     pub fn properties(&self) -> TextureProperties<'_> {
         unsafe {
@@ -323,17 +327,8 @@ impl Texture {
     /// Unlike the window, renderer and GPU device builders, the renderer is
     /// a required parameter here, since `SDL_CreateTextureWithProperties`
     /// takes it directly.
-    ///
-    /// A single [`Properties`] can be shared between the window, renderer,
-    /// GPU device and texture builders, since their creation properties
-    /// (`SDL_PROP_WINDOW_CREATE_*`, `SDL_PROP_RENDERER_CREATE_*`,
-    /// `SDL_PROP_GPU_DEVICE_CREATE_*`, `SDL_PROP_TEXTURE_CREATE_*`) never
-    /// collide with each other.
-    pub fn builder<'a>(
-        renderer: Ref<'a, Renderer>,
-        props: Ref<'a, Properties>,
-    ) -> TextureBuilder<'a> {
-        TextureBuilder::new(renderer, props)
+    pub fn builder<'a>(props: Ref<'a, Properties>) -> TextureBuilder<'a> {
+        TextureBuilder::new(props)
     }
 
     /// Create a texture for a rendering context.

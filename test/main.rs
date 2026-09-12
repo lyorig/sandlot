@@ -44,11 +44,11 @@ fn main_init() -> Result {
         .window(wnd.as_ref())
         .build()?;
 
-    let tex = Texture::builder(rnd.as_ref(), props.as_ref())
+    let tex = Texture::builder(props.as_ref())
         .format(PixelFormat::Rgb24)
         .access(TextureAccess::Static)
         .size(Point::new(16, 16))
-        .build()?;
+        .build(rnd.as_ref())?;
 
     assert_eq!(tex.size(), Point::new(16.0, 16.0));
 

@@ -26,11 +26,11 @@ fn texture_builder() -> Result {
         .window(wnd.as_ref())
         .build()?;
 
-    let tex = Texture::builder(rnd.as_ref(), props.as_ref())
+    let tex = Texture::builder(props.as_ref())
         .format(PixelFormat::Rgb24)
         .access(TextureAccess::Static)
         .size(Point::new(16, 16))
-        .build()?;
+        .build(rnd.as_ref())?;
 
     assert_eq!(tex.size(), Point::new(16.0, 16.0));
 
@@ -52,11 +52,11 @@ fn texture_properties() -> Result {
         .window(wnd.as_ref())
         .build()?;
 
-    let tex = Texture::builder(rnd.as_ref(), props.as_ref())
+    let tex = Texture::builder(props.as_ref())
         .format(PixelFormat::Rgb24)
         .access(TextureAccess::Static)
         .size(Point::new(16, 16))
-        .build()?;
+        .build(rnd.as_ref())?;
 
     let tp = tex.properties();
     assert!(tp.format() == PixelFormat::Rgb24);
@@ -82,9 +82,9 @@ fn texture_build_cleanup() -> Result {
         .window(wnd.as_ref())
         .build()?;
 
-    let tex = Texture::builder(rnd.as_ref(), props.as_ref())
+    let tex = Texture::builder(props.as_ref())
         .size(Point::new(16, 16))
-        .build_cleanup()?;
+        .build_cleanup(rnd.as_ref())?;
 
     assert_eq!(tex.size(), Point::new(16.0, 16.0));
 

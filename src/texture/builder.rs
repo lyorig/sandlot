@@ -30,13 +30,12 @@ const CREATE_PROPERTIES: [*const c_char; 7] = [
 /// (D3D11, D3D12, Metal, OpenGL, OpenGLES2, Vulkan and GPU), as well as
 /// [`SDL_PROP_TEXTURE_CREATE_PALETTE_POINTER`], are not covered.
 pub struct TextureBuilder<'a> {
-    renderer: Ref<'a, Renderer>,
     inner: Ref<'a, Properties>,
 }
 
 impl<'a> TextureBuilder<'a> {
-    pub(super) fn new(renderer: Ref<'a, Renderer>, inner: Ref<'a, Properties>) -> Self {
-        Self { renderer, inner }
+    pub(super) fn new(inner: Ref<'a, Properties>) -> Self {
+        Self { inner }
     }
 
     /// A [`Colorspace`] value describing the texture colorspace. Defaults
@@ -116,18 +115,18 @@ impl<'a> TextureBuilder<'a> {
 
     /// Build the texture.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
-    pub fn build(&self) -> Result<Texture> {
+    pub fn build(&self, rnd: Ref<Renderer>) -> Result<Texture> {
         Texture::from_ptr(unsafe {
-            SDL_CreateTextureWithProperties(self.renderer.handle.as_ptr(), self.inner.id())
+            SDL_CreateTextureWithProperties(rnd.handle.as_ptr(), self.inner.id())
         })
     }
 
     /// Build the texture, and cleanup all properties.
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
-    pub fn build_cleanup(&self) -> Result<Texture> {
+    pub fn build_cleanup(&self, rnd: Ref<Renderer>) -> Result<Texture> {
         let res = Texture::from_ptr(unsafe {
-            SDL_CreateTextureWithProperties(self.renderer.handle.as_ptr(), self.inner.id())
+            SDL_CreateTextureWithProperties(rnd.handle.as_ptr(), self.inner.id())
         });
         Self::clear_from(self.inner);
         res
