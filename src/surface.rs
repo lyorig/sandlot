@@ -68,7 +68,7 @@ use crate::{
     pixels::{BlendMode, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
     resource::Ref,
-    resv2::resource_new,
+    resource::resource_new,
     traits,
     util::{opt2ptr, to_result},
 };

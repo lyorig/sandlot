@@ -54,10 +54,12 @@ use crate::{
     util::{impl_enum_transmute, opt2res, to_result},
 };
 
-resource_new!(
-    /// Text created with `TTF_CreateText()`.
-    TTF_Text, Text, TTF_DestroyText
-);
+resource_new! {
+   /// A text object to be drawn using a text engine.
+   pub struct Text<> : TTF_Text, ~TTF_DestroyText {
+       marker: PhantomData<()>,
+   }
+}
 
 /// Text direction flags.
 ///

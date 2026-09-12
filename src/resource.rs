@@ -121,133 +121,77 @@ impl<T: Resource> DerefMut for RefMut<'_, T> {
     }
 }
 
-macro_rules! resource_new_impl {
-    ($sdl:ident, $owned:ident) => {
-        paste::paste! {
-            #[derive(Clone, Copy)]
-            #[doc(alias = "" $sdl "")]
-            pub struct [<$owned Handle>] {
-                pub(crate) handle: std::ptr::NonNull<$sdl>,
-            }
-
-            impl [<$owned Handle>] {
-                pub(crate) fn from_ptr(handle: *mut $sdl) -> Option<Self> {
-                    std::ptr::NonNull::new(handle).map(|handle| Self { handle })
-                }
-
-                pub(crate) fn as_ptr(&self) -> *mut $sdl {
-                    self.handle.as_ptr()
-                }
-            }
-
-            impl $owned {
-                pub(crate) fn from_ptr(handle: *mut $sdl) -> $crate::Result<Self> {
-                    match std::ptr::NonNull::new(handle) {
-                        Some(handle) => Ok(Self {
-                            inner: [<$owned Handle>] { handle },
-                        }),
-                        None => Err($crate::error::Error::current()),
-                    }
-                }
-            }
-
-            impl std::ops::Deref for $owned {
-                type Target = [<$owned Handle>];
-                fn deref(&self) -> &Self::Target {
-                    &self.inner
-                }
-            }
-
-            impl std::ops::DerefMut for $owned {
-                fn deref_mut(&mut self) -> &mut Self::Target {
-                    &mut self.inner
-                }
-            }
-
-            impl $crate::resource::Handle for [<$owned Handle>] {
-                type Raw = *mut $sdl;
-                type Inner = ::std::ptr::NonNull<$sdl>;
-
-                fn as_raw(&self) -> Self::Raw {
-                    self.handle.as_ptr()
-                }
-
-                fn as_inner(&self) -> Self::Inner {
-                    self.handle
-                }
-            }
-
-            impl $crate::resource::Resource for $owned {
-                type Handle = [<$owned Handle>];
-
-                unsafe fn as_handle(&self) -> Self::Handle {
-                    self.inner
-                }
-            }
-        }
+/// Hack around `#[warn(unused_parens)]`.
+macro_rules! expand_parens {
+    () => {
+        ()
+    };
+    ($t:ty) => {
+        $t
+    };
+    ($($t:ty),+) => {
+        ($($t),*)
     };
 }
 
-macro_rules! resource_new_no_drop {
-    ($(#[$meta:meta])* $sdl:ident, $owned:ident) => {
-        paste::paste! {
-            $(#[$meta])*
-            ///
-            /// BEWARE: This struct has no automatic destructor, and must be manually dropped or otherwise consumed!
-            #[must_use = "This struct has to be manually dropped via an associated `drop()` method."]
-            #[doc(alias = "" $sdl "")]
-            pub struct $owned {
-                pub(crate) inner: [<$owned Handle>],
-            }
-
-            $crate::resource::resource_new_impl!($sdl, $owned);
-        }
-    };
-}
-
-/// Define a resource and implement shared traits and member functions.
+/// Define shared behavior for an owned SDL object.
+///
+/// # Example usage
+///
+/// You can either define a type with an explicit [`Drop`]:
+///
+/// ```
+/// use sdl3_sys::video::{SDL_DestroyWindow, SDL_Window};
+/// use crate::{init::{Ref, Video}, resource::resource_new};
+///
+/// resource_new! {
+///     pub struct Window<'ctx, 'vid> : SDL_Window, ~SDL_DestroyWindow {
+///         marker: PhantomData<(Ref<'vid, Video<'ctx>>)>,
+///     }
+/// }
+/// ```
+///
+/// or without (for example, if the type's destructor has multiple arguments)
+///
+/// ```
+/// use crate::{gpu::Device, resource::Ref};
+/// use sdl3_sys::gpu::SDL_GPUTexture;
+///
+/// resource_new! {
+///     pub struct Texture<'dev> : SDL_GPUTexture {
+///         marker: PhantomData<(Ref<'dev, Device>)>,
+///     }
+/// }
+/// ```
+///
+/// You do **not need to import [`PhantomData`]**. That's just an artistic
+/// decision to make the macro look as if you were writing a normal struct.
+///
+/// FIXME: Omit the `marker` field completely if no lifetimes are specified.
 macro_rules! resource_new {
-    ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident) => {
-        paste::paste! {
-            $(#[$meta])*
-            #[doc(alias = "" $sdl "")]
-            pub struct $owned {
-                pub(crate) inner: [<$owned Handle>],
-            }
+    (
+        $(#[$meta:meta])*
+        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
+            marker: PhantomData<($($t:ty),*)>,
         }
-
-        paste::paste! {
-            $crate::resource::resource_new_impl!($sdl, $owned);
-
-            impl Drop for $owned {
-                #[doc(alias = "" $sdl "")]
-                fn drop(&mut self) {
-                    unsafe { $dtor(self.inner.handle.as_ptr()) }
-                }
-            }
-        }
-    };
-}
-
-macro_rules! resource_new_tied {
-    ($(#[$meta:meta])* $sdl:ident, $owned:ident, $dtor:ident, $tied:ident) => {
-        paste::paste! {
+    ) => {
+        ::paste::paste! {
             $(#[$meta])*
-            #[doc(alias = "" $sdl "")]
-            pub struct $owned<'a> {
-                pub(crate) inner: [<$owned Handle>],
-                marker: PhantomData<&'a $tied>,
-            }
-
             #[derive(Clone, Copy)]
             #[doc(alias = "" $sdl "")]
-            pub struct [<$owned Handle>] {
-                pub(crate) handle: ::std::ptr::NonNull<$sdl>,
+            pub struct [<$owned Handle>]<$($lt),*> {
+                handle: ::std::ptr::NonNull<$sdl>,
+                marker: ::std::marker::PhantomData<$crate::resource::expand_parens!($($t),*)>
             }
 
-            impl [<$owned Handle>] {
+
+            $(#[$meta])*
+            impl<$($lt),*> [<$owned Handle>]<$($lt),*> {
                 pub(crate) fn from_ptr(handle: *mut $sdl) -> Option<Self> {
-                    std::ptr::NonNull::new(handle).map(|handle| Self { handle })
+                    ::std::ptr::NonNull::new(handle).map(|handle| Self {
+                        handle,
+                        marker: ::std::marker::PhantomData,
+                    })
                 }
 
                 /// Convenience method to directly access the underlying pointer.
@@ -256,32 +200,41 @@ macro_rules! resource_new_tied {
                 }
             }
 
-            impl<'a> $owned<'a> {
+            $(#[$meta])*
+            #[doc(alias = "" $sdl "")]
+            pub struct $owned<$($lt),*> {
+                inner: [<$owned Handle>]<$($lt),*>
+            }
+
+            impl<$($lt),*> $owned<$($lt),*> {
                 pub(crate) fn from_ptr(handle: *mut $sdl) -> $crate::Result<Self> {
-                    match std::ptr::NonNull::new(handle) {
+                    match ::std::ptr::NonNull::new(handle) {
                         Some(handle) => Ok(Self {
-                            inner: [<$owned Handle>] { handle },
-                            marker: PhantomData,
+                            inner: [<$owned Handle>] {
+                                handle,
+                                marker: ::std::marker::PhantomData,
+                            },
                         }),
                         None => Err($crate::error::Error::current()),
                     }
                 }
             }
 
-            impl std::ops::Deref for $owned<'_> {
-                type Target = [<$owned Handle>];
+            impl<$($lt),*> ::std::ops::Deref for $owned<$($lt),*> {
+                type Target = [<$owned Handle>]<$($lt),*>;
+
                 fn deref(&self) -> &Self::Target {
                     &self.inner
                 }
             }
 
-            impl std::ops::DerefMut for $owned<'_> {
+            impl<$($lt),*> ::std::ops::DerefMut for $owned<$($lt),*> {
                 fn deref_mut(&mut self) -> &mut Self::Target {
                     &mut self.inner
                 }
             }
 
-            impl $crate::resource::Handle for [<$owned Handle>] {
+            impl<$($lt),*> $crate::resource::Handle for [<$owned Handle>]<$($lt),*> {
                 type Raw = *mut $sdl;
                 type Inner = ::std::ptr::NonNull<$sdl>;
 
@@ -294,22 +247,38 @@ macro_rules! resource_new_tied {
                 }
             }
 
-            impl $crate::resource::Resource for $owned<'_> {
-                type Handle = [<$owned Handle>];
+            impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
+                type Handle = [<$owned Handle>]<$($lt),*>;
 
                 unsafe fn as_handle(&self) -> Self::Handle {
                     self.inner
                 }
             }
+        }
+    };
 
-            impl Drop for $owned<'_> {
+    (
+        $(#[$meta:meta])*
+        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty, ~$dtor:ident {
+            marker: PhantomData<($($t:ty),*)>,
+        }
+    ) => {
+        $crate::resource::resource_new! {
+            $(#[$meta])*
+            pub struct $owned<$($lt),*> : $sdl {
+                marker: PhantomData<($($t),*)>,
+            }
+        }
+
+        ::paste::paste! {
+            impl<$($lt),*> ::std::ops::Drop for $owned<$($lt),*> {
                 #[doc(alias = "" $dtor "")]
                 fn drop(&mut self) {
                     unsafe { $dtor(self.inner.handle.as_ptr()) }
                 }
             }
         }
-    };
+    }
 }
 
-pub(crate) use {resource_new, resource_new_impl, resource_new_no_drop, resource_new_tied};
+pub(crate) use {expand_parens, resource_new};

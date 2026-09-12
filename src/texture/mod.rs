@@ -41,7 +41,7 @@ use crate::{
     rect::{PointF32, PointI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resv2::resource_new,
+    resource::resource_new,
     surface::Surface,
     traits,
     util::impl_enum_transmute,

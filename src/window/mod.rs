@@ -114,7 +114,7 @@ use crate::{
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resv2::resource_new,
+    resource::resource_new,
     surface::Surface,
     util::impl_enum_transmute,
     util::mod_reexport,

@@ -11,7 +11,7 @@ use crate::{
     Result,
     gpu::{ColorTargetDescription, VertexAttribute, VertexBufferDescription},
     properties::Properties,
-    resource::resource_new_no_drop,
+    resource::resource_new,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
     util::mod_reexport,
@@ -114,11 +114,13 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd> GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 
     }
 }
 
-resource_new_no_drop!(
+resource_new! {
     /// An opaque handle representing a graphics pipeline.
     /// Used during render passes.
-    SDL_GPUGraphicsPipeline, GraphicsPipeline
-);
+    pub struct GraphicsPipeline<> : SDL_GPUGraphicsPipeline {
+        marker: PhantomData<()>,
+    }
+}
 impl GraphicsPipeline {
     /// Build a [`GraphicsPipeline`] with additional parameters not available in [`GraphicsPipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> GraphicsPipelineBuilder<'_> {

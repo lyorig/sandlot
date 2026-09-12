@@ -9,7 +9,7 @@ use crate::{
     gpu::{EnableAnisotropy, EnableCompare},
     properties::Properties,
     resource::Ref,
-    resource::resource_new_no_drop,
+    resource::resource_new,
     util::impl_enum_transmute,
     util::mod_reexport,
 };
@@ -146,10 +146,12 @@ impl SamplerCreateInfo {
     }
 }
 
-resource_new_no_drop!(
+resource_new! {
     /// An opaque handle representing a sampler.
-    SDL_GPUSampler, Sampler
-);
+    pub struct Sampler<> : SDL_GPUSampler {
+        marker: PhantomData<()>,
+    }
+}
 impl Sampler {
     /// Build a [`Sampler`] with additional parameters not available in [`SamplerCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> SamplerBuilder<'_> {

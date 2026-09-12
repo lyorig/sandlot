@@ -12,6 +12,7 @@
 
 use sdl3_ttf_sys::ttf::*;
 
+use crate::properties::Properties;
 use crate::resource::resource_new;
 use crate::util::impl_enum_transmute;
 use crate::{
@@ -34,7 +35,9 @@ impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding, INVALID);
 
 resource_new!(
     /// A text engine that draws text objects with the SDL GPU API.
-    TTF_TextEngine, GpuEngine, TTF_DestroyGPUTextEngine
+    pub struct GpuEngine<> : TTF_TextEngine, ~TTF_DestroyGPUTextEngine {
+        marker: PhantomData<()>,
+    }
 );
 
 impl GpuEngine {
@@ -47,7 +50,7 @@ impl GpuEngine {
     }
 
     /// Bind the builder to an existing property group.
-    pub fn builder(props: Ref<crate::properties::Properties>) -> GpuEngineBuilder {
+    pub fn builder(props: Ref<Properties>) -> GpuEngineBuilder {
         GpuEngineBuilder::new(props)
     }
 }
@@ -75,7 +78,9 @@ impl GpuEngineHandle {
 
 resource_new!(
     /// A text engine that draws text objects to an `SDL_Surface`.
-    TTF_TextEngine, SurfaceEngine, TTF_DestroySurfaceTextEngine
+    pub struct SurfaceEngine<> : TTF_TextEngine, ~TTF_DestroySurfaceTextEngine {
+        marker: PhantomData<()>,
+    }
 );
 
 impl SurfaceEngine {
@@ -88,9 +93,9 @@ impl SurfaceEngine {
 
 resource_new!(
     /// A text engine that draws text objects with an SDL 2D renderer.
-    TTF_TextEngine,
-    RendererEngine,
-    TTF_DestroyRendererTextEngine
+    pub struct RendererEngine<> : TTF_TextEngine, ~TTF_DestroyRendererTextEngine {
+        marker: PhantomData<()>,
+    }
 );
 
 impl RendererEngine {
@@ -103,7 +108,7 @@ impl RendererEngine {
     }
 
     /// Bind the builder to an existing property group.
-    pub fn builder(props: Ref<crate::properties::Properties>) -> RendererEngineBuilder {
+    pub fn builder(props: Ref<Properties>) -> RendererEngineBuilder {
         RendererEngineBuilder::new(props)
     }
 }

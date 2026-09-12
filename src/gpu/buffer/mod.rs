@@ -11,7 +11,7 @@ use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, properties::Properties, resource::Ref, resource::resource_new_no_drop,
+    Result, gpu::Cycle, properties::Properties, resource::Ref, resource::resource_new,
     util::impl_enum_transmute, util::mod_reexport,
 };
 
@@ -184,11 +184,13 @@ impl<'b> StorageBufferReadWriteBinding<'b> {
     }
 }
 
-resource_new_no_drop!(
-    /// Represents a GPU buffer.
-    /// Used for vertices, indices, indirect draw commands, and general compute data.
-    SDL_GPUBuffer, Buffer
-);
+resource_new! {
+   /// Represents a GPU buffer.
+   /// Used for vertices, indices, indirect draw commands, and general compute data.
+   pub struct Buffer<> : SDL_GPUBuffer {
+       marker: PhantomData<()>,
+   }
+}
 
 impl Buffer {
     /// Build a [`Buffer`] with additional parameters not available in [`BufferCreateInfo`].

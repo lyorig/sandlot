@@ -27,11 +27,13 @@ use super::{
 #[expect(unused_imports)]
 use super::texture::TextureUsageFlags;
 
-resource_new!(
+resource_new! {
     /// An opaque handle representing a compute pass.
     /// Transient; invalid once the pass ends.
-    SDL_GPUComputePass, ComputePass, SDL_EndGPUComputePass
-);
+    pub struct ComputePass<> : SDL_GPUComputePass, ~SDL_EndGPUComputePass {
+        marker: PhantomData<()>,
+    }
+}
 
 /// Parameters of an indirect dispatch command.
 ///

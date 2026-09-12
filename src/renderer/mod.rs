@@ -81,7 +81,7 @@ use crate::{
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectF32, RectI32},
     resource::Ref,
-    resv2::resource_new,
+    resource::resource_new,
     surface::Surface,
     texture::{Texture, TextureHandle},
     traits,

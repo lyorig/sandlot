@@ -7,8 +7,7 @@ use std::{ffi::CStr, marker::PhantomData};
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, properties::Properties, resource::Ref, resource::resource_new_no_drop,
-    util::mod_reexport,
+    Result, properties::Properties, resource::Ref, resource::resource_new, util::mod_reexport,
 };
 
 use super::{ShaderFormat, device::Device};
@@ -95,11 +94,13 @@ impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
     }
 }
 
-resource_new_no_drop!(
+resource_new! {
     /// An opaque handle representing a compute pipeline.
     /// Used during compute passes.
-    SDL_GPUComputePipeline, ComputePipeline
-);
+    pub struct ComputePipeline<> : SDL_GPUComputePipeline {
+        marker: PhantomData<()>,
+    }
+}
 impl ComputePipeline {
     /// Build a [`ComputePipeline`] with additional parameters not available in [`ComputePipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ComputePipelineBuilder<'_> {

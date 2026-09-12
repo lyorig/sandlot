@@ -87,10 +87,12 @@ pub enum SwapchainComposition {
 impl_enum_transmute!(SDL_GPUPresentMode, PresentMode);
 impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 
-resource_new!(
+resource_new! {
     /// An opaque handle representing the SDL_GPU context.
-    SDL_GPUDevice, Device, SDL_DestroyGPUDevice
-);
+    pub struct Device<> : SDL_GPUDevice, ~SDL_DestroyGPUDevice {
+        marker: PhantomData<()>,
+    }
+}
 impl Device {
     /// Create a GPU device.
     ///

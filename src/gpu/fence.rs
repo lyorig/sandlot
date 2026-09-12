@@ -4,14 +4,16 @@
 
 use sdl3_sys::gpu::*;
 
-use crate::{resource::Ref, resource::resource_new_no_drop};
+use crate::{resource::Ref, resource::resource_new};
 
 use super::device::Device;
 
-resource_new_no_drop!(
+resource_new! {
     /// An opaque handle representing a fence.
-    SDL_GPUFence, Fence
-);
+    pub struct Fence<> : SDL_GPUFence {
+        marker: PhantomData<()>,
+    }
+}
 impl Fence {
     /// Release a fence obtained from command-buffer submission.
     ///

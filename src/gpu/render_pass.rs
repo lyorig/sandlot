@@ -237,11 +237,13 @@ impl IndirectDrawCommand {
     }
 }
 
-resource_new!(
+resource_new! {
     /// An opaque handle representing a render pass.
     /// Transient; invalid once the pass ends.
-    SDL_GPURenderPass, RenderPass, SDL_EndGPURenderPass
-);
+    pub struct RenderPass<> : SDL_GPURenderPass, ~SDL_EndGPURenderPass {
+        marker: PhantomData<()>,
+    }
+}
 
 /// Parameters of an indirect indexed draw command.
 ///

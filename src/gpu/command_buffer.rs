@@ -14,7 +14,7 @@
 //! - [x] SDL_PushGPUFragmentUniformData
 //! - [x] SDL_PushGPUVertexUniformData
 
-use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, ptr::NonNull};
+use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit};
 
 use sdl3_sys::{gpu::*, surface::SDL_FlipMode};
 
@@ -22,7 +22,7 @@ use crate::{
     Result,
     color::RgbaF32,
     gpu::Cycle,
-    resource::resource_new_no_drop,
+    resource::resource_new,
     resource::{Ref, Resource},
     util::impl_enum_transmute,
     util::{opt2ptr_mut, to_result},
@@ -40,9 +40,7 @@ use super::{
 /// Converts a raw swapchain texture pointer into a reference.
 /// A null pointer (e.g. too many frames in flight) yields `None`.
 fn swapchain_texture<'a>(ptr: *mut SDL_GPUTexture) -> Option<Ref<'a, Texture>> {
-    let handle = NonNull::new(ptr)?;
-    let inner = TextureHandle { handle };
-    Some(unsafe { Ref::from_handle(inner) })
+    TextureHandle::from_ptr(ptr).map(|handle| unsafe { Ref::from_handle(handle) })
 }
 
 /// The flip applied to a source region during a blit.
@@ -106,11 +104,13 @@ impl<'s, 'd> BlitInfo<'s, 'd> {
     }
 }
 
-resource_new_no_drop!(
+resource_new! {
     /// An opaque handle representing a command buffer.
     /// Most state is managed via command buffers, and is local to each one.
-    SDL_GPUCommandBuffer, CommandBuffer
-);
+    pub struct CommandBuffer<> : SDL_GPUCommandBuffer {
+        marker: PhantomData<()>,
+    }
+}
 impl CommandBuffer {
     /// Acquire a command buffer from a GPU device.
     ///

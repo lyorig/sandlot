@@ -1,20 +1,22 @@
-use std::{ffi::CStr, marker::PhantomData, ptr::NonNull};
+use std::ffi::CStr;
 
 use sdl3_ttf_sys::ttf::*;
 
 use crate::{
     Result,
     color::RgbaU8,
+    resource::resource_new,
     surface::Surface,
     ttf::{Context, RtStr},
     util::c_ptr_to_str,
 };
 
-crate::resource::resource_new_tied!(
-    /// The internal structure containing font information.
-    /// Opaque data.
-    TTF_Font, Font, TTF_CloseFont, Context
-);
+resource_new! {
+    /// A font loaded from a TTF file.
+    pub struct Font<'ttf> : TTF_Font, ~TTF_CloseFont {
+        marker: PhantomData<(&'ttf Context)>,
+    }
+}
 
 impl Clone for Font<'_> {
     /// Create a copy of an existing font.
@@ -26,17 +28,13 @@ impl Clone for Font<'_> {
     #[doc(alias = "TTF_CopyFont")]
     fn clone(&self) -> Self {
         let ptr = unsafe { TTF_CopyFont(self.handle.as_ptr()) };
-        let handle = unsafe { NonNull::new_unchecked(ptr) };
-        let inner = FontHandle { handle };
+        let inner = FontHandle::from_ptr(ptr).expect("A valid font should be copyable");
 
-        Self {
-            inner,
-            marker: PhantomData,
-        }
+        Self { inner }
     }
 }
 
-impl FontHandle {
+impl FontHandle<'_> {
     /// Render a single UNICODE codepoint at high quality to a new ARGB
     /// surface.
     ///
