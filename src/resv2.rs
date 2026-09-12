@@ -42,6 +42,8 @@ pub(crate) use expand_parens;
 ///     }
 /// }
 /// ```
+///
+/// FIXME: Omit the `marker` field completely if no lifetimes are specified.
 macro_rules! resource_new {
     (
         $(#[$meta:meta])*

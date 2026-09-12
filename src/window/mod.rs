@@ -114,7 +114,7 @@ use crate::{
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::Ref,
-    resource::resource_new,
+    resv2::resource_new,
     surface::Surface,
     util::impl_enum_transmute,
     util::mod_reexport,
@@ -266,10 +266,12 @@ impl WindowId {
     }
 }
 
-resource_new!(
-    /// The struct used as an opaque handle to a window.
-    SDL_Window, Window, SDL_DestroyWindow
-);
+resource_new! {
+    /// Represents an OS window.
+    pub struct Window<> : SDL_Window, ~SDL_DestroyWindow {
+        marker: PhantomData<()>,
+    }
+}
 
 /// Get the number of video drivers compiled into SDL.
 #[doc(alias = "SDL_GetNumVideoDrivers")]
@@ -1522,7 +1524,10 @@ impl Window {
     #[doc(alias = "SDL_GetWindowFromID")]
     pub unsafe fn from_id<'a>(id: WindowId) -> Option<Ref<'a, Window>> {
         NonNull::new(unsafe { SDL_GetWindowFromID(id.as_sdl()) }).map(|handle| {
-            let handle = WindowHandle { handle };
+            let handle = WindowHandle {
+                handle,
+                marker: std::marker::PhantomData,
+            };
             unsafe { Ref::from_handle(handle) }
         })
     }
