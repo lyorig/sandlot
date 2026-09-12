@@ -67,14 +67,15 @@ use crate::{
     color::{RgbU8, RgbaF32, RgbaU8},
     pixels::{BlendMode, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
-    resource::{Ref, resource_new},
+    resource::Ref,
+    resv2::resource_new,
     traits,
     util::{opt2ptr, to_result},
 };
 
 use sdl3_sys::surface::*;
 
-resource_new!(
+resource_new! {
     /// A collection of pixels used in software blitting.
     ///
     /// # Remarks
@@ -92,8 +93,10 @@ resource_new!(
     /// e.g. a 32x32 surface in NV12 format with a pitch of 32 would consist of 32x32 bytes of Y plane followed by 32x16 bytes of UV plane.
     ///
     /// When a surface holds MJPG format data, pixels points at the compressed JPEG image and pitch is the length of that data.
-    SDL_Surface, Surface, SDL_DestroySurface
-);
+    pub struct Surface<> : SDL_Surface, ~SDL_DestroySurface {
+        marker: PhantomData<()>,
+    }
+}
 
 impl SurfaceHandle {
     /// Get the size of the surface.

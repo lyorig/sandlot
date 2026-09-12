@@ -1,5 +1,8 @@
 /// Hack around `#[warn(unused_parens)]`.
 macro_rules! expand_parens {
+    () => {
+        ()
+    };
     ($t:ty) => {
         $t
     };
@@ -8,19 +11,51 @@ macro_rules! expand_parens {
     };
 }
 
+pub(crate) use expand_parens;
+
+/// Define shared behavior for an owned SDL object.
+///
+/// # Example usage
+///
+/// You can either define a type with an explicit [`Drop`]:
+///
+/// ```
+/// use sdl3_sys::video::{SDL_DestroyWindow, SDL_Window};
+/// use crate::{init::{Ref, Video}, resv2::resource_new};
+///
+/// resource_new! {
+///     pub struct Window<'ctx, 'vid> : SDL_Window, ~SDL_DestroyWindow {
+///         marker: PhantomData<(Ref<'vid, Video<'ctx>>)>,
+///     }
+/// }
+/// ```
+///
+/// or without (for example, if the type's destructor has multiple arguments)
+///
+/// ```
+/// use crate::{gpu::Device, resource::Ref};
+/// use sdl3_sys::gpu::SDL_GPUTexture;
+///
+/// resource_new! {
+///     pub struct Texture<'dev> : SDL_GPUTexture {
+///         marker: PhantomData<(Ref<'dev, Device>)>,
+///     }
+/// }
+/// ```
 macro_rules! resource_new {
     (
         $(#[$meta:meta])*
-        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty, $dtor:ty {
+        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
             marker: PhantomData<($($t:ty),*)>,
         }
     ) => {
         ::paste::paste! {
             $(#[$meta])*
             #[derive(Clone, Copy)]
+            #[doc(alias = "" $sdl "")]
             pub struct [<$owned Handle>]<$($lt),*> {
                 handle: ::std::ptr::NonNull<$sdl>,
-                marker: ::std::marker::PhantomData<expand_parens!($($t),*)>
+                marker: ::std::marker::PhantomData<$crate::resv2::expand_parens!($($t),*)>
             }
 
 
@@ -40,7 +75,7 @@ macro_rules! resource_new {
             }
 
             $(#[$meta])*
-            /// TODO: Add doc alias.
+            #[doc(alias = "" $sdl "")]
             pub struct $owned<$($lt),*> {
                 pub(crate) inner: [<$owned Handle>]<$($lt),*>
             }
@@ -93,19 +128,31 @@ macro_rules! resource_new {
                     self.inner
                 }
             }
+        }
+    };
 
+    (
+        $(#[$meta:meta])*
+        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty, ~$dtor:ident {
+            marker: PhantomData<($($t:ty),*)>,
+        }
+    ) => {
+        crate::resv2::resource_new! {
+            $(#[$meta])*
+            pub struct $owned<$($lt),*> : $sdl {
+                marker: PhantomData<($($t),*)>,
+            }
+        }
+
+        ::paste::paste! {
             impl<$($lt),*> ::std::ops::Drop for $owned<$($lt),*> {
-                /// TODO: Add doc alias.
+                #[doc(alias = "" $dtor "")]
                 fn drop(&mut self) {
                     unsafe { $dtor(self.inner.handle.as_ptr()) }
                 }
             }
         }
-    };
-}
-
-resource_new! {
-    pub struct Test<'ctx, 'vid> : sdl3_sys::video::SDL_Window, sdl3_sys::video::SDL_DestroyWindow {
-        marker: PhantomData<(crate::init::Ref<'vid, crate::init::Video<'ctx>>)>,
     }
 }
+
+pub(crate) use resource_new;
