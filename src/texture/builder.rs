@@ -115,10 +115,10 @@ impl<'a> TextureBuilder<'a> {
 
     /// Build the texture.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
-    pub fn build<'rnd, 'ctx, 'vid, 'wnd>(
+    pub fn build<'ctx, 'vid, 'wnd, 'rnd>(
         &self,
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
-    ) -> Result<Texture<'rnd, 'ctx, 'vid, 'wnd>> {
+    ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
         Texture::from_ptr(unsafe {
             SDL_CreateTextureWithProperties(rnd.handle.as_ptr(), self.inner.id())
         })
@@ -127,10 +127,10 @@ impl<'a> TextureBuilder<'a> {
     /// Build the texture, and cleanup all properties.
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
-    pub fn build_cleanup<'rnd, 'ctx, 'vid, 'wnd>(
+    pub fn build_cleanup<'ctx, 'vid, 'wnd, 'rnd>(
         &self,
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
-    ) -> Result<Texture<'rnd, 'ctx, 'vid, 'wnd>> {
+    ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
         let res = Texture::from_ptr(unsafe {
             SDL_CreateTextureWithProperties(rnd.handle.as_ptr(), self.inner.id())
         });

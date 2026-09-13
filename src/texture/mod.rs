@@ -68,7 +68,7 @@ impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 
 resource_new! {
     /// An efficient driver-specific representation of pixel data.
-    pub struct Texture<'rnd, 'ctx, 'vid, 'wnd> : SDL_Texture {
+    pub struct Texture<'ctx, 'vid, 'wnd, 'rnd> : SDL_Texture {
         marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 
@@ -76,7 +76,7 @@ resource_new! {
     ~SDL_DestroyTexture
 }
 
-impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {
+impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// Get the size of a texture, as floating point values.
     #[doc(alias = "SDL_GetTextureSize")]
     pub fn size(&self) -> PointF32 {
@@ -299,7 +299,7 @@ impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     }
 }
 
-impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {
+impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// Get the properties associated with a texture.
     ///
     /// Read-only properties of this texture, as documented by
@@ -325,7 +325,7 @@ impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {
     }
 }
 
-impl<'rnd, 'ctx, 'vid, 'wnd> Texture<'rnd, 'ctx, 'vid, 'wnd> {
+impl<'ctx, 'vid, 'wnd, 'rnd> Texture<'ctx, 'vid, 'wnd, 'rnd> {
     /// Bind the builder to a renderer and an existing property group.
     ///
     /// Unlike the window, renderer and GPU device builders, the renderer is

@@ -157,7 +157,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// The caller must only use the returned reference within the lifetime
     /// of the backing texture.
     #[doc(alias = "SDL_GetRenderTarget")]
-    pub unsafe fn target<'a>(&self) -> Option<Ref<'a, Texture<'_, 'ctx, 'vid, 'wnd>>> {
+    pub unsafe fn target<'a>(&self) -> Option<Ref<'a, Texture<'ctx, 'vid, 'wnd, '_>>> {
         TextureHandle::from_ptr(unsafe { SDL_GetRenderTarget(self.handle.as_ptr()) })
             .map(|h| unsafe { Ref::from_handle(h) })
     }
@@ -810,8 +810,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// of the backing texture.
     pub unsafe fn xchg_target<'a>(
         &self,
-        tgt: Ref<'_, Texture<'_, 'ctx, 'vid, 'wnd>>,
-    ) -> Result<Option<Ref<'a, Texture<'_, 'ctx, 'vid, 'wnd>>>> {
+        tgt: Ref<'a, Texture<'ctx, 'vid, 'wnd, '_>>,
+    ) -> Result<Option<Ref<'a, Texture<'ctx, 'vid, 'wnd, '_>>>> {
         let old = unsafe { self.target() };
         self.set_target(tgt)?;
         Ok(old)
