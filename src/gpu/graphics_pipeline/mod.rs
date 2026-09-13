@@ -86,8 +86,8 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>
     /// * `target_info` specifies render-target formats and blend modes.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        vertex_shader: Ref<'vs, Shader>,
-        fragment_shader: Ref<'fs, Shader>,
+        vertex_shader: Ref<'vs, Shader<'ctx, 'vid, 'dev>>,
+        fragment_shader: Ref<'fs, Shader<'ctx, 'vid, 'dev>>,
         vertex_input_state: VertexInputState<'vbd, 'va>,
         primitive_type: PrimitiveType,
         rasterizer_state: RasterizerState,

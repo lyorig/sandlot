@@ -142,7 +142,11 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// supplies consecutive slots from there. Each texture must have been
     /// created with [`crate::gpu::texture::TextureUsageFlags::COMPUTE_STORAGE_READ`].
     #[doc(alias = "SDL_BindGPUComputeStorageTextures")]
-    pub fn bind_storage_textures(&self, first_slot: u32, textures: &[Ref<Texture>]) {
+    pub fn bind_storage_textures(
+        &self,
+        first_slot: u32,
+        textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
+    ) {
         unsafe {
             SDL_BindGPUComputeStorageTextures(
                 self.handle.as_ptr(),

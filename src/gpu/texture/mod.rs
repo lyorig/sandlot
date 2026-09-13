@@ -524,7 +524,10 @@ pub struct TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev>(
 
 impl<'t, 's, 'ctx, 'vid, 'dev> TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev> {
     /// Bind `texture` to `sampler`.
-    pub fn new(texture: Ref<'t, Texture>, sampler: Ref<'s, Sampler>) -> Self {
+    pub fn new(
+        texture: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
+        sampler: Ref<'s, Sampler<'ctx, 'vid, 'dev>>,
+    ) -> Self {
         Self(
             SDL_GPUTextureSamplerBinding {
                 texture: texture.handle.as_ptr(),

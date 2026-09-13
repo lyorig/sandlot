@@ -265,7 +265,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     ///
     /// This operation must be recorded outside any render, compute, or copy pass.
     #[doc(alias = "SDL_GenerateMipmapsForGPUTexture")]
-    pub fn generate_mipmaps(&self, texture: Ref<Texture>) {
+    pub fn generate_mipmaps(&self, texture: Ref<Texture<'ctx, 'vid, 'dev>>) {
         unsafe { SDL_GenerateMipmapsForGPUTexture(self.handle.as_ptr(), texture.handle.as_ptr()) }
     }
 

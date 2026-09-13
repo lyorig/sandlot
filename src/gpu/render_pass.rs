@@ -169,7 +169,7 @@ impl<'t, 'ctx, 'vid, 'dev> DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev> {
     /// Describe depth/stencil clear, load/store, cycling, mip-level, and layer
     /// behavior.
     pub fn new(
-        tex: Ref<'t, Texture>,
+        tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
         clear_depth: f32,
         (load_op, store_op): (LoadOp, StoreOp),
         (stencil_load_op, stencil_store_op): (LoadOp, StoreOp),
@@ -423,7 +423,11 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind graphics-storage textures to consecutive vertex-shader slots.
     /// Textures must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUVertexStorageTextures")]
-    pub fn bind_vertex_storage_textures(&self, first_slot: u32, textures: &[Ref<Texture>]) {
+    pub fn bind_vertex_storage_textures(
+        &self,
+        first_slot: u32,
+        textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
+    ) {
         unsafe {
             SDL_BindGPUVertexStorageTextures(
                 self.handle.as_ptr(),
@@ -465,7 +469,11 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind graphics-storage textures to consecutive fragment-shader slots.
     /// Textures must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUFragmentStorageTextures")]
-    pub fn bind_fragment_storage_textures(&self, first_slot: u32, textures: &[Ref<Texture>]) {
+    pub fn bind_fragment_storage_textures(
+        &self,
+        first_slot: u32,
+        textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
+    ) {
         unsafe {
             SDL_BindGPUFragmentStorageTextures(
                 self.handle.as_ptr(),
