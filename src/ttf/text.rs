@@ -33,7 +33,7 @@
 //! - [x] TTF_SetTextWrapWidth
 //! - [x] TTF_TextWrapWhitespaceVisible
 //! - [x] TTF_UpdateText
-//! - [ ] TTF_SetTextEngine *not implemented at the moment*
+//! - [x] TTF_SetTextEngine
 //! - [x] TTF_GetTextEngine
 
 use std::{mem::MaybeUninit, ptr::NonNull};
@@ -47,8 +47,7 @@ use crate::{
     error::Error,
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
-    resource::Ref,
-    resource::resource_new,
+    resource::{Handle, Ref, Resource, resource_new},
     surface::Surface,
     ttf::{Font, FontHandle, RtStr},
     util::{impl_enum_transmute, opt2res, to_result},
@@ -555,6 +554,21 @@ impl TextHandle {
     #[doc(alias = "TTF_DrawRendererText")]
     pub fn draw_to_renderer(&self, pos: PointF32) -> Result<()> {
         to_result(unsafe { TTF_DrawRendererText(self.as_ptr(), pos.x, pos.y) })
+    }
+
+    /// Set the text engine used by this text object.
+    ///
+    /// # Remarks
+    ///
+    /// This function may cause the internal text representation to be rebuilt.
+    #[doc(alias = "TTF_SetTextEngine")]
+    pub fn set_engine<'this, 'eng, H, R>(&'this self, engine: Ref<'eng, R>) -> Result<()>
+    where
+        'eng: 'this,
+        H: Handle<Raw = *mut TTF_TextEngine>,
+        R: Resource<Handle = H>,
+    {
+        to_result(unsafe { TTF_SetTextEngine(self.as_ptr(), engine.as_raw()) })
     }
 
     /// # Safety

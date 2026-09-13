@@ -9,10 +9,23 @@ pub trait Handle: Copy {
 
     /// The actual type contained within the handle, i.e. `NonZero<SDL_Surface>`.
     type Inner: Copy;
+
+    fn as_raw(self) -> Self::Raw;
+    fn as_inner(self) -> Self::Inner;
 }
 
 pub trait Resource: Sized {
     type Handle: Handle;
+
+    fn as_handle(&self) -> Self::Handle;
+
+    fn as_ref(&self) -> Ref<'_, Self> {
+        unsafe { Ref::from_handle(self.as_handle()) }
+    }
+
+    fn as_mut(&mut self) -> RefMut<'_, Self> {
+        unsafe { RefMut::from_handle(self.as_handle()) }
+    }
 }
 
 pub struct Ref<'a, T: Resource> {
@@ -220,10 +233,22 @@ macro_rules! resource_new {
             impl<$($lt),*> $crate::resource::Handle for [<$owned Handle>]<$($lt),*> {
                 type Raw = *mut $sdl;
                 type Inner = ::std::ptr::NonNull<$sdl>;
+
+                fn as_raw(self) -> Self::Raw {
+                    self.handle.as_ptr()
+                }
+
+                fn as_inner(self) -> Self::Inner {
+                    self.handle
+                }
             }
 
             impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
                 type Handle = [<$owned Handle>]<$($lt),*>;
+
+                fn as_handle(&self) -> Self::Handle {
+                    self.inner
+                }
             }
         }
     };

@@ -1377,7 +1377,12 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// [`Window::with_renderer`] instead of this function, to avoid window
     /// flicker.
     #[doc(alias = "SDL_CreateWindow")]
-    pub fn new(title: &CStr, size: PointI32, flags: WindowFlags) -> Result<Self> {
+    pub fn new(
+        _vid: init::Ref<'vid, init::Video<'ctx>>,
+        title: &CStr,
+        size: PointI32,
+        flags: WindowFlags,
+    ) -> Result<Self> {
         Self::from_ptr(unsafe { SDL_CreateWindow(title.as_ptr(), size.x, size.y, flags.into()) })
     }
 

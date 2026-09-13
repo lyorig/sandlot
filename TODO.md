@@ -1,4 +1,5 @@
 # Sandlot wishlist
 
 - Pass for `Copy` types with methods which unnnecessarily take `&(mut) self` instead of just `(mut) self`
-- `TextureBuilder`: take `Renderer` at build timee
+- Rename pass: `WindowId` -> `window::Id` etc.
+- `Resource` trait (shadowed by eponymous methods)

@@ -278,11 +278,11 @@ impl Properties {
     }
 
     pub fn as_ref(&self) -> Ref<'_, Properties> {
-        unsafe { Ref::from_handle(self.inner) }
+        Resource::as_ref(self)
     }
 
     pub fn as_mut(&mut self) -> RefMut<'_, Properties> {
-        unsafe { RefMut::from_handle(self.inner) }
+        Resource::as_mut(self)
     }
 }
 
@@ -302,10 +302,22 @@ impl std::ops::DerefMut for Properties {
 impl Handle for PropertiesHandle {
     type Raw = u32;
     type Inner = NonZero<Self::Raw>;
+
+    fn as_raw(self) -> Self::Raw {
+        self.handle.get()
+    }
+
+    fn as_inner(self) -> Self::Inner {
+        self.handle
+    }
 }
 
 impl Resource for Properties {
     type Handle = PropertiesHandle;
+
+    fn as_handle(&self) -> PropertiesHandle {
+        self.inner
+    }
 }
 
 impl Drop for Properties {

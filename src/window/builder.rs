@@ -255,7 +255,7 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
     }
 
     /// Build the window, and cleanup all properties.
-    /// See the [crate::properties] module docs for more info.
+    /// See the [`crate::properties`] module docs for more info.
     #[doc(alias = "SDL_CreateWindowWithProperties")]
     pub fn build_cleanup<'ctx, 'vid>(
         &self,
