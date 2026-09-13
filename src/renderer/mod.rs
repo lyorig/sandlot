@@ -121,7 +121,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// GPU-renderer backends. Not covered: the Metal backend
     /// (`SDL_PROP_RENDERER_METAL_*`), which sdl3-sys does not expose.
     #[doc(alias = "SDL_GetRendererProperties")]
-    pub fn properties(&self) -> RendererProperties<'_, 'wnd, 'ctx, 'vid> {
+    pub fn properties(&self) -> RendererProperties<'_, 'ctx, 'vid, 'wnd> {
         unsafe {
             let id = SDL_GetRendererProperties(self.handle.as_ptr());
             let handle = PropertiesHandle::from_id(id).unwrap_unchecked();

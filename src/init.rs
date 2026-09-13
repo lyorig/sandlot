@@ -347,16 +347,13 @@ impl<'ctx> VideoHandle<'ctx> {
 
     /// Get a list of valid windows.
     #[doc(alias = "SDL_GetWindows")]
-    pub fn windows(&self) -> Result<Box<[WindowHandle<'ctx, '_>]>> {
+    pub fn windows<'a>(&self) -> Result<Box<[resource::Ref<'a, Window<'ctx, '_>>]>> {
         let mut count = MaybeUninit::uninit();
         let ptr = unsafe { SDL_GetWindows(count.as_mut_ptr()) };
 
-        // SAFETY: On success, SDL allocates `count` window pointers. `WindowHandle`
-        // is a `Copy` wrapper around `NonNull<SDL_Window>`, which has the same size
-        // and alignment as `*mut SDL_Window`.
-        unsafe {
-            Box::from_raw_parts_nullck(ptr.cast::<WindowHandle>(), count.assume_init() as usize)
-        }
+        // SAFETY: On success, SDL allocates `count` window pointers.
+        // `Ref<Window>` as the same size and alignment as `*mut SDL_Window`.
+        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as usize) }
     }
 
     /// Get a window from a stored ID.

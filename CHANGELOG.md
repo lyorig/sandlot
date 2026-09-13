@@ -1,5 +1,32 @@
 # What's new!
 
+## v0.1.3
+- Lifetimes!
+  - several structs now have lifetimes representing the initialization hierarchy
+  - this adds a LOT of lifetimes to the source code (see `RenderStateCreateInfo` for the motherlode), but also shouldn't break **well-formed** existing code.
+    - for example, examples required no changes aside from function arguments
+    - structs which contained multiple tied objects have become self-referential and will require changes
+- Subsystems!
+  - now backed by proper types, they're required to initialize relevant objects and ensure lifetime safety
+
+```rust
+let wnd;
+{
+    let video = Video::new()?;
+    wnd = Window::new(video.as_ref(), /* ... */) // won't compile
+}
+```
+  
+- Usability!
+  - `as_ref` and friends are now implemented directly on the type (no `trait Resource` import necessary)
+- Documentation!
+  - existing boolenums now have documentation
+  - module doc headers are more concise to look good at [docs.rs](https://docs.rs)
+  - `Drop` code has added SDL docs
+  - and too many small legibility/correctness changes to count
+- SDL enums
+  - `SDL_FlashOperation` (`window::FlashOp`)
+
 ## v0.1.2
 
 - Text input functions moved from `mod keyboard` to `Event`:

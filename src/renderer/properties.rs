@@ -25,12 +25,12 @@ use crate::{
 /// existence; backend properties are returned as `Option` since they only
 /// exist on their respective backends.
 #[derive(Clone, Copy)]
-pub struct RendererProperties<'a, 'wnd, 'ctx, 'vid> {
+pub struct RendererProperties<'a, 'ctx, 'vid, 'wnd> {
     inner: Ref<'a, Properties>,
     marker: PhantomData<Ref<'wnd, Window<'ctx, 'vid>>>,
 }
 
-impl<'a, 'wnd, 'ctx, 'vid> RendererProperties<'a, 'wnd, 'ctx, 'vid> {
+impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
     pub(super) fn new(inner: Ref<'a, Properties>) -> Self {
         Self {
             inner,
