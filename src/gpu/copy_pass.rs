@@ -13,11 +13,12 @@ use super::{buffer::BufferLocation, command_buffer::CommandBuffer, texture::Text
 resource_new! {
     /// An opaque handle representing a copy pass.
     /// Transient; invalid once the pass ends.
-    pub struct CopyPass<> : SDL_GPUCopyPass, ~SDL_EndGPUCopyPass {
-        marker: PhantomData<()>,
+    pub struct CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUCopyPass, ~SDL_EndGPUCopyPass {
+        marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
 }
-impl CopyPass {
+
+impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Begin a copy pass on a command buffer.
     ///
     /// `cmdbuf` is the command buffer that records the pass. All operations
@@ -26,7 +27,7 @@ impl CopyPass {
     ///
     /// Returns [`Err`] if SDL cannot begin the pass.
     #[doc(alias = "SDL_BeginGPUCopyPass")]
-    pub fn new(cmdbuf: Ref<CommandBuffer>) -> Result<Self> {
+    pub fn new(cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>) -> Result<Self> {
         let handle = unsafe { SDL_BeginGPUCopyPass(cmdbuf.handle.as_ptr()) };
         Self::from_ptr(handle)
     }
@@ -38,7 +39,7 @@ impl CopyPass {
     /// - [`CopyPass::new`]
     /// - `op`
     pub fn run<F: FnOnce(Ref<Self>) -> Result<()>>(
-        cmdbuf: Ref<CommandBuffer>,
+        cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>,
         op: F,
     ) -> Result<()> {
         let pass = Self::new(cmdbuf)?;
@@ -46,7 +47,7 @@ impl CopyPass {
     }
 }
 
-impl CopyPassHandle {
+impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Copy a region from one texture to another on the GPU timeline.
     ///
     /// * `source` identifies the source texture and location.

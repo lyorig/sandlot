@@ -248,6 +248,7 @@ pub struct VertexInputState<'vbd, 'va>(
     PhantomData<&'vbd [VertexBufferDescription]>,
     PhantomData<&'va [VertexAttribute]>,
 );
+
 impl<'vbd, 'va> VertexInputState<'vbd, 'va> {
     /// Build vertex input state from buffer descriptions and attributes.
     pub fn new(

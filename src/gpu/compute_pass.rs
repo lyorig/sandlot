@@ -23,14 +23,6 @@ use super::{
 #[expect(unused_imports)]
 use super::texture::TextureUsageFlags;
 
-resource_new! {
-    /// An opaque handle representing a compute pass.
-    /// Transient; invalid once the pass ends.
-    pub struct ComputePass<> : SDL_GPUComputePass, ~SDL_EndGPUComputePass {
-        marker: PhantomData<()>,
-    }
-}
-
 /// Parameters of an indirect dispatch command.
 ///
 /// Commands of this type are read by
@@ -58,7 +50,16 @@ impl IndirectDispatchCommand {
         (c.groupcount_x, c.groupcount_y, c.groupcount_z)
     }
 }
-impl ComputePass {
+
+resource_new! {
+    /// An opaque handle representing a compute pass.
+    /// Transient; invalid once the pass ends.
+    pub struct ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUComputePass, ~SDL_EndGPUComputePass {
+        marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
+    }
+}
+
+impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Begin a compute pass on a command buffer.
     ///
     /// `cmdbuf` is the command buffer that records the pass. The storage
@@ -74,7 +75,7 @@ impl ComputePass {
     /// Returns [`Err`] if SDL cannot begin the pass.
     #[doc(alias = "SDL_BeginGPUComputePass")]
     pub fn new(
-        cmdbuf: Ref<CommandBuffer>,
+        cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>,
         storage_texture_bindings: &[StorageTextureReadWriteBinding],
         storage_buffer_bindings: &[StorageBufferReadWriteBinding],
     ) -> Result<Self> {
@@ -87,6 +88,7 @@ impl ComputePass {
                 storage_buffer_bindings.len() as _,
             )
         };
+
         Self::from_ptr(handle)
     }
 
@@ -97,7 +99,7 @@ impl ComputePass {
     /// - [`ComputePass::new`]
     /// - `op`
     pub fn run<F: FnOnce(Ref<Self>) -> Result<()>>(
-        cmdbuf: Ref<CommandBuffer>,
+        cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>,
         storage_texture_bindings: &[StorageTextureReadWriteBinding],
         storage_buffer_bindings: &[StorageBufferReadWriteBinding],
         op: F,
@@ -107,7 +109,7 @@ impl ComputePass {
     }
 }
 
-impl ComputePassHandle {
+impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind a compute pipeline for dispatches in this pass.
     ///
     /// `pipeline` is the compute pipeline to bind. A pipeline must be bound

@@ -53,10 +53,10 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
     /// Describe the fragment shader and additional fragment sampler, storage
     /// texture, and storage buffer bindings to activate with the render state.
     pub fn new(
-        fragment_shader: Ref<'frag, Shader>,
+        fragment_shader: Ref<'frag, Shader<'ctx, 'vid, 'dev>>,
         sampler_bindings: &'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s, 'ctx, 'vid, 'dev>],
-        storage_textures: &'stex [Ref<'stex_t, Texture>],
-        storage_buffers: &'sbuf [Ref<'sbuf_b, Buffer>],
+        storage_textures: &'stex [Ref<'stex_t, Texture<'ctx, 'vid, 'dev>>],
+        storage_buffers: &'sbuf [Ref<'sbuf_b, Buffer<'ctx, 'vid, 'dev>>],
     ) -> Self {
         Self(
             SDL_GPURenderStateCreateInfo {

@@ -164,6 +164,7 @@ pub struct DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev>(
     SDL_GPUDepthStencilTargetInfo,
     PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
 );
+
 impl<'t, 'ctx, 'vid, 'dev> DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev> {
     /// Describe depth/stencil clear, load/store, cycling, mip-level, and layer
     /// behavior.
@@ -240,14 +241,6 @@ impl IndirectDrawCommand {
     }
 }
 
-resource_new! {
-    /// An opaque handle representing a render pass.
-    /// Transient; invalid once the pass ends.
-    pub struct RenderPass<> : SDL_GPURenderPass, ~SDL_EndGPURenderPass {
-        marker: PhantomData<()>,
-    }
-}
-
 /// Parameters of an indirect indexed draw command.
 ///
 /// Commands of this type are read by
@@ -298,7 +291,16 @@ impl IndirectIndexedCommand {
         self.0.first_instance
     }
 }
-impl RenderPass {
+
+resource_new! {
+    /// An opaque handle representing a render pass.
+    /// Transient; invalid once the pass ends.
+    pub struct RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPURenderPass, ~SDL_EndGPURenderPass {
+        marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
+    }
+}
+
+impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Begin a render pass on a command buffer.
     ///
     /// `color_targets` describes the color subresources and their load/store
@@ -312,7 +314,7 @@ impl RenderPass {
     /// Returns [`Err`] if SDL cannot begin the pass.
     #[doc(alias = "SDL_BeginGPURenderPass")]
     pub fn new(
-        cmdbuf: Ref<CommandBuffer>,
+        cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>,
         color_targets: &[ColorTargetInfo],
         depth_stencil_target: Option<&DepthStencilTargetInfo>,
     ) -> Result<Self> {
@@ -335,7 +337,7 @@ impl RenderPass {
     /// - [`RenderPass::new`]
     /// - `op`
     pub fn run<F: FnOnce(Ref<Self>) -> Result<()>>(
-        cmdbuf: Ref<CommandBuffer>,
+        cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>,
         color_targets: &[ColorTargetInfo],
         depth_stencil_target: Option<&DepthStencilTargetInfo>,
         op: F,
@@ -345,7 +347,7 @@ impl RenderPass {
     }
 }
 
-impl RenderPassHandle {
+impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Set the current viewport state.
     #[doc(alias = "SDL_SetGPUViewport")]
     pub fn set_viewport(&self, viewport: &Viewport) {

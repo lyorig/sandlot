@@ -152,7 +152,7 @@ impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     pub fn run_fence<F: FnOnce(Ref<Self>) -> Result<()>>(
         device: Ref<'dev, Device<'ctx, 'vid>>,
         op: F,
-    ) -> Result<Fence> {
+    ) -> Result<Fence<'ctx, 'vid, 'dev>> {
         let cmdbuf = Self::new(device)?;
         op(cmdbuf.as_ref())?;
         cmdbuf.submit_fence()
@@ -177,7 +177,7 @@ impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     ///
     /// Returns [`Err`] if submission or fence acquisition fails.
     #[doc(alias = "SDL_SubmitGPUCommandBufferAndAcquireFence")]
-    pub fn submit_fence(self) -> Result<Fence> {
+    pub fn submit_fence(self) -> Result<Fence<'ctx, 'vid, 'dev>> {
         let fence = unsafe { SDL_SubmitGPUCommandBufferAndAcquireFence(self.handle.as_ptr()) };
         Fence::from_ptr(fence)
     }
