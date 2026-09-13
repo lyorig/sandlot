@@ -8,6 +8,8 @@
     - structs which contained multiple tied objects have become self-referential and will require changes
 - Subsystems!
   - now backed by proper types, they're required to initialize relevant objects and ensure lifetime safety
+  - dependent functionality exposed as methods (e.g. `SDL_PushEvent` as `Events::push`)
+  - zero-sized handles, `Ref`s and owned types, analogous to resources
   - created via `init` (as opposed to the previous `new`)
 
 ```rust
@@ -22,11 +24,19 @@ let wnd;
   - `as_ref` and friends are now implemented directly on the type (no `trait Resource` import necessary)
 - Documentation!
   - existing boolenums now have documentation
-  - module doc headers are more concise to look good at [docs.rs](https://docs.rs)
+  - module doc headers are more concise
   - `Drop` code has added SDL docs
   - and too many small legibility/correctness changes to count
 - SDL enums
   - `SDL_FlashOperation` (`window::FlashOp`)
+- Renames
+  - `Font::{new` -> `open}`
+  - `sandlot::Context` -> `sandlot::init::Context`
+  - `ShaderFormat::{as` -> `to}_mask`
+- Removals
+  - `DrawBuilder`
+  - `size_of!`
+  - macros and functions intended for private use (`boolenum!`, `resource_new!`, `opt2ptr`, etc.)
 
 ## v0.1.2
 
