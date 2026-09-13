@@ -157,19 +157,6 @@ impl Drop for Context {
 
 pub trait Subsystem: Sized {
     type Handle: Copy;
-
-    /// # Safety
-    /// Think of this function as returning a pointer to `self`.
-    /// Handles are only valid as long as their owning objects.
-    unsafe fn as_handle(&self) -> Self::Handle;
-
-    fn as_ref(&self) -> Ref<'_, Self> {
-        unsafe { Ref::from_handle(self.as_handle()) }
-    }
-
-    fn as_mut(&mut self) -> RefMut<'_, Self> {
-        unsafe { RefMut::from_handle(self.as_handle()) }
-    }
 }
 
 #[derive(Clone, Copy)]
@@ -287,6 +274,22 @@ macro_rules! subsystem_new {
                     }
                 }
 
+                /// # Safety
+                ///
+                /// Think of this function as returning a pointer to `self`.
+                /// Handles are only valid as long as their owning objects.
+                pub unsafe fn as_handle(&self) -> [<$name Handle>]<'ctx> {
+                    self.handle
+                }
+
+                pub fn as_ref(&self) -> $crate::init::Ref<'_, $name<'_>> {
+                    unsafe { $crate::init::Ref::from_handle(self.as_handle()) }
+                }
+
+                pub fn as_mut(&mut self) -> $crate::init::RefMut<'_, $name<'_>> {
+                    unsafe { $crate::init::RefMut::from_handle(self.as_handle()) }
+                }
+
                 /// Get whether this subsystem is currently initialized.
                 #[doc(alias = "SDL_WasInit")]
                 pub fn is_init() -> ::core::primitive::bool {
@@ -297,10 +300,6 @@ macro_rules! subsystem_new {
 
             impl<'ctx> Subsystem for $name<'ctx> {
                 type Handle = [<$name Handle>]<'ctx>;
-
-                unsafe fn as_handle(&self) -> Self::Handle {
-                    self.handle
-                }
             }
 
             impl<'ctx> ::std::ops::Deref for $name<'ctx> {

@@ -9,7 +9,7 @@ use sandlot::{
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
-    init::{Context, Subsystem, Video},
+    init::{Context, Video},
     properties::Properties,
     rect::Point,
     resource::{Ref, Resource},

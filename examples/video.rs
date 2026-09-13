@@ -6,7 +6,7 @@ use sandlot::{
     Result,
     color::Rgba,
     event::Event,
-    init::{Context, Subsystem, Video},
+    init::{Context, Video},
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},

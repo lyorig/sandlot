@@ -3,7 +3,7 @@ use std::mem::ManuallyDrop;
 use rustest::{Result, main, test};
 
 use sandlot::{
-    init::{Context, Subsystem, Video},
+    init::{Context, Video},
     pixels::PixelFormat,
     properties::Properties,
     rect::{Point, PointI32},

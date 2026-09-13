@@ -1,6 +1,6 @@
 use rustest::{Result, test};
 use sandlot::{
-    init::{Context, Subsystem, Video},
+    init::{Context, Video},
     pixels::PixelFormat,
     properties::Properties,
     rect::Point,
