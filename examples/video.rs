@@ -6,8 +6,7 @@ use sandlot::{
     Result,
     color::Rgba,
     event::Event,
-    init::Context,
-    init::Video,
+    init::{Context, Subsystem, Video},
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
@@ -40,7 +39,7 @@ fn run() -> Result<()> {
         .position(Point::new(Window::POS_CENTERED, Window::POS_CENTERED))
         .title(c"sandlot Example")
         .size(Point::new(640, 480))
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     wnd.sync()?;
 

@@ -5,8 +5,15 @@
 use std::mem::ManuallyDrop;
 
 use sandlot::{
-    Result, color::RgbaF32, event::Event, gpu::*, init::Context, init::Video,
-    properties::Properties, rect::Point, resource::Resource, window::Window,
+    Result,
+    color::RgbaF32,
+    event::Event,
+    gpu::*,
+    init::{Context, Subsystem, Video},
+    properties::Properties,
+    rect::Point,
+    resource::Resource,
+    window::Window,
 };
 
 cfg_select! {
@@ -56,7 +63,7 @@ fn run() -> Result<()> {
     let wnd = Window::builder(props)
         .title(c"sandlot GPU")
         .size(Point::new(720, 480))
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     print_properties(device.properties());
 

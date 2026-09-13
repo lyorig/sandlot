@@ -9,8 +9,7 @@ use sandlot::{
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
-    init::Context,
-    init::Video,
+    init::{Context, Subsystem, Video},
     properties::Properties,
     rect::Point,
     resource::{Ref, Resource},
@@ -221,7 +220,7 @@ fn run() -> Result<()> {
     let wnd = Window::builder(props)
         .title(c"sandlot Teapot Example")
         .size(Point::new(1280, 720))
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     device.claim_window(wnd.as_ref())?;
     device.set_swapchain_parameters(wnd.as_ref(), SwapchainComposition::Sdr, PresentMode::Vsync)?;

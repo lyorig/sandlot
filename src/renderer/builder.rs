@@ -18,13 +18,13 @@ const CREATE_PROPERTIES: [*const c_char; 5] = [
     SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER,
 ];
 
-pub struct RendererBuilder<'p, 'wnd, 'surf> {
+pub struct RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     inner: Ref<'p, Properties>,
-    marker_wnd: PhantomData<Ref<'wnd, Window>>,
+    marker_wnd: PhantomData<Ref<'wnd, Window<'ctx, 'vid>>>,
     marker_surf: PhantomData<Ref<'surf, Surface>>,
 }
 
-impl<'p, 'wnd, 'surf> RendererBuilder<'p, 'wnd, 'surf> {
+impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
         Self {
             inner,

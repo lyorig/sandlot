@@ -28,16 +28,18 @@ use sdl3_sys::{
     filesystem::{SDL_GetBasePath, SDL_GetUserFolder},
     init::SDL_Quit,
     keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
+    video::{SDL_GetGrabbedWindow, SDL_GetWindowFromID, SDL_GetWindows},
 };
 
 use crate::{
     Result,
+    boxed::Box,
     error::Error,
     event::{Event, EventIter},
     fs::Folder,
     resource,
     util::{c_ptr_to_str, opt2res_map, to_result},
-    window::Window,
+    window::{Window, WindowHandle, WindowId},
 };
 
 /// A zero-sized type that only exists to call [`SDL_Quit`].
@@ -334,6 +336,53 @@ subsystem_new!(
     /// The video subsystem provides access to the display and windowing system.
     /// Also initializes the events subsystem, accessible via [`VideoHandle::events`].
     Video, VIDEO, Events => events);
+
+impl<'ctx> VideoHandle<'ctx> {
+    /// Get the window that currently has an input grab enabled.
+    ///
+    /// Returns [`None`] if input is not grabbed.
+    #[doc(alias = "SDL_GetGrabbedWindow")]
+    pub fn grabbed_window(&self) -> Option<WindowHandle<'ctx, '_>> {
+        WindowHandle::from_ptr(unsafe { SDL_GetGrabbedWindow() })
+    }
+
+    /// Get a list of valid windows.
+    #[doc(alias = "SDL_GetWindows")]
+    pub fn windows(&self) -> Result<Box<[WindowHandle<'ctx, '_>]>> {
+        let mut count = MaybeUninit::uninit();
+        let ptr = unsafe { SDL_GetWindows(count.as_mut_ptr()) };
+
+        // SAFETY: On success, SDL allocates `count` window pointers. `WindowHandle`
+        // is a `Copy` wrapper around `NonNull<SDL_Window>`, which has the same size
+        // and alignment as `*mut SDL_Window`.
+        unsafe {
+            Box::from_raw_parts_nullck(ptr.cast::<WindowHandle>(), count.assume_init() as usize)
+        }
+    }
+
+    /// Get a window from a stored ID.
+    ///
+    /// Returns [`None`] if no window with that ID exists.
+    ///
+    /// # Safety
+    ///
+    /// The lifetime of the returned reference is inferred.
+    /// In practice, it's going to be valid until the window is destroyed.
+    /// It is your responsibility to only use it before that happens.
+    ///
+    /// # Remarks
+    ///
+    /// The numeric ID is what `SDL_WindowEvent` references, and is necessary
+    /// to map these events to specific window objects.
+    #[doc(alias = "SDL_GetWindowFromID")]
+    pub unsafe fn window_from_id<'a>(
+        &self,
+        id: WindowId,
+    ) -> Option<resource::Ref<'a, Window<'ctx, '_>>> {
+        let ptr = unsafe { SDL_GetWindowFromID(id.as_sdl()) };
+        WindowHandle::from_ptr(ptr).map(|h| unsafe { resource::Ref::from_handle(h) })
+    }
+}
 
 subsystem_new!(
     /// The events subsystem provides access to the event queue.

@@ -3,8 +3,7 @@ use std::mem::ManuallyDrop;
 use rustest::{Result, main, test};
 
 use sandlot::{
-    init::Context,
-    init::Video,
+    init::{Context, Subsystem, Video},
     pixels::PixelFormat,
     properties::Properties,
     rect::{Point, PointI32},
@@ -27,7 +26,8 @@ mod ttf;
 /// Basic initialization stuff.
 #[test]
 fn main_init() -> Result {
-    let _ctx = Context::new();
+    let ctx = Context::new();
+    let vid = Video::init(&ctx)?;
 
     const WINDOW_SIZE: PointI32 = Point::new(128, 128);
 
@@ -36,7 +36,7 @@ fn main_init() -> Result {
     let wnd = Window::builder(props.as_ref())
         .hidden(true)
         .size(WINDOW_SIZE)
-        .build()?;
+        .build(vid.as_ref())?;
 
     assert_eq!(wnd.size(), WINDOW_SIZE);
 

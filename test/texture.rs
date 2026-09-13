@@ -1,6 +1,6 @@
 use rustest::{Result, test};
 use sandlot::{
-    init::Context,
+    init::{Context, Subsystem, Video},
     pixels::PixelFormat,
     properties::Properties,
     rect::Point,
@@ -14,13 +14,15 @@ use sdl3_sys::render::SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER;
 /// `Texture::builder` with `SDL_CreateTextureWithProperties`.
 #[test]
 fn texture_builder() -> Result {
-    let _ctx = Context::new();
+    let ctx = Context::new();
+    let vid = Video::init(&ctx)?;
+
     let props = Properties::new()?;
 
     let wnd = Window::builder(props.as_ref())
         .hidden(true)
         .size(Point::new(128, 128))
-        .build()?;
+        .build(vid.as_ref())?;
 
     let rnd = Renderer::builder(props.as_ref())
         .window(wnd.as_ref())
@@ -40,13 +42,15 @@ fn texture_builder() -> Result {
 /// `Texture::properties` reflects what was used at creation.
 #[test]
 fn texture_properties() -> Result {
-    let _ctx = Context::new();
+    let ctx = Context::new();
+    let vid = Video::init(&ctx)?;
+
     let props = Properties::new()?;
 
     let wnd = Window::builder(props.as_ref())
         .hidden(true)
         .size(Point::new(128, 128))
-        .build()?;
+        .build(vid.as_ref())?;
 
     let rnd = Renderer::builder(props.as_ref())
         .window(wnd.as_ref())
@@ -70,13 +74,15 @@ fn texture_properties() -> Result {
 /// `build_cleanup` clears the texture creation properties.
 #[test]
 fn texture_build_cleanup() -> Result {
-    let _ctx = Context::new();
+    let ctx = Context::new();
+    let vid = Video::init(&ctx)?;
+
     let props = Properties::new()?;
 
     let wnd = Window::builder(props.as_ref())
         .hidden(true)
         .size(Point::new(128, 128))
-        .build()?;
+        .build(vid.as_ref())?;
 
     let rnd = Renderer::builder(props.as_ref())
         .window(wnd.as_ref())

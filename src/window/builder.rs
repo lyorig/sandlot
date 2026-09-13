@@ -5,7 +5,7 @@ use std::{
 
 use sdl3_sys::video::*;
 
-use crate::{Result, properties::Properties, rect::PointI32, resource::Ref, window::Window};
+use crate::{Result, init, properties::Properties, rect::PointI32, resource::Ref, window::Window};
 
 const CREATE_PROPERTIES: [*const c_char; 26] = [
     SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN,
@@ -36,12 +36,12 @@ const CREATE_PROPERTIES: [*const c_char; 26] = [
     SDL_PROP_WINDOW_CREATE_Y_NUMBER,
 ];
 
-pub struct WindowBuilder<'p, 'parent> {
+pub struct WindowBuilder<'p, 'parent, 'parent_ctx, 'parent_vid> {
     inner: Ref<'p, Properties>,
-    marker: PhantomData<Ref<'parent, Window>>,
+    marker: PhantomData<Ref<'parent, Window<'parent_ctx, 'parent_vid>>>,
 }
 
-impl<'p, 'parent> WindowBuilder<'p, 'parent> {
+impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_ctx, 'parent_vid> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
         Self {
             inner,
@@ -247,14 +247,20 @@ impl<'p, 'parent> WindowBuilder<'p, 'parent> {
 
     /// Build the window.
     #[doc(alias = "SDL_CreateWindowWithProperties")]
-    pub fn build(&self) -> Result<Window> {
+    pub fn build<'ctx, 'vid>(
+        &self,
+        _video: init::Ref<'vid, init::Video<'ctx>>,
+    ) -> Result<Window<'ctx, 'vid>> {
         Window::from_ptr(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) })
     }
 
     /// Build the window, and cleanup all properties.
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateWindowWithProperties")]
-    pub fn build_cleanup(&self) -> Result<Window> {
+    pub fn build_cleanup<'ctx, 'vid>(
+        &self,
+        _video: init::Ref<'vid, init::Video<'ctx>>,
+    ) -> Result<Window<'ctx, 'vid>> {
         let res = Window::from_ptr(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res

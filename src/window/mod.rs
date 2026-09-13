@@ -16,7 +16,7 @@
 //! - [x] SDL_FlashWindow
 //! - [x] SDL_GetCurrentVideoDriver
 //! - [x] SDL_GetDisplayForWindow
-//! - [x] SDL_GetGrabbedWindow
+//! - [x] SDL_GetGrabbedWindow (impl'd as [`crate::init::VideoHandle::grabbed_window`])
 //! - [x] SDL_GetNumVideoDrivers
 //! - [x] SDL_GetSystemTheme
 //! - [x] SDL_GetVideoDriver
@@ -41,7 +41,7 @@
 //! - [x] SDL_GetWindowProgressState
 //! - [x] SDL_GetWindowProgressValue
 //! - [x] SDL_GetWindowProperties
-//! - [x] SDL_GetWindows
+//! - [x] SDL_GetWindows (impl'd as [`crate::init::VideoHandle::windows`])
 //! - [x] SDL_GetWindowSafeArea
 //! - [x] SDL_GetWindowSize
 //! - [x] SDL_GetWindowSizeInPixels
@@ -110,15 +110,13 @@ use crate::{
     boxed::Box,
     display::Display,
     error::Error,
+    init,
     properties::{Properties, PropertiesHandle},
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
-    resource::Ref,
-    resource::resource_new,
+    resource::{Ref, resource_new},
     surface::Surface,
-    util::impl_enum_transmute,
-    util::mod_reexport,
-    util::{c_ptr_to_str, opt2ptr, opt2res_map, to_result},
+    util::{c_ptr_to_str, impl_enum_transmute, mod_reexport, opt2ptr, opt2res_map, to_result},
 };
 
 // doc-only
@@ -261,15 +259,15 @@ impl WindowId {
         Self { inner }
     }
 
-    const fn as_sdl(self) -> SDL_WindowID {
+    pub(crate) const fn as_sdl(self) -> SDL_WindowID {
         SDL_WindowID(self.inner.get())
     }
 }
 
 resource_new! {
     /// Represents an OS window.
-    pub struct Window<> : SDL_Window, ~SDL_DestroyWindow {
-        marker: PhantomData<()>,
+    pub struct Window<'ctx, 'vid> : SDL_Window, ~SDL_DestroyWindow {
+        marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
 }
 
@@ -333,26 +331,6 @@ pub fn system_theme() -> Option<SystemTheme> {
     SystemTheme::from_sdl(st)
 }
 
-/// Get the window that currently has an input grab enabled.
-///
-/// Returns [`None`] if input is not grabbed.
-#[doc(alias = "SDL_GetGrabbedWindow")]
-pub fn grabbed_window() -> Option<WindowHandle> {
-    WindowHandle::from_ptr(unsafe { SDL_GetGrabbedWindow() })
-}
-
-/// Get a list of valid windows.
-#[doc(alias = "SDL_GetWindows")]
-pub fn windows() -> Result<Box<[WindowHandle]>> {
-    let mut count = MaybeUninit::uninit();
-    let ptr = unsafe { SDL_GetWindows(count.as_mut_ptr()) };
-
-    // SAFETY: On success, SDL allocates `count` window pointers. `WindowHandle`
-    // is a `Copy` wrapper around `NonNull<SDL_Window>`, which has the same size
-    // and alignment as `*mut SDL_Window`.
-    unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
-}
-
 /// Check whether the screensaver is currently enabled.
 ///
 /// # Remarks
@@ -386,7 +364,7 @@ pub fn disable_screen_saver() -> Result<()> {
     to_result(unsafe { SDL_DisableScreenSaver() })
 }
 
-impl WindowHandle {
+impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Block until any pending window state is finalized.
     ///
     /// # Remarks
@@ -898,8 +876,7 @@ impl WindowHandle {
     /// function again to update the window. This is an expensive operation,
     /// so should be done sparingly.
     ///
-    /// The window must have been created with the `SDL_WINDOW_TRANSPARENT`
-    /// flag ([`WindowFlags::TRANSPARENT`]).
+    /// The window must have been created with the  [`WindowFlags::TRANSPARENT`] flag.
     #[doc(alias = "SDL_SetWindowShape")]
     pub fn set_shape(&self, shape: Ref<Surface>) -> Result<()> {
         to_result(unsafe { SDL_SetWindowShape(self.as_ptr(), shape.handle.as_ptr()) })
@@ -932,7 +909,7 @@ impl WindowHandle {
     ///
     /// # Remarks
     ///
-    /// This will add or remove the window's `SDL_WINDOW_BORDERLESS` flag and
+    /// This will add or remove the window's [`WindowFlags::BORDERLESS`] flag and
     /// add or remove the border from the actual window. This is a no-op if
     /// the window's border already matches the requested state.
     ///
@@ -946,7 +923,7 @@ impl WindowHandle {
     ///
     /// # Remarks
     ///
-    /// This will add or remove the window's `SDL_WINDOW_RESIZABLE` flag and
+    /// This will add or remove the window's [`WindowFlags::RESIZABLE`] flag and
     /// allow/disallow user resizing of the window. This is a no-op if the
     /// window's resizable state already matches the requested state.
     ///
@@ -960,7 +937,7 @@ impl WindowHandle {
     ///
     /// # Remarks
     ///
-    /// This will add or remove the window's `SDL_WINDOW_ALWAYS_ON_TOP` flag.
+    /// This will add or remove the window's [`WindowFlags::ALWAYS_ON_TOP`] flag.
     /// This will bring the window to the front and keep the window above
     /// the rest.
     #[doc(alias = "SDL_SetWindowAlwaysOnTop")]
@@ -1215,7 +1192,7 @@ impl WindowHandle {
     /// stealing focus from another application. If the window is
     /// successfully raised and gains input focus, an
     /// [`Event::WindowFocusGained`] event will be emitted, and the window
-    /// will have the `SDL_WINDOW_INPUT_FOCUS` flag set.
+    /// will have the [`WindowFlags::INPUT_FOCUS`] flag set.
     #[doc(alias = "SDL_RaiseWindow")]
     pub fn raise(&self) -> Result<()> {
         to_result(unsafe { SDL_RaiseWindow(self.as_ptr()) })
@@ -1226,7 +1203,7 @@ impl WindowHandle {
     /// # Remarks
     ///
     /// Non-resizable windows can't be maximized. The window must have the
-    /// `SDL_WINDOW_RESIZABLE` flag set, or this will have no effect.
+    /// [`WindowFlags::RESIZABLE`] flag set, or this will have no effect.
     ///
     /// On some windowing systems this request is asynchronous and the new
     /// window state may not have been applied immediately upon the return of
@@ -1335,7 +1312,7 @@ impl WindowHandle {
     }
 }
 
-impl Window {
+impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// Used to indicate that the window position should be centered.
     pub const POS_CENTERED: i32 = SDL_WINDOWPOS_CENTERED;
     /// Used to indicate that the window position is undefined.
@@ -1505,31 +1482,6 @@ impl Window {
                 Err(Error::current())
             }
         }
-    }
-
-    /// Get a window from a stored ID.
-    ///
-    /// Returns [`None`] if no window with that ID exists.
-    ///
-    /// # Safety
-    ///
-    /// The lifetime of the returned reference is inferred.
-    /// In practice, it's going to be valid until the window is destroyed.
-    /// It is your responsibility to only use it before that happens.
-    ///
-    /// # Remarks
-    ///
-    /// The numeric ID is what `SDL_WindowEvent` references, and is necessary
-    /// to map these events to specific window objects.
-    #[doc(alias = "SDL_GetWindowFromID")]
-    pub unsafe fn from_id<'a>(id: WindowId) -> Option<Ref<'a, Window>> {
-        NonNull::new(unsafe { SDL_GetWindowFromID(id.as_sdl()) }).map(|handle| {
-            let handle = WindowHandle {
-                handle,
-                marker: std::marker::PhantomData,
-            };
-            unsafe { Ref::from_handle(handle) }
-        })
     }
 
     /// Get the numeric ID of a window.
