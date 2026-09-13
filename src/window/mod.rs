@@ -485,7 +485,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     ///
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRenderer")]
-    pub fn renderer(&self) -> Option<RendererHandle> {
+    pub fn renderer(&self) -> Option<RendererHandle<'ctx, 'vid, '_>> {
         RendererHandle::from_ptr(unsafe { SDL_GetRenderer(self.handle.as_ptr()) })
     }
 
@@ -502,7 +502,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     ///
     /// Returns [`None`] if the window has no parent.
     #[doc(alias = "SDL_GetWindowParent")]
-    pub fn parent(&self) -> Option<WindowHandle> {
+    pub fn parent(&self) -> Option<WindowHandle<'ctx, 'vid>> {
         WindowHandle::from_ptr(unsafe { SDL_GetWindowParent(self.as_ptr()) })
     }
 
@@ -1454,11 +1454,11 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// renderer for it; see [`Window::new`] for the meaning of the
     /// parameters and additional remarks.
     #[doc(alias = "SDL_CreateWindowAndRenderer")]
-    pub fn with_renderer(
+    pub fn with_renderer<'wnd>(
         title: &CStr,
         size: PointI32,
         flags: WindowFlags,
-    ) -> Result<(Self, Renderer)> {
+    ) -> Result<(Self, Renderer<'ctx, 'vid, 'wnd>)> {
         let mut ret = MaybeUninit::<(*mut SDL_Window, *mut SDL_Renderer)>::uninit();
         let ptr = ret.as_mut_ptr();
 

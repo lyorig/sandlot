@@ -1,5 +1,6 @@
 use std::{
     ffi::{CStr, c_char, c_void},
+    marker::PhantomData,
     ptr::NonNull,
 };
 
@@ -24,13 +25,17 @@ use crate::{
 /// existence; backend properties are returned as `Option` since they only
 /// exist on their respective backends.
 #[derive(Clone, Copy)]
-pub struct RendererProperties<'a> {
+pub struct RendererProperties<'a, 'wnd, 'ctx, 'vid> {
     inner: Ref<'a, Properties>,
+    marker: PhantomData<Ref<'wnd, Window<'ctx, 'vid>>>,
 }
 
-impl<'a> RendererProperties<'a> {
+impl<'a, 'wnd, 'ctx, 'vid> RendererProperties<'a, 'wnd, 'ctx, 'vid> {
     pub(super) fn new(inner: Ref<'a, Properties>) -> Self {
-        Self { inner }
+        Self {
+            inner,
+            marker: PhantomData,
+        }
     }
 
     fn get_str(&self, key: *const c_char) -> &str {
@@ -53,7 +58,7 @@ impl<'a> RendererProperties<'a> {
         self.get_str(SDL_PROP_RENDERER_NAME_STRING)
     }
 
-    pub fn window(&self) -> Option<Ref<'a, Window>> {
+    pub fn window(&self) -> Option<Ref<'wnd, Window<'ctx, 'vid>>> {
         let p = unsafe {
             self.inner
                 .pointer(SDL_PROP_RENDERER_WINDOW_POINTER, std::ptr::null_mut())
@@ -192,7 +197,7 @@ impl<'a> RendererProperties<'a> {
     }
 }
 
-impl std::ops::Deref for RendererProperties<'_> {
+impl std::ops::Deref for RendererProperties<'_, '_, '_, '_> {
     type Target = PropertiesHandle;
 
     fn deref(&self) -> &Self::Target {

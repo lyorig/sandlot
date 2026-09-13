@@ -95,12 +95,12 @@ mod_reexport!(properties);
 
 resource_new! {
     /// Represents rendering state.
-    pub struct Renderer<> : SDL_Renderer, ~SDL_DestroyRenderer {
-        marker: PhantomData<()>,
+    pub struct Renderer<'ctx, 'vid, 'wnd> : SDL_Renderer, ~SDL_DestroyRenderer {
+        marker: PhantomData<(Ref<'wnd, Window<'ctx, 'vid>>)>,
     }
 }
 
-impl RendererHandle {
+impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// Get the name of a renderer.
     #[doc(alias = "SDL_GetRendererName")]
     pub fn name(&self) -> &str {
@@ -121,7 +121,7 @@ impl RendererHandle {
     /// GPU-renderer backends. Not covered: the Metal backend
     /// (`SDL_PROP_RENDERER_METAL_*`), which sdl3-sys does not expose.
     #[doc(alias = "SDL_GetRendererProperties")]
-    pub fn properties(&self) -> RendererProperties<'_> {
+    pub fn properties(&self) -> RendererProperties<'_, 'wnd, 'ctx, 'vid> {
         unsafe {
             let id = SDL_GetRendererProperties(self.handle.as_ptr());
             let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
@@ -133,7 +133,7 @@ impl RendererHandle {
 
     /// Get the window associated with a renderer.
     #[doc(alias = "SDL_GetRenderWindow")]
-    pub fn window(&self) -> Ref<'_, Window> {
+    pub fn window(&self) -> Ref<'wnd, Window<'ctx, 'vid>> {
         unsafe {
             let ptr = SDL_GetRenderWindow(self.handle.as_ptr());
             let handle = WindowHandle::from_ptr(ptr).unwrap_unchecked();
@@ -888,7 +888,7 @@ impl RendererHandle {
     }
 }
 
-impl traits::BlendMode for RendererHandle {
+impl traits::BlendMode for RendererHandle<'_, '_, '_> {
     /// Get the blend mode used for drawing operations.
     #[doc(alias = "SDL_GetRenderDrawBlendMode")]
     fn blend_mode(&self) -> BlendMode {
@@ -916,7 +916,7 @@ impl traits::BlendMode for RendererHandle {
     }
 }
 
-impl Renderer {
+impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// Disable vsync. See [`RendererHandle::set_vsync`].
     pub const VSYNC_DISABLED: i32 = SDL_RENDERER_VSYNC_DISABLED;
 
@@ -953,7 +953,7 @@ impl Renderer {
     /// you can call `SDL_SetRenderLogicalPresentation` to change the content
     /// size and scaling options.
     #[doc(alias = "SDL_CreateRenderer")]
-    pub fn new(wnd: Ref<Window>, name: Option<&CStr>) -> Result<Renderer> {
+    pub fn new(wnd: Ref<Window>, name: Option<&CStr>) -> Result<Self> {
         Self::from_ptr(unsafe {
             SDL_CreateRenderer(
                 wnd.handle.as_ptr(),
@@ -991,40 +991,5 @@ impl Renderer {
     #[doc(alias = "SDL_GetNumRenderDrivers")]
     pub fn num_drivers() -> i32 {
         unsafe { SDL_GetNumRenderDrivers() }
-    }
-}
-
-/// A builder-like struct intended an an alternative
-/// to `RendererHandle::draw()`.
-pub struct DrawBuilder<'rnd, 'tex, 'rct> {
-    renderer: Ref<'rnd, Renderer>,
-
-    texture: Ref<'tex, Texture>,
-    src: Option<&'rct RectF32>,
-    dst: Option<&'rct RectF32>,
-}
-
-impl<'rnd, 'tex, 'rct> DrawBuilder<'rnd, 'tex, 'rct> {
-    pub fn new(rnd: Ref<'rnd, Renderer>, tex: Ref<'tex, Texture>) -> Self {
-        Self {
-            renderer: rnd,
-            texture: tex,
-            src: None,
-            dst: None,
-        }
-    }
-
-    pub fn from(&mut self, src: &'rct RectF32) -> &mut Self {
-        self.src = Some(src);
-        self
-    }
-
-    pub fn to(&mut self, dst: &'rct RectF32) -> &mut Self {
-        self.dst = Some(dst);
-        self
-    }
-
-    pub fn draw(&self) -> Result<()> {
-        self.renderer.draw(self.texture, self.src, self.dst)
     }
 }

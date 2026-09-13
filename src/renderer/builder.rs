@@ -113,7 +113,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// you're creating this with needs one, proving the subsystem has been
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
-    pub fn build(&self) -> Result<Renderer> {
+    pub fn build(&self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
         Renderer::from_ptr(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) })
     }
 
@@ -124,7 +124,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// you're creating this with needs one, proving the subsystem has been
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
-    pub fn build_cleanup(&self) -> Result<Renderer> {
+    pub fn build_cleanup(&self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
         let res = Renderer::from_ptr(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res

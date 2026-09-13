@@ -81,12 +81,12 @@ impl<'p, 'dev> GpuEngineBuilder<'p, 'dev> {
 
 /// Builder for [`RendererEngine`], using
 /// [`TTF_CreateRendererTextEngineWithProperties`](https://wiki.libsdl.org/SDL3_ttf/TTF_CreateRendererTextEngineWithProperties).
-pub struct RendererEngineBuilder<'p, 'renderer> {
+pub struct RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wnd> {
     inner: Ref<'p, Properties>,
-    marker: PhantomData<Ref<'renderer, Renderer>>,
+    marker: PhantomData<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>>,
 }
 
-impl<'p, 'renderer> RendererEngineBuilder<'p, 'renderer> {
+impl<'p, 'rnd, 'ctx, 'vid, 'wnd> RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wnd> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
         Self {
             inner,
@@ -96,7 +96,7 @@ impl<'p, 'renderer> RendererEngineBuilder<'p, 'renderer> {
 
     /// The renderer used to create textures and draw text.
     #[doc(alias = "TTF_PROP_RENDERER_TEXT_ENGINE_RENDERER")]
-    pub fn renderer(&mut self, value: Ref<'renderer, Renderer>) -> &mut Self {
+    pub fn renderer(&mut self, value: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>) -> &mut Self {
         self.set_pointer(
             TTF_PROP_RENDERER_TEXT_ENGINE_RENDERER,
             value.handle.as_ptr().cast(),
