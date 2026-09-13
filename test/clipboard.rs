@@ -2,8 +2,7 @@ use std::assert_matches;
 
 use sandlot::{
     clipboard::{has_text, set_text, text},
-    init::Context,
-    init::Video,
+    init::{Context, Video},
 };
 
 use rustest::test;
