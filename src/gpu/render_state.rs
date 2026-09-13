@@ -15,16 +15,40 @@ use crate::{
 ///
 /// The fragment shader and binding slices are borrowed for the lifetimes encoded
 /// in this type. The wrapper sets SDL's extension-property ID to zero.
-pub struct RenderStateCreateInfo<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b>(
+pub struct RenderStateCreateInfo<
+    'frag,
+    'sbin,
+    'sbin_t,
+    'sbin_s,
+    'stex,
+    'stex_t,
+    'sbuf,
+    'sbuf_b,
+    'ctx,
+    'vid,
+    'dev,
+>(
     SDL_GPURenderStateCreateInfo,
     PhantomData<Ref<'frag, Shader>>,
     PhantomData<&'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s>]>,
     PhantomData<&'stex [Ref<'stex_t, Texture>]>,
-    PhantomData<&'sbuf [Ref<'sbuf_b, Buffer>]>,
+    PhantomData<&'sbuf [Ref<'sbuf_b, Buffer<'ctx, 'vid, 'dev>>]>,
 );
 
-impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b>
-    RenderStateCreateInfo<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b>
+impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid, 'dev>
+    RenderStateCreateInfo<
+        'frag,
+        'sbin,
+        'sbin_t,
+        'sbin_s,
+        'stex,
+        'stex_t,
+        'sbuf,
+        'sbuf_b,
+        'ctx,
+        'vid,
+        'dev,
+    >
 {
     /// Describe the fragment shader and additional fragment sampler, storage
     /// texture, and storage buffer bindings to activate with the render state.

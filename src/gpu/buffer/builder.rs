@@ -36,18 +36,22 @@ impl<'p> BufferBuilder<'p> {
         }
     }
 
-    pub fn build(&self, device: Ref<Device>, mut create_info: BufferCreateInfo) -> Result<Buffer> {
+    pub fn build<'ctx, 'vid, 'dev>(
+        &self,
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        mut create_info: BufferCreateInfo,
+    ) -> Result<Buffer<'ctx, 'vid, 'dev>> {
         create_info.0.props = self.props.id();
         Buffer::new(device, &create_info)
     }
 
     /// Creates a [`Buffer`] using [`BufferCreateInfo`],
     /// then removes all buffer creation properties from the attached property group.
-    pub fn build_cleanup(
+    pub fn build_cleanup<'ctx, 'vid, 'dev>(
         &self,
-        device: Ref<Device>,
+        device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: BufferCreateInfo,
-    ) -> Result<Buffer> {
+    ) -> Result<Buffer<'ctx, 'vid, 'dev>> {
         let res = self.build(device, create_info);
         Self::clear_from(self.props);
         res

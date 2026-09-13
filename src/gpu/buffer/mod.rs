@@ -83,8 +83,11 @@ impl BufferCreateInfo {
 /// bytes, and the region starts at `offset` within the buffer.
 #[doc(alias = "SDL_GPUBufferRegion")]
 #[derive(Clone, Copy)]
-pub struct BufferRegion<'b>(SDL_GPUBufferRegion, PhantomData<Ref<'b, Buffer>>);
-impl<'b> BufferRegion<'b> {
+pub struct BufferRegion<'b, 'ctx, 'vid, 'dev>(
+    SDL_GPUBufferRegion,
+    PhantomData<Ref<'b, Buffer<'ctx, 'vid, 'dev>>>,
+);
+impl<'b, 'ctx, 'vid, 'dev> BufferRegion<'b, 'ctx, 'vid, 'dev> {
     /// Describe a region of `buffer` beginning at `offset` and extending for
     /// `size` bytes.
     pub fn new(buffer: Ref<'b, Buffer>, offset: u32, size: u32) -> Self {
@@ -111,14 +114,14 @@ impl<'b> BufferRegion<'b> {
 /// data to bind.
 #[doc(alias = "SDL_GPUBufferBinding")]
 #[derive(Clone, Copy)]
-pub struct BufferBinding<'b>(
+pub struct BufferBinding<'b, 'ctx, 'vid, 'dev>(
     pub(crate) SDL_GPUBufferBinding,
-    PhantomData<Ref<'b, Buffer>>,
+    PhantomData<Ref<'b, Buffer<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'b> BufferBinding<'b> {
+impl<'b, 'ctx, 'vid, 'dev> BufferBinding<'b, 'ctx, 'vid, 'dev> {
     /// Bind `buffer` starting at `offset` bytes into the buffer.
-    pub fn new(buffer: Ref<'b, Buffer>, offset: u32) -> Self {
+    pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, offset: u32) -> Self {
         Self(
             SDL_GPUBufferBinding {
                 buffer: buffer.handle.as_ptr(),
@@ -135,14 +138,14 @@ impl<'b> BufferBinding<'b> {
 /// from the beginning of that buffer.
 #[doc(alias = "SDL_GPUBufferLocation")]
 #[derive(Clone, Copy)]
-pub struct BufferLocation<'b>(
+pub struct BufferLocation<'b, 'ctx, 'vid, 'dev>(
     pub(crate) SDL_GPUBufferLocation,
-    PhantomData<Ref<'b, Buffer>>,
+    PhantomData<Ref<'b, Buffer<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'b> BufferLocation<'b> {
+impl<'b, 'ctx, 'vid, 'dev> BufferLocation<'b, 'ctx, 'vid, 'dev> {
     /// Refer to `buffer` at `offset` bytes from its beginning.
-    pub fn new(buffer: Ref<'b, Buffer>, offset: u32) -> Self {
+    pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, offset: u32) -> Self {
         Self(
             SDL_GPUBufferLocation {
                 buffer: buffer.handle.as_ptr(),
@@ -153,7 +156,7 @@ impl<'b> BufferLocation<'b> {
     }
 
     /// Same as [`Self::new`], with an offset of zero.
-    pub fn at_start(buffer: Ref<'b, Buffer>) -> Self {
+    pub fn at_start(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>) -> Self {
         Self::new(buffer, 0)
     }
 }
@@ -165,14 +168,14 @@ impl<'b> BufferLocation<'b> {
 /// `cycle` controls whether SDL cycles the buffer when it is already bound.
 #[doc(alias = "SDL_GPUStorageBufferReadWriteBinding")]
 #[derive(Clone, Copy)]
-pub struct StorageBufferReadWriteBinding<'b>(
+pub struct StorageBufferReadWriteBinding<'b, 'ctx, 'vid, 'dev>(
     SDL_GPUStorageBufferReadWriteBinding,
-    PhantomData<Ref<'b, Buffer>>,
+    PhantomData<Ref<'b, Buffer<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'b> StorageBufferReadWriteBinding<'b> {
+impl<'b, 'ctx, 'vid, 'dev> StorageBufferReadWriteBinding<'b, 'ctx, 'vid, 'dev> {
     /// Bind `buffer` for read-write access, using `cycle` when it is already bound.
-    pub fn new(buffer: Ref<'b, Buffer>, cycle: Cycle) -> Self {
+    pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, cycle: Cycle) -> Self {
         Self(
             SDL_GPUStorageBufferReadWriteBinding {
                 buffer: buffer.handle.as_ptr(),
@@ -187,12 +190,12 @@ impl<'b> StorageBufferReadWriteBinding<'b> {
 resource_new! {
    /// Represents a GPU buffer.
    /// Used for vertices, indices, indirect draw commands, and general compute data.
-   pub struct Buffer<> : SDL_GPUBuffer {
-       marker: PhantomData<()>,
+   pub struct Buffer<'ctx, 'vid, 'dev> : SDL_GPUBuffer {
+       marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
    }
 }
 
-impl Buffer {
+impl<'ctx, 'vid, 'dev> Buffer<'ctx, 'vid, 'dev> {
     /// Build a [`Buffer`] with additional parameters not available in [`BufferCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> BufferBuilder<'_> {
         BufferBuilder::new(props)
@@ -207,7 +210,10 @@ impl Buffer {
     /// Returns [`Err`] if the buffer cannot be created or its usage combination
     /// is invalid.
     #[doc(alias = "SDL_CreateGPUBuffer")]
-    pub fn new(device: Ref<Device>, create_info: &BufferCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &BufferCreateInfo,
+    ) -> Result<Self> {
         let handle =
             unsafe { SDL_CreateGPUBuffer(device.handle.as_ptr(), &raw const create_info.0) };
 
@@ -221,12 +227,12 @@ impl Buffer {
     /// resources, a buffer created with this module has no automatic destructor,
     /// so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUBuffer")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe { SDL_ReleaseGPUBuffer(device.handle.as_ptr(), self.handle.as_ptr()) };
     }
 }
 
-impl BufferHandle {
+impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// Upload data from a transfer buffer to this buffer on the GPU timeline.
     ///
     /// * `copy_pass` is the copy pass that records the upload.
@@ -284,7 +290,7 @@ impl BufferHandle {
     /// used by debugging tools. To name a buffer at creation time, prefer the
     /// [`BufferBuilder`] name property when constructing it.
     #[doc(alias = "SDL_SetGPUBufferName")]
-    pub fn set_name(&self, device: Ref<Device>, name: &CStr) {
+    pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
             SDL_SetGPUBufferName(device.handle.as_ptr(), self.handle.as_ptr(), name.as_ptr());
         };
