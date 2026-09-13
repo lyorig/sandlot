@@ -5,7 +5,6 @@ use sandlot::{
     properties::Properties,
     rect::Point,
     renderer::Renderer,
-    resource::Resource,
     texture::{Texture, TextureAccess},
     window::Window,
 };

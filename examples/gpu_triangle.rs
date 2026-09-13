@@ -12,7 +12,6 @@ use sandlot::{
     init::{Context, Video},
     properties::Properties,
     rect::Point,
-    resource::Resource,
     window::Window,
 };
 

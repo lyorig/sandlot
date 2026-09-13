@@ -8,7 +8,6 @@ use sandlot::{
     properties::Properties,
     rect::{Point, PointI32},
     renderer::Renderer,
-    resource::Resource,
     texture::{Texture, TextureAccess},
     window::Window,
 };

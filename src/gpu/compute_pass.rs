@@ -10,11 +10,7 @@
 
 use sdl3_sys::gpu::*;
 
-use crate::{
-    Result,
-    resource::resource_new,
-    resource::{Ref, Resource},
-};
+use crate::{Result, resource::Ref, resource::resource_new};
 
 use super::{
     buffer::{Buffer, StorageBufferReadWriteBinding},

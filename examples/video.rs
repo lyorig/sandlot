@@ -10,7 +10,6 @@ use sandlot::{
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
-    resource::Resource,
     window::Window,
 };
 

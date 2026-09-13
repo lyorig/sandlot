@@ -92,7 +92,7 @@ use sdl3_sys::properties::*;
 use crate::{
     Result,
     error::Error,
-    resource::{Handle, Ref, Resource},
+    resource::{Handle, Ref, RefMut, Resource},
     util::{opt2res_map, to_result},
 };
 
@@ -218,6 +218,14 @@ impl PropertiesHandle {
     pub(crate) fn id(self) -> SDL_PropertiesID {
         SDL_PropertiesID::new(self.handle.get())
     }
+
+    pub fn as_raw(&self) -> u32 {
+        self.handle.get()
+    }
+
+    pub fn as_inner(&self) -> NonZero<u32> {
+        self.handle
+    }
 }
 
 /// An ID that represents a properties set.
@@ -260,6 +268,18 @@ impl Properties {
             None => Err(Error::current()),
         }
     }
+
+    pub unsafe fn as_handle(&self) -> PropertiesHandle {
+        self.inner
+    }
+
+    pub fn as_ref(&self) -> Ref<'_, Properties> {
+        unsafe { Ref::from_handle(self.inner) }
+    }
+
+    pub fn as_mut(&mut self) -> RefMut<'_, Properties> {
+        unsafe { RefMut::from_handle(self.inner) }
+    }
 }
 
 impl std::ops::Deref for Properties {
@@ -278,21 +298,10 @@ impl std::ops::DerefMut for Properties {
 impl Handle for PropertiesHandle {
     type Raw = u32;
     type Inner = NonZero<Self::Raw>;
-
-    fn as_raw(&self) -> Self::Raw {
-        self.handle.get()
-    }
-
-    fn as_inner(&self) -> Self::Inner {
-        self.handle
-    }
 }
 
 impl Resource for Properties {
     type Handle = PropertiesHandle;
-    unsafe fn as_handle(&self) -> Self::Handle {
-        self.inner
-    }
 }
 
 impl Drop for Properties {

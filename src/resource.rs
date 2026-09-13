@@ -9,30 +9,10 @@ pub trait Handle: Copy {
 
     /// The actual type contained within the handle, i.e. `NonZero<SDL_Surface>`.
     type Inner: Copy;
-
-    fn as_raw(&self) -> Self::Raw;
-    fn as_inner(&self) -> Self::Inner;
 }
 
 pub trait Resource: Sized {
     type Handle: Handle;
-
-    /// Return the raw underlying handle of this object.
-    ///
-    /// # Safety
-    /// Think of this function as returning a pointer to `self`.
-    /// Handles are only valid as long as their owning objects.
-    unsafe fn as_handle(&self) -> Self::Handle;
-
-    /// Create a new reference tied to this resource.
-    fn as_ref(&self) -> Ref<'_, Self> {
-        unsafe { Ref::from_handle(self.as_handle()) }
-    }
-
-    /// Create a new mutable reference tied to this resource.
-    fn as_mut<'a>(&'a mut self) -> RefMut<'a, Self> {
-        unsafe { RefMut::from_handle(self.as_handle()) }
-    }
 }
 
 pub struct Ref<'a, T: Resource> {
@@ -41,21 +21,11 @@ pub struct Ref<'a, T: Resource> {
 }
 
 impl<T: Resource> Ref<'_, T> {
-    /// Construct a new reference from a handle, assuming it is valid.
-    /// This conversion is zero-cost.
-    ///
-    /// # Safety
-    /// The lifetime of the returned reference is inferred; functions building
-    /// on this one should tie it to the handle's owning object, if possible.
-    pub(crate) unsafe fn from_handle(handle: T::Handle) -> Self {
+    pub unsafe fn from_handle(handle: T::Handle) -> Self {
         Self {
             handle,
             _marker: PhantomData,
         }
-    }
-
-    fn as_raw(&self) -> <T::Handle as Handle>::Raw {
-        self.handle.as_raw()
     }
 }
 
@@ -81,21 +51,11 @@ pub struct RefMut<'a, T: Resource> {
 }
 
 impl<T: Resource> RefMut<'_, T> {
-    /// Construct a new reference from a handle, assuming it is valid.
-    /// This conversion is zero-cost.
-    ///
-    /// # Safety
-    /// The lifetime of the returned mutable reference is inferred; functions building
-    /// on this one should tie it to the handle's owning object, if possible.
-    pub(crate) unsafe fn from_handle(handle: T::Handle) -> Self {
+    pub unsafe fn from_handle(handle: T::Handle) -> Self {
         Self {
             handle,
             _marker: PhantomData,
         }
-    }
-
-    fn as_raw(&self) -> <T::Handle as Handle>::Raw {
-        self.handle.as_raw()
     }
 }
 
@@ -194,9 +154,12 @@ macro_rules! resource_new {
                     })
                 }
 
-                /// Convenience method to directly access the underlying pointer.
-                pub(crate) fn as_ptr(&self) -> *mut $sdl {
+                pub fn as_ptr(&self) -> *mut $sdl {
                     self.handle.as_ptr()
+                }
+
+                pub fn as_inner(&self) -> ::std::ptr::NonNull<$sdl> {
+                    self.handle
                 }
             }
 
@@ -218,6 +181,14 @@ macro_rules! resource_new {
                         None => Err($crate::error::Error::current()),
                     }
                 }
+
+                pub fn as_ref(&self) -> $crate::resource::Ref<'_, $owned<$($lt),*>> {
+                    unsafe { $crate::resource::Ref::from_handle(self.inner) }
+                }
+
+                pub unsafe fn as_handle(&self) -> [<$owned Handle>]<$($lt),*> {
+                    self.inner
+                }
             }
 
             impl<$($lt),*> ::std::ops::Deref for $owned<$($lt),*> {
@@ -237,22 +208,10 @@ macro_rules! resource_new {
             impl<$($lt),*> $crate::resource::Handle for [<$owned Handle>]<$($lt),*> {
                 type Raw = *mut $sdl;
                 type Inner = ::std::ptr::NonNull<$sdl>;
-
-                fn as_raw(&self) -> Self::Raw {
-                    self.handle.as_ptr()
-                }
-
-                fn as_inner(&self) -> Self::Inner {
-                    self.handle
-                }
             }
 
             impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
                 type Handle = [<$owned Handle>]<$($lt),*>;
-
-                unsafe fn as_handle(&self) -> Self::Handle {
-                    self.inner
-                }
             }
         }
     };

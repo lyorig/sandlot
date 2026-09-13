@@ -11,8 +11,8 @@ use crate::{
     Result,
     gpu::{ColorTargetDescription, VertexAttribute, VertexBufferDescription},
     properties::Properties,
+    resource::Ref,
     resource::resource_new,
-    resource::{Ref, Resource},
     util::impl_enum_transmute,
     util::mod_reexport,
 };
