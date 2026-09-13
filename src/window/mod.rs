@@ -116,7 +116,7 @@ use crate::{
     renderer::{Renderer, RendererHandle},
     resource::{Ref, resource_new},
     surface::Surface,
-    util::{c_ptr_to_str, impl_enum_transmute, mod_reexport, opt2ptr, opt2res_map, to_result},
+    util::{c_ptr_to_str, impl_enum_transmute, mod_reexport, opt2ptr, to_result},
 };
 
 // doc-only
@@ -244,14 +244,30 @@ pub enum ProgressState {
 
 impl_enum_transmute!(SDL_ProgressState, ProgressState, INVALID);
 
+/// Window flash operation.
+#[repr(i32)]
+#[derive(Clone, Copy, PartialEq, Eq)]
+#[doc(alias = "SDL_FlashOperation")]
+pub enum FlashOp {
+    /// Cancel any window flash state.
+    Cancel = SDL_FlashOperation::CANCEL.0,
+    /// Flash the window briefly to get attention.
+    Briefly = SDL_FlashOperation::BRIEFLY.0,
+    /// Flash the window until it gets focus.
+    UntilFocused = SDL_FlashOperation::UNTIL_FOCUSED.0,
+}
+
+impl_enum_transmute!(SDL_FlashOperation, FlashOp);
+
 #[derive(Clone, Copy)]
+#[doc(alias = "SDL_WindowID")]
 pub struct WindowId {
     inner: NonZero<u32>,
 }
 
 impl WindowId {
-    fn from_raw(raw: u32) -> Result<Self> {
-        opt2res_map(NonZero::new(raw), |inner| Self { inner })
+    fn from_raw(raw: u32) -> Option<Self> {
+        NonZero::new(raw).map(|inner| Self { inner })
     }
 
     const unsafe fn from_raw_unchecked(raw: u32) -> Self {
@@ -259,7 +275,7 @@ impl WindowId {
         Self { inner }
     }
 
-    pub(crate) const fn as_sdl(self) -> SDL_WindowID {
+    pub(crate) const fn as_raw(self) -> SDL_WindowID {
         SDL_WindowID(self.inner.get())
     }
 }
@@ -385,8 +401,8 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
 
     /// Request a window to demand attention from the user.
     #[doc(alias = "SDL_FlashWindow")]
-    pub fn flash(&self, op: SDL_FlashOperation) -> Result<()> {
-        to_result(unsafe { SDL_FlashWindow(self.handle.as_ptr(), op) })
+    pub fn flash(&self, op: FlashOp) -> Result<()> {
+        to_result(unsafe { SDL_FlashWindow(self.handle.as_ptr(), op.into()) })
     }
 
     /// Get the size of a window's client area.

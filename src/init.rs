@@ -378,7 +378,7 @@ impl<'ctx> VideoHandle<'ctx> {
         &self,
         id: WindowId,
     ) -> Option<resource::Ref<'a, Window<'ctx, '_>>> {
-        let ptr = unsafe { SDL_GetWindowFromID(id.as_sdl()) };
+        let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
         WindowHandle::from_ptr(ptr).map(|h| unsafe { resource::Ref::from_handle(h) })
     }
 }
