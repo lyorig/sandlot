@@ -117,11 +117,12 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd> GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 
 resource_new! {
     /// An opaque handle representing a graphics pipeline.
     /// Used during render passes.
-    pub struct GraphicsPipeline<> : SDL_GPUGraphicsPipeline {
-        marker: PhantomData<()>,
+    pub struct GraphicsPipeline<'ctx, 'vid, 'dev> : SDL_GPUGraphicsPipeline {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl GraphicsPipeline {
+
+impl<'ctx, 'vid, 'dev> GraphicsPipeline<'ctx, 'vid, 'dev> {
     /// Build a [`GraphicsPipeline`] with additional parameters not available in [`GraphicsPipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> GraphicsPipelineBuilder<'_> {
         GraphicsPipelineBuilder::new(props)
@@ -135,7 +136,10 @@ impl GraphicsPipeline {
     ///
     /// Returns [`Err`] if the graphics pipeline cannot be created.
     #[doc(alias = "SDL_CreateGPUGraphicsPipeline")]
-    pub fn new(device: Ref<Device>, create_info: &GraphicsPipelineCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &GraphicsPipelineCreateInfo,
+    ) -> Result<Self> {
         let handle = unsafe {
             SDL_CreateGPUGraphicsPipeline(device.handle.as_ptr(), &raw const create_info.0)
         };
@@ -150,7 +154,7 @@ impl GraphicsPipeline {
     /// - [`GraphicsPipeline::new`]
     /// - `op`
     pub fn with<F: FnOnce(Ref<Self>) -> Result<()>>(
-        device: Ref<Device>,
+        device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &GraphicsPipelineCreateInfo,
         f: F,
     ) -> Result<()> {
@@ -168,12 +172,12 @@ impl GraphicsPipeline {
     /// RAII resources, a graphics pipeline created with this module has no
     /// automatic destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUGraphicsPipeline")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe { SDL_ReleaseGPUGraphicsPipeline(device.handle.as_ptr(), self.handle.as_ptr()) };
     }
 }
 
-impl GraphicsPipelineHandle {
+impl<'ctx, 'vid, 'dev> GraphicsPipelineHandle<'ctx, 'vid, 'dev> {
     /// Bind this graphics pipeline to a render pass for rendering.
     ///
     /// `render_pass` is the render pass that will use the pipeline. A graphics
