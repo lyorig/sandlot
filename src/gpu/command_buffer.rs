@@ -109,11 +109,12 @@ impl<'s, 'd, 'ctx, 'vid, 'dev> BlitInfo<'s, 'd, 'ctx, 'vid, 'dev> {
 resource_new! {
     /// An opaque handle representing a command buffer.
     /// Most state is managed via command buffers, and is local to each one.
-    pub struct CommandBuffer<> : SDL_GPUCommandBuffer {
-        marker: PhantomData<()>,
+    pub struct CommandBuffer<'ctx, 'vid, 'dev> : SDL_GPUCommandBuffer {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl CommandBuffer {
+
+impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     /// Acquire a command buffer from a GPU device.
     ///
     /// `device` is the GPU device from which to acquire the buffer. The command
@@ -122,7 +123,7 @@ impl CommandBuffer {
     ///
     /// Returns [`Err`] if a command buffer cannot be acquired.
     #[doc(alias = "SDL_AcquireGPUCommandBuffer")]
-    pub fn new(device: Ref<Device>) -> Result<Self> {
+    pub fn new(device: Ref<'dev, Device<'ctx, 'vid>>) -> Result<Self> {
         let handle = unsafe { SDL_AcquireGPUCommandBuffer(device.handle.as_ptr()) };
         Self::from_ptr(handle)
     }
@@ -133,7 +134,10 @@ impl CommandBuffer {
     /// - [`CommandBuffer::new`]
     /// - `op`
     /// - [`CommandBuffer::submit`]
-    pub fn run<F: FnOnce(Ref<Self>) -> Result<()>>(device: Ref<Device>, op: F) -> Result<()> {
+    pub fn run<F: FnOnce(Ref<Self>) -> Result<()>>(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        op: F,
+    ) -> Result<()> {
         let cmdbuf = Self::new(device)?;
         op(cmdbuf.as_ref())?;
         cmdbuf.submit()
@@ -146,7 +150,7 @@ impl CommandBuffer {
     /// - `op`
     /// - [`CommandBuffer::submit_fence`]
     pub fn run_fence<F: FnOnce(Ref<Self>) -> Result<()>>(
-        device: Ref<Device>,
+        device: Ref<'dev, Device<'ctx, 'vid>>,
         op: F,
     ) -> Result<Fence> {
         let cmdbuf = Self::new(device)?;
@@ -191,7 +195,7 @@ impl CommandBuffer {
     }
 }
 
-impl CommandBufferHandle {
+impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// Acquire a texture for presentation from a claimed window.
     ///
     /// `wnd` is the claimed window. `tex_x` and `tex_y`, when present, receive
@@ -209,7 +213,7 @@ impl CommandBufferHandle {
         &self,
         wnd: Ref<Window>,
         (tex_x, tex_y): (Option<&mut u32>, Option<&mut u32>),
-    ) -> Result<Option<Ref<'_, Texture>>> {
+    ) -> Result<Option<Ref<'_, Texture<'ctx, 'vid, 'dev>>>> {
         let mut tex = MaybeUninit::uninit();
         let res = unsafe {
             SDL_AcquireGPUSwapchainTexture(
@@ -242,7 +246,7 @@ impl CommandBufferHandle {
         &self,
         wnd: Ref<Window>,
         (tex_x, tex_y): (Option<&mut u32>, Option<&mut u32>),
-    ) -> Result<Option<Ref<'_, Texture>>> {
+    ) -> Result<Option<Ref<'_, Texture<'ctx, 'vid, 'dev>>>> {
         let mut tex = MaybeUninit::uninit();
         let res = unsafe {
             SDL_WaitAndAcquireGPUSwapchainTexture(
