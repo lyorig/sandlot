@@ -148,11 +148,12 @@ impl SamplerCreateInfo {
 
 resource_new! {
     /// An opaque handle representing a sampler.
-    pub struct Sampler<> : SDL_GPUSampler {
-        marker: PhantomData<()>,
+    pub struct Sampler<'ctx, 'vid, 'dev> : SDL_GPUSampler {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl Sampler {
+
+impl<'ctx, 'vid, 'dev> Sampler<'ctx, 'vid, 'dev> {
     /// Build a [`Sampler`] with additional parameters not available in [`SamplerCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> SamplerBuilder<'_> {
         SamplerBuilder::new(props)
@@ -166,7 +167,10 @@ impl Sampler {
     ///
     /// Returns [`Err`] if the sampler cannot be created.
     #[doc(alias = "SDL_CreateGPUSampler")]
-    pub fn new(device: Ref<Device>, create_info: &SamplerCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &SamplerCreateInfo,
+    ) -> Result<Self> {
         let handle =
             unsafe { SDL_CreateGPUSampler(device.handle.as_ptr(), &raw const create_info.0) };
 
@@ -180,7 +184,7 @@ impl Sampler {
     /// RAII resources, a sampler created with this module has no automatic
     /// destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUSampler")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe { SDL_ReleaseGPUSampler(device.handle.as_ptr(), self.handle.as_ptr()) };
     }
 }

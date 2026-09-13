@@ -513,13 +513,13 @@ impl<'t> TextureLocation<'t> {
 /// texture and sampler are borrowed for `'t` and `'s`, respectively.
 #[doc(alias = "SDL_GPUTextureSamplerBinding")]
 #[derive(Clone, Copy)]
-pub struct TextureSamplerBinding<'t, 's>(
+pub struct TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev>(
     SDL_GPUTextureSamplerBinding,
     PhantomData<Ref<'t, Texture>>,
-    PhantomData<Ref<'s, Sampler>>,
+    PhantomData<Ref<'s, Sampler<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'t, 's> TextureSamplerBinding<'t, 's> {
+impl<'t, 's, 'ctx, 'vid, 'dev> TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev> {
     /// Bind `texture` to `sampler`.
     pub fn new(texture: Ref<'t, Texture>, sampler: Ref<'s, Sampler>) -> Self {
         Self(

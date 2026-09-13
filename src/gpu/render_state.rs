@@ -30,7 +30,7 @@ pub struct RenderStateCreateInfo<
 >(
     SDL_GPURenderStateCreateInfo,
     PhantomData<Ref<'frag, Shader>>,
-    PhantomData<&'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s>]>,
+    PhantomData<&'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s, 'ctx, 'vid, 'dev>]>,
     PhantomData<&'stex [Ref<'stex_t, Texture>]>,
     PhantomData<&'sbuf [Ref<'sbuf_b, Buffer<'ctx, 'vid, 'dev>>]>,
 );
@@ -54,7 +54,7 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
     /// texture, and storage buffer bindings to activate with the render state.
     pub fn new(
         fragment_shader: Ref<'frag, Shader>,
-        sampler_bindings: &'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s>],
+        sampler_bindings: &'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s, 'ctx, 'vid, 'dev>],
         storage_textures: &'stex [Ref<'stex_t, Texture>],
         storage_buffers: &'sbuf [Ref<'sbuf_b, Buffer>],
     ) -> Self {
