@@ -8,11 +8,12 @@
     - structs which contained multiple tied objects have become self-referential and will require changes
 - Subsystems!
   - now backed by proper types, they're required to initialize relevant objects and ensure lifetime safety
+  - created via `init` (as opposed to the previous `new`)
 
 ```rust
 let wnd;
 {
-    let video = Video::new()?;
+    let video = Video::init(&ctx)?;
     wnd = Window::new(video.as_ref(), /* ... */) // won't compile
 }
 ```

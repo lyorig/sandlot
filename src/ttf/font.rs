@@ -446,7 +446,7 @@ impl<'ttf> Font<'ttf> {
     ///
     /// See [`Context::open`] for remarks.
     #[doc(alias = "TTF_OpenFont")]
-    pub fn new(_ctx: &'ttf Context, file: &CStr, point_size: f32) -> Result<Self> {
+    pub fn open(_ctx: &'ttf Context, file: &CStr, point_size: f32) -> Result<Self> {
         unsafe { Self::new_unchecked(file, point_size) }
     }
 
