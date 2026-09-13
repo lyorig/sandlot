@@ -68,12 +68,12 @@ impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 
 resource_new! {
     /// An efficient driver-specific representation of pixel data.
-    pub struct Texture<> : SDL_Texture, ~SDL_DestroyTexture {
-        marker: PhantomData<()>,
+    pub struct Texture<'rnd, 'ctx, 'vid, 'wnd> : SDL_Texture, ~SDL_DestroyTexture {
+        marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 }
 
-impl TextureHandle {
+impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {
     /// Get the size of a texture, as floating point values.
     #[doc(alias = "SDL_GetTextureSize")]
     pub fn size(&self) -> PointF32 {
@@ -103,8 +103,9 @@ impl TextureHandle {
     ///
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRendererFromTexture")]
-    pub fn renderer(&self) -> Option<RendererHandle> {
+    pub fn renderer(&self) -> Option<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>> {
         RendererHandle::from_ptr(unsafe { SDL_GetRendererFromTexture(self.handle.as_ptr()) })
+            .map(|handle| unsafe { Ref::from_handle(handle) })
     }
 
     /// Set the scale mode used for texture scale operations.
@@ -123,7 +124,7 @@ impl TextureHandle {
     }
 }
 
-impl traits::BlendMode for TextureHandle {
+impl traits::BlendMode for TextureHandle<'_, '_, '_, '_> {
     /// Get the blend mode used for texture copy operations.
     #[doc(alias = "SDL_GetTextureBlendMode")]
     fn blend_mode(&self) -> BlendMode {
@@ -149,7 +150,7 @@ impl traits::BlendMode for TextureHandle {
     }
 }
 
-impl traits::ColorModU8 for TextureHandle {
+impl traits::ColorModU8 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional color value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureColorMod")]
@@ -222,7 +223,7 @@ impl traits::ColorModU8 for TextureHandle {
     }
 }
 
-impl traits::ColorModF32 for TextureHandle {
+impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional color value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureColorModFloat")]
@@ -295,7 +296,7 @@ impl traits::ColorModF32 for TextureHandle {
     }
 }
 
-impl TextureHandle {
+impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {
     /// Get the properties associated with a texture.
     ///
     /// Read-only properties of this texture, as documented by
@@ -321,7 +322,7 @@ impl TextureHandle {
     }
 }
 
-impl Texture {
+impl<'rnd, 'ctx, 'vid, 'wnd> Texture<'rnd, 'ctx, 'vid, 'wnd> {
     /// Bind the builder to a renderer and an existing property group.
     ///
     /// Unlike the window, renderer and GPU device builders, the renderer is
@@ -341,11 +342,11 @@ impl Texture {
     /// The contents of a texture when first created are not defined.
     #[doc(alias = "SDL_CreateTexture")]
     pub fn new(
-        rnd: Ref<Renderer>,
+        rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
         fmt: PixelFormat,
         access: TextureAccess,
         size: PointI32,
-    ) -> Result<Texture> {
+    ) -> Result<Self> {
         Self::from_ptr(unsafe {
             SDL_CreateTexture(
                 rnd.handle.as_ptr(),
@@ -371,7 +372,10 @@ impl Texture {
     /// `SDL_PROP_TEXTURE_FORMAT_NUMBER` property (see
     /// [`TextureHandle::properties`]).
     #[doc(alias = "SDL_CreateTextureFromSurface")]
-    pub fn from_surface(rnd: Ref<Renderer>, surf: Ref<Surface>) -> Result<Texture> {
+    pub fn from_surface(
+        rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
+        surf: Ref<Surface>,
+    ) -> Result<Self> {
         Self::from_ptr(unsafe {
             SDL_CreateTextureFromSurface(rnd.handle.as_ptr(), surf.handle.as_ptr())
         })

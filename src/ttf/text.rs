@@ -536,7 +536,7 @@ impl TextHandle {
     ///
     /// The text must have been created using a surface text engine, i.e.
     /// [`Text::new`] combined with
-    /// [`TextHandle::set_engine`] and
+    /// [`TTF_SetTextEngine`] and
     /// [`SurfaceEngine::new`](crate::ttf::SurfaceEngine::new).
     #[doc(alias = "TTF_DrawSurfaceText")]
     pub fn draw_to_surface(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
@@ -572,7 +572,7 @@ impl TextHandle {
 impl Text {
     /// Create a text object from UTF-8 text and a text engine.
     ///
-    /// The engine may be set afterwards via [`TextHandle::set_engine`].
+    /// The engine may be set afterwards via [`TTF_SetTextEngine`].
     #[doc(alias = "TTF_CreateText")]
     pub fn new(font: Ref<Font>, text: &str) -> Result<Self> {
         let text = RtStr::new(text);

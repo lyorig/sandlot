@@ -21,6 +21,10 @@ pub struct Ref<'a, T: Resource> {
 }
 
 impl<T: Resource> Ref<'_, T> {
+    /// # Safety
+    ///
+    /// The returned reference's lifetime is inferred.
+    /// Functions which build on this one should tie it to the owned resource.
     pub unsafe fn from_handle(handle: T::Handle) -> Self {
         Self {
             handle,
@@ -51,6 +55,10 @@ pub struct RefMut<'a, T: Resource> {
 }
 
 impl<T: Resource> RefMut<'_, T> {
+    /// # Safety
+    ///
+    /// The returned reference's lifetime is inferred.
+    /// Functions which build on this one should tie it to the owned resource.
     pub unsafe fn from_handle(handle: T::Handle) -> Self {
         Self {
             handle,
@@ -186,6 +194,10 @@ macro_rules! resource_new {
                     unsafe { $crate::resource::Ref::from_handle(self.inner) }
                 }
 
+                /// # Safety
+                ///
+                /// The caller must only use the returned handle within the lifetime
+                /// of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$owned Handle>]<$($lt),*> {
                     self.inner
                 }

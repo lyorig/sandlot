@@ -100,7 +100,7 @@ resource_new! {
     }
 }
 
-impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
+impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Get the name of a renderer.
     #[doc(alias = "SDL_GetRendererName")]
     pub fn name(&self) -> &str {
@@ -146,8 +146,13 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     ///
     /// Returns [`None`] for the default render target, which is the window
     /// for which the renderer was created.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only use the returned reference within the lifetime
+    /// of the backing texture.
     #[doc(alias = "SDL_GetRenderTarget")]
-    pub fn target(&self) -> Option<Ref<'_, Texture>> {
+    pub unsafe fn target<'a>(&self) -> Option<Ref<'a, Texture<'_, 'ctx, 'vid, 'wnd>>> {
         TextureHandle::from_ptr(unsafe { SDL_GetRenderTarget(self.handle.as_ptr()) })
             .map(|h| unsafe { Ref::from_handle(h) })
     }
@@ -378,9 +383,6 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// `src` selects the source rectangle, or the entire texture if [`None`].
     /// `dst` selects the destination rectangle, or the entire rendering
     /// target if [`None`].
-    ///
-    /// This function is a direct wrapper of SDL's `SDL_RenderTexture`;
-    /// see [`DrawBuilder`] for a neater way to draw to a renderer.
     #[doc(alias = "SDL_RenderTexture")]
     pub fn draw(
         &self,
@@ -795,8 +797,17 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
         self.set_target_opt(None)
     }
 
-    pub fn xchg_target(&self, tgt: Ref<Texture>) -> Result<Option<Ref<'_, Texture>>> {
-        let old = self.target();
+    /// Exchange the current target with a new one, returning the old target.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only use the returned reference within the lifetime
+    /// of the backing texture.
+    pub unsafe fn xchg_target<'a>(
+        &self,
+        tgt: Ref<'_, Texture<'_, 'ctx, 'vid, 'wnd>>,
+    ) -> Result<Option<Ref<'a, Texture<'_, 'ctx, 'vid, 'wnd>>>> {
+        let old = unsafe { self.target() };
         self.set_target(tgt)?;
         Ok(old)
     }

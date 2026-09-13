@@ -269,6 +269,10 @@ impl Properties {
         }
     }
 
+    /// # Safety
+    ///
+    /// The caller must only use the returned handle within the lifetime
+    /// of the backing property group.
     pub unsafe fn as_handle(&self) -> PropertiesHandle {
         self.inner
     }
