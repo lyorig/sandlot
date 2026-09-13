@@ -29,7 +29,7 @@ pub struct RenderStateCreateInfo<
     'dev,
 >(
     SDL_GPURenderStateCreateInfo,
-    PhantomData<Ref<'frag, Shader>>,
+    PhantomData<Ref<'frag, Shader<'ctx, 'vid, 'dev>>>,
     PhantomData<&'sbin [TextureSamplerBinding<'sbin_t, 'sbin_s, 'ctx, 'vid, 'dev>]>,
     PhantomData<&'stex [Ref<'stex_t, Texture>]>,
     PhantomData<&'sbuf [Ref<'sbuf_b, Buffer<'ctx, 'vid, 'dev>>]>,

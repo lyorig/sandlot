@@ -64,15 +64,17 @@ impl_enum_transmute!(SDL_GPUPrimitiveType, PrimitiveType);
 /// not exposed by this constructor.
 #[doc(alias = "SDL_GPUGraphicsPipelineCreateInfo")]
 #[derive(Clone, Copy)]
-pub struct GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 'ctd>(
+pub struct GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>(
     SDL_GPUGraphicsPipelineCreateInfo,
-    PhantomData<Ref<'vs, Shader>>,
-    PhantomData<Ref<'fs, Shader>>,
+    PhantomData<Ref<'vs, Shader<'ctx, 'vid, 'dev>>>,
+    PhantomData<Ref<'fs, Shader<'ctx, 'vid, 'dev>>>,
     PhantomData<&'vbd [VertexBufferDescription]>,
     PhantomData<&'va [VertexAttribute]>,
     PhantomData<&'ctd [ColorTargetDescription]>,
 );
-impl<'vs, 'fs, 'vbd, 'va, 'ctd> GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 'ctd> {
+impl<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>
+    GraphicsPipelineCreateInfo<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>
+{
     /// Describe the shaders and fixed-function state of a graphics pipeline.
     ///
     /// * `vertex_shader` and `fragment_shader` are the shaders used by the pipeline.

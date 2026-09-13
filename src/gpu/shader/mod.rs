@@ -107,11 +107,12 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
 
 resource_new! {
     /// An opaque handle representing a compiled shader object.
-    pub struct Shader<> : SDL_GPUShader {
-        marker: PhantomData<()>,
+    pub struct Shader<'ctx, 'vid, 'dev> : SDL_GPUShader {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl Shader {
+
+impl<'ctx, 'vid, 'dev> Shader<'ctx, 'vid, 'dev> {
     /// Build a [`Shader`] with additional parameters not available in [`ShaderCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ShaderBuilder<'_> {
         ShaderBuilder::new(props)
@@ -126,7 +127,10 @@ impl Shader {
     ///
     /// Returns [`Err`] if the shader cannot be created.
     #[doc(alias = "SDL_CreateGPUShader")]
-    pub fn new(device: Ref<Device>, create_info: &ShaderCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &ShaderCreateInfo,
+    ) -> Result<Self> {
         let handle =
             unsafe { SDL_CreateGPUShader(device.handle.as_ptr(), &raw const create_info.0) };
 
@@ -140,7 +144,7 @@ impl Shader {
     /// resources, a shader created with this module has no automatic destructor,
     /// so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUShader")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe {
             SDL_ReleaseGPUShader(device.handle.as_ptr(), self.handle.as_ptr());
         }
