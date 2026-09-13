@@ -53,10 +53,15 @@ impl IndirectDispatchCommand {
 
 resource_new! {
     /// An opaque handle representing a compute pass.
-    /// Transient; invalid once the pass ends.
-    pub struct ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUComputePass, ~SDL_EndGPUComputePass {
+    /// Transient and invalid once the pass ends.
+    pub struct ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUComputePass {
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
+
+    /// Ends the current compute pass.
+    ///
+    /// All bound compute state on the command buffer is unset. The compute pass handle is now invalid.
+    ~SDL_EndGPUComputePass
 }
 
 impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> {

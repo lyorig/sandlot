@@ -87,9 +87,12 @@ impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 
 resource_new! {
     /// An opaque handle representing the SDL_GPU context.
-    pub struct Device<'ctx, 'vid> : SDL_GPUDevice, ~SDL_DestroyGPUDevice {
+    pub struct Device<'ctx, 'vid> : SDL_GPUDevice {
         marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
+
+    /// Destroys a GPU context previously returned by [`Device::new`].
+    ~SDL_DestroyGPUDevice
 }
 impl<'ctx, 'vid> Device<'ctx, 'vid> {
     /// Create a GPU device.

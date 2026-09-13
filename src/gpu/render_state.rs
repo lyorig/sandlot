@@ -80,9 +80,12 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
 
 resource_new! {
     /// A custom GPU render state.
-    pub struct RenderState<> : SDL_GPURenderState, ~SDL_DestroyGPURenderState {
+    pub struct RenderState<> : SDL_GPURenderState {
         marker: PhantomData<()>,
     }
+
+    /// Destroys custom GPU render state.
+    ~SDL_DestroyGPURenderState
 }
 
 impl RenderStateHandle {

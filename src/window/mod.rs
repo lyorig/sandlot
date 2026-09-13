@@ -282,9 +282,19 @@ impl WindowId {
 
 resource_new! {
     /// Represents an OS window.
-    pub struct Window<'ctx, 'vid> : SDL_Window, ~SDL_DestroyWindow {
+    pub struct Window<'ctx, 'vid> : SDL_Window {
         marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
+
+    /// Destroys a window.
+    ///
+    /// Any child windows owned by the window will be recursively destroyed as
+    /// well.
+    ///
+    /// Note that on some platforms, the visible window may not actually be
+    /// removed from the screen until the SDL event loop is pumped again, even
+    /// though the window is no longer valid after this call.
+    ~SDL_DestroyWindow
 }
 
 /// Get the number of video drivers compiled into SDL.

@@ -126,9 +126,12 @@ macro_rules! expand_parens {
 /// use crate::{init::{Ref, Video}, resource::resource_new};
 ///
 /// resource_new! {
-///     pub struct Window<'ctx, 'vid> : SDL_Window, ~SDL_DestroyWindow {
+///     pub struct Window<'ctx, 'vid> : SDL_Window {
 ///         marker: PhantomData<(Ref<'vid, Video<'ctx>>)>,
 ///     }
+///
+///     /// Destroys a window.
+///     ~SDL_DestroyWindow
 /// }
 /// ```
 ///
@@ -151,13 +154,13 @@ macro_rules! expand_parens {
 /// FIXME: Omit the `marker` field completely if no lifetimes are specified.
 macro_rules! resource_new {
     (
-        $(#[$meta:meta])*
+        $(#[$doc:meta])*
         pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
             marker: PhantomData<($($t:ty),*)>,
         }
     ) => {
         ::paste::paste! {
-            $(#[$meta])*
+            $(#[$doc])*
             #[derive(Clone, Copy)]
             #[doc(alias = "" $sdl "")]
             pub struct [<$owned Handle>]<$($lt),*> {
@@ -166,7 +169,7 @@ macro_rules! resource_new {
             }
 
 
-            $(#[$meta])*
+            $(#[$doc])*
             impl<$($lt),*> [<$owned Handle>]<$($lt),*> {
                 pub(crate) fn from_ptr(handle: *mut $sdl) -> Option<Self> {
                     ::std::ptr::NonNull::new(handle).map(|handle| Self {
@@ -184,7 +187,7 @@ macro_rules! resource_new {
                 }
             }
 
-            $(#[$meta])*
+            $(#[$doc])*
             #[doc(alias = "" $sdl "")]
             pub struct $owned<$($lt),*> {
                 inner: [<$owned Handle>]<$($lt),*>
@@ -254,13 +257,16 @@ macro_rules! resource_new {
     };
 
     (
-        $(#[$meta:meta])*
-        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty, ~$dtor:ident {
+        $(#[$doc:meta])*
+        pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
             marker: PhantomData<($($t:ty),*)>,
         }
+
+        $(#[$doc_dtor:meta])*
+        ~$dtor:ident
     ) => {
         $crate::resource::resource_new! {
-            $(#[$meta])*
+            $(#[$doc])*
             pub struct $owned<$($lt),*> : $sdl {
                 marker: PhantomData<($($t),*)>,
             }
@@ -268,6 +274,7 @@ macro_rules! resource_new {
 
         ::paste::paste! {
             impl<$($lt),*> ::std::ops::Drop for $owned<$($lt),*> {
+                $(#[$doc_dtor])*
                 #[doc(alias = "" $dtor "")]
                 fn drop(&mut self) {
                     unsafe { $dtor(self.inner.handle.as_ptr()) }

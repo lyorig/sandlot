@@ -35,9 +35,15 @@ impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding, INVALID);
 
 resource_new!(
     /// A text engine that draws text objects with the SDL GPU API.
-    pub struct GpuEngine<> : TTF_TextEngine, ~TTF_DestroyGPUTextEngine {
+    pub struct GpuEngine<> : TTF_TextEngine {
         marker: PhantomData<()>,
     }
+
+    /// Destroys a text engine created for drawing text with the SDL GPU API.
+    ///
+    /// All text created by this engine should be destroyed before calling this
+    /// function.
+    ~TTF_DestroyGPUTextEngine
 );
 
 impl GpuEngine {
@@ -78,9 +84,15 @@ impl GpuEngineHandle {
 
 resource_new!(
     /// A text engine that draws text objects to an `SDL_Surface`.
-    pub struct SurfaceEngine<> : TTF_TextEngine, ~TTF_DestroySurfaceTextEngine {
+    pub struct SurfaceEngine<> : TTF_TextEngine {
         marker: PhantomData<()>,
     }
+
+    /// Destroys a text engine created for drawing text on SDL surfaces.
+    ///
+    /// All text created by this engine should be destroyed before calling this
+    /// function.
+    ~TTF_DestroySurfaceTextEngine
 );
 
 impl SurfaceEngine {
@@ -93,9 +105,15 @@ impl SurfaceEngine {
 
 resource_new!(
     /// A text engine that draws text objects with an SDL 2D renderer.
-    pub struct RendererEngine<> : TTF_TextEngine, ~TTF_DestroyRendererTextEngine {
+    pub struct RendererEngine<> : TTF_TextEngine {
         marker: PhantomData<()>,
     }
+
+    /// Destroys a text engine created for drawing text on an SDL renderer.
+    ///
+    /// All text created by this engine should be destroyed before calling this
+    /// function.
+    ~TTF_DestroyRendererTextEngine
 );
 
 impl RendererEngine {

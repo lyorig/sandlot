@@ -13,9 +13,17 @@ use crate::{
 
 resource_new! {
     /// A font loaded from a TTF file.
-    pub struct Font<'ttf> : TTF_Font, ~TTF_CloseFont {
+    pub struct Font<'ttf> : TTF_Font {
         marker: PhantomData<(&'ttf Context)>,
     }
+
+    /// Disposes of a previously-created font.
+    ///
+    /// This frees any resources associated with the font. The font is not valid
+    /// after being passed to this function. String pointers from functions that
+    /// return information on this font are no longer valid after this call, as
+    /// well.
+    ~TTF_CloseFont
 }
 
 impl Clone for Font<'_> {

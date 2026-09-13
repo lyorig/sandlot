@@ -295,9 +295,15 @@ impl IndirectIndexedCommand {
 resource_new! {
     /// An opaque handle representing a render pass.
     /// Transient; invalid once the pass ends.
-    pub struct RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPURenderPass, ~SDL_EndGPURenderPass {
+    pub struct RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPURenderPass {
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
+
+    /// Ends the given render pass.
+    ///
+    /// All bound graphics state on the render pass command buffer is unset. The
+    /// render pass handle is now invalid.
+    ~SDL_EndGPURenderPass
 }
 
 impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> {

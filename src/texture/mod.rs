@@ -68,9 +68,12 @@ impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 
 resource_new! {
     /// An efficient driver-specific representation of pixel data.
-    pub struct Texture<'rnd, 'ctx, 'vid, 'wnd> : SDL_Texture, ~SDL_DestroyTexture {
+    pub struct Texture<'rnd, 'ctx, 'vid, 'wnd> : SDL_Texture {
         marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
+
+    /// Destroys the specified texture.
+    ~SDL_DestroyTexture
 }
 
 impl<'rnd, 'ctx, 'vid, 'wnd> TextureHandle<'rnd, 'ctx, 'vid, 'wnd> {

@@ -55,9 +55,12 @@ use crate::{
 
 resource_new! {
    /// A text object to be drawn using a text engine.
-   pub struct Text<> : TTF_Text, ~TTF_DestroyText {
+   pub struct Text<> : TTF_Text {
        marker: PhantomData<()>,
    }
+
+   /// Destroys a text object created by a text engine.
+   ~TTF_DestroyText
 }
 
 /// Text direction flags.

@@ -95,9 +95,14 @@ mod_reexport!(properties);
 
 resource_new! {
     /// Represents rendering state.
-    pub struct Renderer<'ctx, 'vid, 'wnd> : SDL_Renderer, ~SDL_DestroyRenderer {
+    pub struct Renderer<'ctx, 'vid, 'wnd> : SDL_Renderer {
         marker: PhantomData<(Ref<'wnd, Window<'ctx, 'vid>>)>,
     }
+
+    /// Destroys the rendering context for a window and frees all associated textures.
+    ///
+    /// This should be called before destroying the associated window.
+    ~SDL_DestroyRenderer
 }
 
 impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {

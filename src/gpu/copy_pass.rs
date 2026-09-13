@@ -13,9 +13,12 @@ use super::{buffer::BufferLocation, command_buffer::CommandBuffer, texture::Text
 resource_new! {
     /// An opaque handle representing a copy pass.
     /// Transient; invalid once the pass ends.
-    pub struct CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUCopyPass, ~SDL_EndGPUCopyPass {
+    pub struct CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUCopyPass {
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
+
+    /// Ends the current copy pass.
+    ~SDL_EndGPUCopyPass
 }
 
 impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> {
