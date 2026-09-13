@@ -438,12 +438,15 @@ impl<'tb> TextureTransferInfo<'tb> {
 /// layer, starts at `(x, y, z)`, and has `(width, height, depth)` dimensions.
 #[doc(alias = "SDL_GPUTextureRegion")]
 #[derive(Clone, Copy)]
-pub struct TextureRegion<'t>(SDL_GPUTextureRegion, PhantomData<Ref<'t, Texture>>);
-impl<'t> TextureRegion<'t> {
+pub struct TextureRegion<'t, 'ctx, 'vid, 'dev>(
+    SDL_GPUTextureRegion,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
+);
+impl<'t, 'ctx, 'vid, 'dev> TextureRegion<'t, 'ctx, 'vid, 'dev> {
     /// Describe a texture region at the given mip level, layer, position, and
     /// dimensions.
     pub fn new(
-        tex: Ref<'t, Texture>,
+        tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
         mip_level: u32,
         layer: u32,
         (x, y, z): (u32, u32, u32),
@@ -465,7 +468,7 @@ impl<'t> TextureRegion<'t> {
         Self(inner, PhantomData)
     }
 
-    pub fn whole_2d(tex: Ref<'t, Texture>, (w, h): (u32, u32)) -> Self {
+    pub fn whole_2d(tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>, (w, h): (u32, u32)) -> Self {
         Self::new(tex, 0, 0, (0, 0, 0), (w, h, 1))
     }
 }
@@ -476,15 +479,15 @@ impl<'t> TextureRegion<'t> {
 /// layer, plus the `(x, y, z)` coordinate within that subresource.
 #[doc(alias = "SDL_GPUTextureLocation")]
 #[derive(Clone, Copy)]
-pub struct TextureLocation<'t>(
+pub struct TextureLocation<'t, 'ctx, 'vid, 'dev>(
     pub(crate) SDL_GPUTextureLocation,
-    PhantomData<Ref<'t, Texture>>,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'t> TextureLocation<'t> {
+impl<'t, 'ctx, 'vid, 'dev> TextureLocation<'t, 'ctx, 'vid, 'dev> {
     /// Describe a location at the given mip level, layer, and coordinate.
     pub fn new(
-        tex: Ref<'t, Texture>,
+        tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
         mip_level: u32,
         layer: u32,
         (x, y, z): (u32, u32, u32),
@@ -502,7 +505,7 @@ impl<'t> TextureLocation<'t> {
     }
 
     /// Same as [`Self::new`], with all parameters set to zero.
-    pub fn at_start(tex: Ref<'t, Texture>) -> Self {
+    pub fn at_start(tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>) -> Self {
         Self::new(tex, 0, 0, (0, 0, 0))
     }
 }
@@ -515,7 +518,7 @@ impl<'t> TextureLocation<'t> {
 #[derive(Clone, Copy)]
 pub struct TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev>(
     SDL_GPUTextureSamplerBinding,
-    PhantomData<Ref<'t, Texture>>,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
     PhantomData<Ref<'s, Sampler<'ctx, 'vid, 'dev>>>,
 );
 
@@ -542,14 +545,19 @@ impl<'t, 's, 'ctx, 'vid, 'dev> TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev> {
 /// whether SDL cycles the texture when it is already bound.
 #[doc(alias = "SDL_GPUStorageTextureReadWriteBinding")]
 #[derive(Clone, Copy)]
-pub struct StorageTextureReadWriteBinding<'t>(
+pub struct StorageTextureReadWriteBinding<'t, 'ctx, 'vid, 'dev>(
     SDL_GPUStorageTextureReadWriteBinding,
-    PhantomData<Ref<'t, Texture>>,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'t> StorageTextureReadWriteBinding<'t> {
+impl<'t, 'ctx, 'vid, 'dev> StorageTextureReadWriteBinding<'t, 'ctx, 'vid, 'dev> {
     /// Bind the selected mip level and layer of `texture` for read-write access.
-    pub fn new(texture: Ref<'t, Texture>, mip_level: u32, layer: u32, cycle: Cycle) -> Self {
+    pub fn new(
+        texture: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
+        mip_level: u32,
+        layer: u32,
+        cycle: Cycle,
+    ) -> Self {
         Self(
             SDL_GPUStorageTextureReadWriteBinding {
                 texture: texture.handle.as_ptr(),
@@ -570,12 +578,16 @@ impl<'t> StorageTextureReadWriteBinding<'t> {
 /// at `(x, y)` and has dimensions `(w, h)`.
 #[doc(alias = "SDL_GPUBlitRegion")]
 #[derive(Clone, Copy)]
-pub struct BlitRegion<'t>(pub(crate) SDL_GPUBlitRegion, PhantomData<Ref<'t, Texture>>);
-impl<'t> BlitRegion<'t> {
+pub struct BlitRegion<'t, 'ctx, 'vid, 'dev>(
+    pub(crate) SDL_GPUBlitRegion,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
+);
+
+impl<'t, 'ctx, 'vid, 'dev> BlitRegion<'t, 'ctx, 'vid, 'dev> {
     /// Describe a blit region at the given mip level, layer or depth plane, and
     /// position.
     pub fn new(
-        tex: Ref<'t, Texture>,
+        tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
         mip_level: u32,
         layer_or_depth_plane: u32,
         (x, y, w, h): (u32, u32, u32, u32),
@@ -598,11 +610,12 @@ impl<'t> BlitRegion<'t> {
 
 resource_new! {
     /// An opaque handle representing a texture.
-    pub struct Texture<> : SDL_GPUTexture {
-        marker: PhantomData<()>,
+    pub struct Texture<'ctx, 'vid, 'dev> : SDL_GPUTexture {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl Texture {
+
+impl<'ctx, 'vid, 'dev> Texture<'ctx, 'vid, 'dev> {
     /// Build a [`Texture`] with additional parameters not available in [`TextureCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> TextureBuilder<'_> {
         TextureBuilder::new(props)
@@ -618,7 +631,10 @@ impl Texture {
     /// Returns [`Err`] if the texture cannot be created or its usage combination
     /// is invalid.
     #[doc(alias = "SDL_CreateGPUTexture")]
-    pub fn new(device: Ref<Device>, create_info: &TextureCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &TextureCreateInfo,
+    ) -> Result<Self> {
         let handle =
             unsafe { SDL_CreateGPUTexture(device.handle.as_ptr(), &raw const create_info.0) };
 
@@ -632,12 +648,12 @@ impl Texture {
     /// RAII resources, a texture created with this module has no automatic
     /// destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUTexture")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe { SDL_ReleaseGPUTexture(device.handle.as_ptr(), self.handle.as_ptr()) };
     }
 }
 
-impl TextureHandle {
+impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     /// Copy data from this texture to a transfer buffer on the GPU timeline.
     ///
     /// * `copy_pass` records the download.
@@ -696,7 +712,7 @@ impl TextureHandle {
     /// used by debugging tools. To name a texture at creation time, prefer the
     /// texture-create name property when constructing it.
     #[doc(alias = "SDL_SetGPUTextureName")]
-    pub fn set_name(&self, device: Ref<Device>, name: &CStr) {
+    pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
             SDL_SetGPUTextureName(device.handle.as_ptr(), self.handle.as_ptr(), name.as_ptr());
         }

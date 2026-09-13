@@ -38,8 +38,10 @@ use super::{
 };
 
 /// Converts a raw swapchain texture pointer into a reference.
-/// A null pointer (e.g. too many frames in flight) yields `None`.
-fn swapchain_texture<'a>(ptr: *mut SDL_GPUTexture) -> Option<Ref<'a, Texture>> {
+/// A null pointer (e.g. too many frames in flight) yields [`None`].
+fn swapchain_texture<'a, 'ctx, 'vid, 'dev>(
+    ptr: *mut SDL_GPUTexture,
+) -> Option<Ref<'a, Texture<'ctx, 'vid, 'dev>>> {
     TextureHandle::from_ptr(ptr).map(|handle| unsafe { Ref::from_handle(handle) })
 }
 
@@ -69,18 +71,18 @@ impl_enum_transmute!(SDL_FlipMode, FlipMode);
 /// already-bound destination texture.
 #[doc(alias = "SDL_GPUBlitInfo")]
 #[derive(Clone, Copy)]
-pub struct BlitInfo<'s, 'd>(
+pub struct BlitInfo<'s, 'd, 'ctx, 'vid, 'dev>(
     SDL_GPUBlitInfo,
-    PhantomData<Ref<'s, Texture>>,
-    PhantomData<Ref<'d, Texture>>,
+    PhantomData<Ref<'s, Texture<'ctx, 'vid, 'dev>>>,
+    PhantomData<Ref<'d, Texture<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'s, 'd> BlitInfo<'s, 'd> {
+impl<'s, 'd, 'ctx, 'vid, 'dev> BlitInfo<'s, 'd, 'ctx, 'vid, 'dev> {
     /// Describe a blit from `source` to `destination` with the given load,
     /// clear, flip, filter, and cycling behavior.
     pub fn new(
-        source: BlitRegion<'s>,
-        destination: BlitRegion<'d>,
+        source: BlitRegion<'s, 'ctx, 'vid, 'dev>,
+        destination: BlitRegion<'d, 'ctx, 'vid, 'dev>,
         load_op: LoadOp,
         clear_color: RgbaF32,
         flip_mode: FlipMode,

@@ -109,24 +109,24 @@ impl Viewport {
 /// or resolved; cycling applies when a bound texture is written.
 #[doc(alias = "SDL_GPUColorTargetInfo")]
 #[derive(Clone, Copy)]
-pub struct ColorTargetInfo<'t, 'rt>(
+pub struct ColorTargetInfo<'t, 'rt, 'ctx, 'vid, 'dev>(
     SDL_GPUColorTargetInfo,
-    PhantomData<Ref<'t, Texture>>,
-    PhantomData<Ref<'rt, Texture>>,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
+    PhantomData<Ref<'rt, Texture<'ctx, 'vid, 'dev>>>,
 );
 
-impl<'t, 'rt> ColorTargetInfo<'t, 'rt> {
+impl<'t, 'rt, 'ctx, 'vid, 'dev> ColorTargetInfo<'t, 'rt, 'ctx, 'vid, 'dev> {
     /// Describe a color target, its clear/load/store behavior, optional resolve
     /// target, and cycling options.
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        tex: Ref<'t, Texture>,
+        tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>,
         mip_level: u32,
         layer_or_depth_plane: u32,
         clear_color: RgbaF32,
         load_op: LoadOp,
         store_op: StoreOp,
-        resolve_texture: Option<Ref<'rt, Texture>>,
+        resolve_texture: Option<Ref<'rt, Texture<'ctx, 'vid, 'dev>>>,
         (resolve_mip_level, resolve_layer): (u32, u32),
         cycle: Cycle,
         crt: CycleResolveTexture,
@@ -160,8 +160,11 @@ impl<'t, 'rt> ColorTargetInfo<'t, 'rt> {
 /// multisample resolves, and layers above 255 are not supported by SDL's ABI.
 #[doc(alias = "SDL_GPUDepthStencilTargetInfo")]
 #[derive(Clone, Copy)]
-pub struct DepthStencilTargetInfo<'t>(SDL_GPUDepthStencilTargetInfo, PhantomData<Ref<'t, Texture>>);
-impl<'t> DepthStencilTargetInfo<'t> {
+pub struct DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev>(
+    SDL_GPUDepthStencilTargetInfo,
+    PhantomData<Ref<'t, Texture<'ctx, 'vid, 'dev>>>,
+);
+impl<'t, 'ctx, 'vid, 'dev> DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev> {
     /// Describe depth/stencil clear, load/store, cycling, mip-level, and layer
     /// behavior.
     pub fn new(
