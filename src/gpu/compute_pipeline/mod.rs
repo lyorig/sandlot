@@ -97,11 +97,12 @@ impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
 resource_new! {
     /// An opaque handle representing a compute pipeline.
     /// Used during compute passes.
-    pub struct ComputePipeline<> : SDL_GPUComputePipeline {
-        marker: PhantomData<()>,
+    pub struct ComputePipeline<'ctx, 'vid, 'dev> : SDL_GPUComputePipeline {
+        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
-impl ComputePipeline {
+
+impl<'ctx, 'vid, 'dev> ComputePipeline<'ctx, 'vid, 'dev> {
     /// Build a [`ComputePipeline`] with additional parameters not available in [`ComputePipelineCreateInfo`].
     pub fn builder(props: Ref<'_, Properties>) -> ComputePipelineBuilder<'_> {
         ComputePipelineBuilder::new(props)
@@ -116,7 +117,10 @@ impl ComputePipeline {
     ///
     /// Returns [`Err`] if the pipeline cannot be created.
     #[doc(alias = "SDL_CreateGPUComputePipeline")]
-    pub fn new(device: Ref<Device>, create_info: &ComputePipelineCreateInfo) -> Result<Self> {
+    pub fn new(
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        create_info: &ComputePipelineCreateInfo,
+    ) -> Result<Self> {
         let handle = unsafe {
             SDL_CreateGPUComputePipeline(device.handle.as_ptr(), &raw const create_info.0)
         };
@@ -131,7 +135,7 @@ impl ComputePipeline {
     /// RAII resources, a compute pipeline created with this module has no
     /// automatic destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUComputePipeline")]
-    pub fn drop(self, device: Ref<Device>) {
+    pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe { SDL_ReleaseGPUComputePipeline(device.handle.as_ptr(), self.handle.as_ptr()) };
     }
 }

@@ -38,22 +38,22 @@ impl<'p> ComputePipelineBuilder<'p> {
         }
     }
 
-    pub fn build(
+    pub fn build<'ctx, 'vid, 'dev>(
         &self,
-        device: Ref<Device>,
-        mut create_info: ComputePipelineCreateInfo,
-    ) -> Result<ComputePipeline> {
+        device: Ref<'dev, Device<'ctx, 'vid>>,
+        mut create_info: ComputePipelineCreateInfo<'_, '_>,
+    ) -> Result<ComputePipeline<'ctx, 'vid, 'dev>> {
         create_info.0.props = self.props.id();
         ComputePipeline::new(device, &create_info)
     }
 
     /// Creates a [`ComputePipeline`] using [`ComputePipelineCreateInfo`],
     /// then removes all compute pipeline creation properties from the attached property group.
-    pub fn build_cleanup(
+    pub fn build_cleanup<'ctx, 'vid, 'dev>(
         &self,
-        device: Ref<Device>,
+        device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: ComputePipelineCreateInfo,
-    ) -> Result<ComputePipeline> {
+    ) -> Result<ComputePipeline<'ctx, 'vid, 'dev>> {
         let res = self.build(device, create_info);
         Self::clear_from(self.props);
         res
