@@ -26,12 +26,10 @@ use crate::{
     Result,
     error::Error,
     gpu::{EnableDebug, WaitAll},
+    init,
     properties::{Properties, PropertiesHandle},
-    resource::Ref,
-    resource::resource_new,
-    util::impl_enum_transmute,
-    util::mod_reexport,
-    util::to_result,
+    resource::{Ref, resource_new},
+    util::{impl_enum_transmute, mod_reexport, to_result},
     window::Window,
 };
 
@@ -89,11 +87,11 @@ impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 
 resource_new! {
     /// An opaque handle representing the SDL_GPU context.
-    pub struct Device<> : SDL_GPUDevice, ~SDL_DestroyGPUDevice {
-        marker: PhantomData<()>,
+    pub struct Device<'ctx, 'vid> : SDL_GPUDevice, ~SDL_DestroyGPUDevice {
+        marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
 }
-impl Device {
+impl<'ctx, 'vid> Device<'ctx, 'vid> {
     /// Create a GPU device.
     ///
     /// `formats` indicates the shader formats that the application can provide.
@@ -103,7 +101,11 @@ impl Device {
     ///
     /// Returns [`Err`] if the GPU device cannot be created.
     #[doc(alias = "SDL_CreateGPUDevice")]
-    pub fn new(formats: ShaderFormats, debug: EnableDebug) -> Result<Self> {
+    pub fn new(
+        _vid: init::Ref<'vid, init::Video<'ctx>>,
+        formats: ShaderFormats,
+        debug: EnableDebug,
+    ) -> Result<Self> {
         let fmts = SDL_GPUShaderFormat::new(formats.bits());
         let handle = unsafe { SDL_CreateGPUDevice(fmts, debug.into(), std::ptr::null()) };
         Self::from_ptr(handle)
@@ -115,7 +117,7 @@ impl Device {
     }
 }
 
-impl DeviceHandle {
+impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// Claim a window and create its swapchain structure.
     ///
     /// `window` is the window to claim. It must be claimed before acquiring a
@@ -149,7 +151,7 @@ impl DeviceHandle {
             SDL_WindowSupportsGPUPresentMode(
                 self.handle.as_ptr(),
                 window.handle.as_ptr(),
-                SDL_GPUPresentMode::new(pm as _),
+                pm.into(),
             )
         }
     }
@@ -213,7 +215,7 @@ impl DeviceHandle {
     ///
     /// Returns [`Err`] if SDL cannot retrieve the driver name.
     #[doc(alias = "SDL_GetGPUDeviceDriver")]
-    pub fn driver(&self) -> Result<&str> {
+    pub fn driver(&self) -> Result<&'static str> {
         let raw = unsafe { SDL_GetGPUDeviceDriver(self.handle.as_ptr()) };
         if raw.is_null() {
             Err(Error::current())

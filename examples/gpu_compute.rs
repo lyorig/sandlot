@@ -21,7 +21,7 @@ cfg_select! {
 
 fn run() -> Result<()> {
     let ctx = Context::new();
-    let _vid = Video::init(&ctx)?;
+    let video = Video::init(&ctx)?;
 
     let props = Properties::global()?;
 
@@ -30,7 +30,7 @@ fn run() -> Result<()> {
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     let pipeline_info = ComputePipelineCreateInfo::new(
         COMPUTE_CODE,

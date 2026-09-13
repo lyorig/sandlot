@@ -6,7 +6,7 @@ use std::{
 
 use sdl3_sys::gpu::*;
 
-use crate::{Result, gpu::Device, properties::Properties, resource::Ref};
+use crate::{Result, gpu::Device, init, properties::Properties, resource::Ref};
 
 const CREATE_PROPERTIES: [*const c_char; 21] = [
     SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN,
@@ -231,14 +231,20 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
 
     /// Build the device.
     #[doc(alias = "SDL_CreateGPUDeviceWithProperties")]
-    pub fn build(&self) -> Result<Device> {
+    pub fn build<'ctx, 'vid>(
+        &self,
+        _vid: init::Ref<'vid, init::Video<'ctx>>,
+    ) -> Result<Device<'ctx, 'vid>> {
         Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) })
     }
 
     /// Build the device, and cleanup all properties.
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateGPUDeviceWithProperties")]
-    pub fn build_cleanup(&self) -> Result<Device> {
+    pub fn build_cleanup<'ctx, 'vid>(
+        &self,
+        _vid: init::Ref<'vid, init::Video<'ctx>>,
+    ) -> Result<Device<'ctx, 'vid>> {
         let res = Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res

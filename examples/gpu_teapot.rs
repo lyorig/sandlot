@@ -213,7 +213,7 @@ fn run() -> Result<()> {
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     sandlot::log!("Driver = {}", device.driver().unwrap_or("[unknown]"));
 

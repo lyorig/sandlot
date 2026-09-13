@@ -187,7 +187,7 @@ impl<'a, 'wnd, 'ctx, 'vid> RendererProperties<'a, 'wnd, 'ctx, 'vid> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER)
     }
 
-    pub fn gpu_device(&self) -> Option<Ref<'a, Device>> {
+    pub fn gpu_device(&self) -> Option<Ref<'a, Device<'ctx, 'vid>>> {
         let p = unsafe {
             self.inner
                 .pointer(SDL_PROP_RENDERER_GPU_DEVICE_POINTER, std::ptr::null_mut())

@@ -18,12 +18,12 @@ const RENDERER_CREATE_PROPERTIES: [*const c_char; 2] = [
 
 /// Builder for [`GpuEngine`], using
 /// [`TTF_CreateGPUTextEngineWithProperties`](https://wiki.libsdl.org/SDL3_ttf/TTF_CreateGPUTextEngineWithProperties).
-pub struct GpuEngineBuilder<'p, 'dev> {
+pub struct GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
     inner: Ref<'p, Properties>,
-    marker: PhantomData<Ref<'dev, Device>>,
+    marker: PhantomData<Ref<'dev, Device<'ctx, 'vid>>>,
 }
 
-impl<'p, 'dev> GpuEngineBuilder<'p, 'dev> {
+impl<'p, 'dev, 'ctx, 'vid> GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
         Self {
             inner,

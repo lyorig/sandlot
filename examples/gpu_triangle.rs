@@ -57,7 +57,7 @@ fn run() -> Result<()> {
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
-        .build_cleanup()?;
+        .build_cleanup(video.as_ref())?;
 
     let wnd = Window::builder(props)
         .title(c"sandlot GPU")
