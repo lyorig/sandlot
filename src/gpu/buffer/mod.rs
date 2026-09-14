@@ -23,8 +23,8 @@ bitflags! {
     /// Specifies how a buffer is intended to be used.
     ///
     /// At least one usage flag is required. Flags can be combined, although
-    /// some combinations are invalid, such as [`Self::VERTEX`] with
-    /// [`Self::INDEX`]. Multiple read usages may result in more conservative
+    /// some combinations are invalid, such as [`BufferUsageFlags::VERTEX`] with
+    /// [`BufferUsageFlags::INDEX`]. Multiple read usages may result in more conservative
     /// memory barriers. Unlike textures, read and write storage usages can be
     /// combined for simultaneous read-write access.
     ///
@@ -87,6 +87,7 @@ pub struct BufferRegion<'b, 'ctx, 'vid, 'dev>(
     SDL_GPUBufferRegion,
     PhantomData<Ref<'b, Buffer<'ctx, 'vid, 'dev>>>,
 );
+
 impl<'b, 'ctx, 'vid, 'dev> BufferRegion<'b, 'ctx, 'vid, 'dev> {
     /// Describe a region of `buffer` beginning at `offset` and extending for
     /// `size` bytes.
@@ -100,7 +101,7 @@ impl<'b, 'ctx, 'vid, 'dev> BufferRegion<'b, 'ctx, 'vid, 'dev> {
         Self(inner, PhantomData)
     }
 
-    /// Same as [`Self::new`], but with an offset of zero.
+    /// Same as [`BufferRegion::new`], but with an offset of zero.
     pub fn whole(buffer: Ref<'b, Buffer>, size: u32) -> Self {
         Self::new(buffer, 0, size)
     }
@@ -155,7 +156,7 @@ impl<'b, 'ctx, 'vid, 'dev> BufferLocation<'b, 'ctx, 'vid, 'dev> {
         )
     }
 
-    /// Same as [`Self::new`], with an offset of zero.
+    /// Same as [`BufferLocation::new`], with an offset of zero.
     pub fn at_start(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>) -> Self {
         Self::new(buffer, 0)
     }

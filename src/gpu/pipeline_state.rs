@@ -65,6 +65,8 @@ pub enum VertexInputRate {
     Instance = SDL_GPUVertexInputRate::INSTANCE.0,
 }
 
+impl_enum_transmute!(SDL_GPUVertexInputRate, VertexInputRate);
+
 /// How polygons are rasterized.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -75,6 +77,8 @@ pub enum FillMode {
     /// Draw polygon edges as line segments.
     Line = SDL_GPUFillMode::LINE.0,
 }
+
+impl_enum_transmute!(SDL_GPUFillMode, FillMode);
 
 /// The triangle-facing direction to cull.
 #[repr(i32)]
@@ -89,6 +93,8 @@ pub enum CullMode {
     Back = SDL_GPUCullMode::BACK.0,
 }
 
+impl_enum_transmute!(SDL_GPUCullMode, CullMode);
+
 /// The vertex winding treated as front-facing.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -99,6 +105,8 @@ pub enum FrontFace {
     /// Clockwise vertex winding is front-facing.
     Clockwise = SDL_GPUFrontFace::CLOCKWISE.0,
 }
+
+impl_enum_transmute!(SDL_GPUFrontFace, FrontFace);
 
 /// A factor used when blending source pixels with destination pixels.
 #[repr(i32)]
@@ -132,6 +140,8 @@ pub enum BlendFactor {
     /// `min(source alpha, 1 - destination alpha)`.
     SrcAlphaSaturate = SDL_GPUBlendFactor::SRC_ALPHA_SATURATE.0,
 }
+
+impl_enum_transmute!(SDL_GPUBlendFactor, BlendFactor);
 
 /// The operation used to combine source and destination pixels.
 #[repr(i32)]
@@ -193,11 +203,6 @@ bitflags! {
     }
 }
 
-impl_enum_transmute!(SDL_GPUVertexInputRate, VertexInputRate);
-impl_enum_transmute!(SDL_GPUFillMode, FillMode);
-impl_enum_transmute!(SDL_GPUCullMode, CullMode);
-impl_enum_transmute!(SDL_GPUFrontFace, FrontFace);
-impl_enum_transmute!(SDL_GPUBlendFactor, BlendFactor);
 impl_enum_transmute!(SDL_GPUColorComponentFlags, ColorComponentFlags);
 
 /// Parameters for a vertex buffer used by a graphics pipeline.

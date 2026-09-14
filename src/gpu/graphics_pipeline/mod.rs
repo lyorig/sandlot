@@ -31,7 +31,7 @@ mod_reexport!(builder);
 
 /// The primitive topology of a graphics pipeline.
 ///
-/// When using [`Self::PointList`], the vertex shader must output a point size:
+/// When using [`PrimitiveType::PointList`], the vertex shader must output a point size:
 /// HLSL targeting SPIR-V uses `[[vk::builtin("PointSize")]]`, GLSL uses
 /// `gl_PointSize`, and MSL uses `[[point_size]]`. Sized points are not supported
 /// by D3D12; point sizes other than 1 are ignored.

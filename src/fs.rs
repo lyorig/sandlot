@@ -53,19 +53,19 @@ use crate::init::ContextHandle;
 ///
 /// | Folder | Windows | macOS/iOS | tvOS | Unix (XDG) | Haiku | Emscripten |
 /// | ------ | ------- | --------- | ---- | ---------- | ----- | ---------- |
-/// | [`Self::Home`] | yes | yes | | yes | yes | yes |
-/// | [`Self::Desktop`] | yes | yes | | yes | yes | |
-/// | [`Self::Documents`] | yes | yes | | yes | | |
-/// | [`Self::Downloads`] | Vista and later | yes | | yes | | |
-/// | [`Self::Music`] | yes | yes | | yes | | |
-/// | [`Self::Pictures`] | yes | yes | | yes | | |
-/// | [`Self::PublicShare`] | | yes | | yes | | |
-/// | [`Self::SavedGames`] | Vista and later | | | | | |
-/// | [`Self::Screenshots`] | Vista and later | | | | | |
-/// | [`Self::Templates`] | yes | | | yes | | |
-/// | [`Self::Videos`] | yes | yes | | yes | | |
+/// | [`Folder::Home`] | yes | yes | | yes | yes | yes |
+/// | [`Folder::Desktop`] | yes | yes | | yes | yes | |
+/// | [`Folder::Documents`] | yes | yes | | yes | | |
+/// | [`Folder::Downloads`] | Vista and later | yes | | yes | | |
+/// | [`Folder::Music`] | yes | yes | | yes | | |
+/// | [`Folder::Pictures`] | yes | yes | | yes | | |
+/// | [`Folder::PublicShare`] | | yes | | yes | | |
+/// | [`Folder::SavedGames`] | Vista and later | | | | | |
+/// | [`Folder::Screenshots`] | Vista and later | | | | | |
+/// | [`Folder::Templates`] | yes | | | yes | | |
+/// | [`Folder::Videos`] | yes | yes | | yes | | |
 ///
-/// On macOS and iOS, [`Self::Videos`] refers to the “Movies” folder.
+/// On macOS and iOS, [`Folder::Videos`] refers to the “Movies” folder.
 #[repr(i32)]
 #[derive(Clone, Copy, Debug)]
 pub enum Folder {
@@ -100,7 +100,7 @@ impl_enum_transmute!(SDL_Folder, Folder);
 /// The type of a filesystem entry.
 ///
 /// Filesystem entries such as devices and named pipes are reported as
-/// [`Self::Other`]. Symlinks are followed when determining the type.
+/// [`PathType::Other`]. Symlinks are followed when determining the type.
 #[repr(i32)]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum PathType {
@@ -119,7 +119,7 @@ impl_enum_transmute!(SDL_PathType, PathType);
 
 /// Information about a path on the filesystem.
 ///
-/// This mirrors `SDL_PathInfo`. The C field `type` is named [`Self::path_type`]
+/// This mirrors `SDL_PathInfo`. The C field `type` is named [`PathInfo::path_type`]
 /// to avoid clashing with the Rust keyword.
 #[doc(alias = "SDL_PathInfo")]
 #[repr(C)]

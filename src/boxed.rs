@@ -30,15 +30,15 @@ impl<T: ?Sized> Box<T> {
         self.into_raw_non_null().as_ptr()
     }
 
-    /// Like [`Self::into_raw`], but preserves the non-null invariant.
+    /// Like [`Box::into_raw`], but preserves the non-null invariant.
     pub(crate) fn into_raw_non_null(self) -> NonNull<T> {
         let ptr = self.ptr;
         std::mem::forget(self);
         ptr
     }
 
-    /// Reconstruct a [`Box`] from a pointer obtained via [`Self::into_raw`]
-    /// (or [`Self::into_raw_non_null`]).
+    /// Reconstruct a [`Box`] from a pointer obtained via [`Box::into_raw`]
+    /// (or [`Box::into_raw_non_null`]).
     ///
     /// # Safety
     /// `raw` must have been obtained from a [`Box`] of this module and must
@@ -49,8 +49,8 @@ impl<T: ?Sized> Box<T> {
         unsafe { Self::from_raw_non_null(NonNull::new_unchecked(raw)) }
     }
 
-    /// Reconstruct a [`Box`] from a pointer obtained via [`Self::into_raw`]
-    /// (or [`Self::into_raw_non_null`]).
+    /// Reconstruct a [`Box`] from a pointer obtained via [`Box::into_raw`]
+    /// (or [`Box::into_raw_non_null`]).
     ///
     /// # Safety
     /// `raw` must have been obtained from a [`Box`] of this module and must

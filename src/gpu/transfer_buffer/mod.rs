@@ -40,7 +40,7 @@ impl<'tb> TransferBufferLocation<'tb> {
         Self(inner, PhantomData)
     }
 
-    /// Like [`Self::new`] with an offset of zero.
+    /// Like [`TransferBufferLocation::new`] with an offset of zero.
     pub fn whole(tb: Ref<'tb, TransferBuffer>) -> Self {
         Self::new(tb, 0)
     }
@@ -167,7 +167,7 @@ impl TransferBufferHandle {
     /// pointer refers to memory owned by the graphics driver; it must not be
     /// freed by the caller.
     ///
-    /// Returns [`Err`] if the buffer cannot be mapped. Call [`Self::unmap`]
+    /// Returns [`Err`] if the buffer cannot be mapped. Call [`TransferBufferHandle::unmap`]
     /// before encoding upload commands that use the buffer.
     #[doc(alias = "SDL_MapGPUTransferBuffer")]
     pub fn map(&self, device: Ref<Device>, cycle: Cycle) -> Result<NonNull<u8>> {

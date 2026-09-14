@@ -43,9 +43,9 @@ impl_enum_transmute!(SDL_GPUTextureType, TextureType);
 bitflags! {
     /// Specifies how a texture is intended to be used.
     ///
-    /// At least one usage flag is required. [`Self::SAMPLER`] cannot be combined
+    /// At least one usage flag is required. [`TextureUsageFlags::SAMPLER`] cannot be combined
     /// with storage-read flags. Compute storage read and write usages allow one
-    /// shader to read and another to write; [`Self::COMPUTE_STORAGE_READ_WRITE`]
+    /// shader to read and another to write; [`TextureUsageFlags::COMPUTE_STORAGE_READ_WRITE`]
     /// additionally allows reads and writes in the same shader or compute pass.
     /// The simultaneous-read-write mode has no synchronization within a pass,
     /// so callers must avoid data races, and it is supported only by some formats.
@@ -504,7 +504,7 @@ impl<'t, 'ctx, 'vid, 'dev> TextureLocation<'t, 'ctx, 'vid, 'dev> {
         Self(inner, PhantomData)
     }
 
-    /// Same as [`Self::new`], with all parameters set to zero.
+    /// Same as [`TextureLocation::new`], with all parameters set to zero.
     pub fn at_start(tex: Ref<'t, Texture<'ctx, 'vid, 'dev>>) -> Self {
         Self::new(tex, 0, 0, (0, 0, 0))
     }

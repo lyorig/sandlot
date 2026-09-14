@@ -140,8 +140,7 @@ impl Context {
     /// Only call this on the main thread!
     #[doc(alias = "SDL_Init")]
     pub fn init() -> Result<Self> {
-        // This initializes the main thread and other basic stuff,
-        // like setting app metadata.
+        // This initializes the main thread and other basic stuff.
         if unsafe { SDL_Init(SDL_InitFlags::new(0)) } {
             Ok(Self {
                 handle: ContextHandle,
@@ -280,6 +279,7 @@ macro_rules! subsystem_new {
                 /// Upon going out of scope, the subsystem will be deinitialized.
                 ///
                 /// Returns [`Err`] if initialization fails.
+                #[doc(alias = "SDL_InitSubSystem")]
                 pub fn init(_ctx: $crate::init::Ref<'ctx, $crate::init::Context>) -> $crate::Result<Self> {
                     if unsafe { ::sdl3_sys::init::SDL_InitSubSystem(::sdl3_sys::init::SDL_InitFlags::$flag) } {
                         Ok(Self {
@@ -447,7 +447,7 @@ impl EventsHandle<'_> {
     /// and places it in the event queue. Without calls to this function no
     /// events would ever be placed on the queue. Usually the need for calls
     /// to it is hidden, since polling via [`EventIter`] or waiting via
-    /// [`Self::wait`] implicitly pump the event loop. However, if you are not
+    /// [`EventsHandle::wait`] implicitly pump the event loop. However, if you are not
     /// polling or waiting for events (e.g. you are filtering them), then you
     /// must call this function to force an event queue update.
     #[doc(alias = "SDL_PumpEvents")]
@@ -461,7 +461,7 @@ impl EventsHandle<'_> {
     ///
     /// # Remarks
     ///
-    /// This function may implicitly pump the event loop (see [`Self::pump`]).
+    /// This function may implicitly pump the event loop (see [`EventsHandle::pump`]).
     #[doc(alias = "SDL_WaitEvent")]
     pub fn wait(self) -> Result<Event> {
         let mut e = MaybeUninit::<SDL_Event>::uninit();

@@ -44,8 +44,8 @@ mod_reexport!(properties);
 
 /// The timing used to present swapchain textures to the OS.
 ///
-/// [`Self::Vsync`] is always supported. [`Self::Immediate`] and
-/// [`Self::Mailbox`] may not be supported on some systems; query support after
+/// [`PresentMode::Vsync`] is always supported. [`PresentMode::Immediate`] and
+/// [`PresentMode::Mailbox`] may not be supported on some systems; query support after
 /// claiming the window before selecting either mode.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -57,13 +57,15 @@ pub enum PresentMode {
     /// Present immediately for the lowest latency. Tearing may occur.
     Immediate = SDL_GPUPresentMode::IMMEDIATE.0,
     /// Wait for vertical blanking without presenting stale pending images.
-    /// Tearing is not possible, with lower visual latency than [`Self::Vsync`].
+    /// Tearing is not possible, with lower visual latency than [`PresentMode::Vsync`].
     Mailbox = SDL_GPUPresentMode::MAILBOX.0,
 }
 
+impl_enum_transmute!(SDL_GPUPresentMode, PresentMode);
+
 /// The texture format and color space of swapchain textures.
 ///
-/// [`Self::Sdr`] is always supported. Other compositions may not be supported
+/// [`SwapchainComposition::Sdr`] is always supported. Other compositions may not be supported
 /// on some systems; query support after claiming the window before selecting one.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -82,7 +84,6 @@ pub enum SwapchainComposition {
     Hdr10St2084 = SDL_GPUSwapchainComposition::HDR10_ST2084.0,
 }
 
-impl_enum_transmute!(SDL_GPUPresentMode, PresentMode);
 impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 
 resource_new! {
@@ -296,8 +297,8 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// mode.
     ///
     /// The operation fails if either requested value is unsupported. Use
-    /// [`Self::window_supports_gpu_present_mode`] and
-    /// [`Self::window_supports_gpu_swapchain_composition`] to check first.
+    /// [`DeviceHandle::window_supports_gpu_present_mode`] and
+    /// [`DeviceHandle::window_supports_gpu_swapchain_composition`] to check first.
     /// [`PresentMode::Vsync`] with [`SwapchainComposition::Sdr`] is always
     /// supported.
     ///

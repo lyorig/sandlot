@@ -281,7 +281,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// Begin a named debug group in the command-buffer call stream.
     ///
     /// `name` is a UTF-8 group name. Each call should be paired with
-    /// [`Self::pop_debug_group`]. On Direct3D 12, this requires
+    /// [`CommandBufferHandle::pop_debug_group`]. On Direct3D 12, this requires
     /// `WinPixEventRuntime.dll` to be available in `PATH` or beside the executable.
     /// On some backends, groups recorded inside a pass are scoped to that native
     /// pass, so they should be popped in the same pass.

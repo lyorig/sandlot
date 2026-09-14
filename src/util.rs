@@ -70,21 +70,23 @@ macro_rules! impl_enum_transmute {
         impl $crate::util::IsCopy for $sdl {}
         impl $crate::util::IsCopy for $wrap {}
 
-        impl $wrap {
-            /// Construct this enum from its SDL equivalent.
-            ///
-            /// # Safety
-            /// The caller must ensure that `value` is a valid enum variant of [`Self`],
-            /// e.g. `ScaleMode` cannot be constructed from `SDL_SCALEMODE_INVALID`.
-            pub const unsafe fn from_sdl_unchecked(value: $sdl) -> Self {
-                unsafe { ::std::mem::transmute(value) }
-            }
+        ::paste::paste! {
+            impl $wrap {
+                #[doc = r"Construct this enum from its SDL equivalent ([`" $sdl "`]).
 
-            /// Convert this enum to its SDL equivalent.
-            /// This is the inverse of [`Self::from_sdl_unchecked`], and is infallible, owing to [`Self`] being a subset
-            /// of the enum it's wrapping.
-            pub const fn to_sdl(self) -> $sdl {
-                unsafe { ::std::mem::transmute(self) }
+# Safety
+The caller must ensure that `value` is a valid enum variant of [`" $wrap "`],
+e.g. `ScaleMode` cannot be constructed from `SDL_SCALEMODE_INVALID`."]
+                pub const unsafe fn from_sdl_unchecked(value: $sdl) -> Self {
+                    unsafe { ::std::mem::transmute(value) }
+                }
+
+                #[doc = r"Convert this enum to its SDL equivalent.
+This is the inverse of [`" $wrap "::from_sdl_unchecked`], and is infallible, owing to [`" $wrap "`] being a subset
+of [`" $sdl "`]."]
+                pub const fn to_sdl(self) -> $sdl {
+                    unsafe { ::std::mem::transmute(self) }
+                }
             }
         }
 

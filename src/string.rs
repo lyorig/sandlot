@@ -11,7 +11,7 @@ use crate::{Result, boxed::Box};
 ///
 /// Unlike [`std::string::String`] which wraps a [`Vec<u8>`], [`String`] wraps a [`Box<c_char>`],
 /// as SDL always provides a null-terminated string pointer. This makes it borrow some [`CStr`]
-/// semantics (i.e. [`Self::count_bytes`]). However, SDL also often makes UTF-8 guarantees about string contents,
+/// semantics (i.e. [`String::count_bytes`]). However, SDL also often makes UTF-8 guarantees about string contents,
 /// so certain conversion methods become infallible (such as [`String::into_boxed_str`]).
 pub struct String {
     handle: Box<c_char>,
@@ -32,14 +32,14 @@ impl String {
     }
 
     /// Convert this SDL string to a byte slice.
-    /// This involves calculating the length via [`Self::count_bytes`].
+    /// This involves calculating the length via [`String::count_bytes`].
     pub fn to_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.handle.as_ptr().cast(), self.count_bytes()) }
     }
 
     /// Convert this SDL string to a string slice. This can be done,
     /// since all strings originating from SDL are guaranteed UTF-8.
-    /// This involves calculating its length via [`Self::count_bytes`].
+    /// This involves calculating its length via [`String::count_bytes`].
     pub fn to_str(&self) -> &str {
         unsafe { str::from_utf8_unchecked(self.to_bytes()) }
     }
@@ -51,7 +51,7 @@ impl String {
     }
 
     /// Transforms `self` into a boxed `str`.
-    /// This involves calculating the length via [`Self::count_bytes`].
+    /// This involves calculating the length via [`String::count_bytes`].
     pub fn into_boxed_str(self) -> Box<str> {
         let len = self.count_bytes();
         let ptr = self.handle.into_raw_non_null().cast::<u8>();
