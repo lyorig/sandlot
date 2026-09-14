@@ -4,7 +4,7 @@ use sdl3_sys::init::*;
 
 use crate::init::Context;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AppKind {
     /// A video game.
     Game,
@@ -14,6 +14,29 @@ pub enum AppKind {
     Application,
 }
 
+impl AppKind {
+    /// Try to parse an [`AppKind`] from the format expected by [`SDL_PROP_APP_METADATA_TYPE_STRING`].
+    ///
+    /// Returns [`None`] if the value is not recognized.
+    pub const fn from_sdl(value: &CStr) -> Option<Self> {
+        match value.to_bytes() {
+            b"game" => Some(AppKind::Game),
+            b"mediaplayer" => Some(AppKind::MediaPlayer),
+            b"application" => Some(AppKind::Application),
+            _ => None,
+        }
+    }
+
+    /// Get a string representation of this app kind in the format expected by [`SDL_PROP_APP_METADATA_TYPE_STRING`].
+    pub const fn to_sdl(self) -> &'static CStr {
+        match self {
+            AppKind::Game => c"game",
+            AppKind::MediaPlayer => c"mediaplayer",
+            AppKind::Application => c"application",
+        }
+    }
+}
+
 pub struct ContextBuilder;
 
 impl ContextBuilder {
@@ -21,6 +44,9 @@ impl ContextBuilder {
         Self {}
     }
 
+    /// # Panics
+    ///
+    /// This method simply calls [`Context::new`]. Consult its documentation for panic conditions.
     pub fn build(self) -> Context {
         Context::new()
     }
@@ -35,7 +61,7 @@ impl ContextBuilder {
     /// This will show up anywhere the OS shows the name of the application separately from window titles,
     /// such as volume control applets, etc.
     ///
-    /// This defaults to "SDL Application".
+    /// This defaults to the application's binary name, or "SDL Application" if that isn't available.
     pub fn name(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_NAME_STRING, value)
     }
@@ -96,14 +122,8 @@ impl ContextBuilder {
     ///
     /// Sandlot will keep the [`AppKind`] enum in sync with the SDL-provided types.
     ///
-    /// This has no default.
+    /// Defaults to [`AppKind::Application`].
     pub fn kind(self, value: AppKind) -> Self {
-        let cs = match value {
-            AppKind::Game => c"game",
-            AppKind::MediaPlayer => c"mediaplayer",
-            AppKind::Application => c"application",
-        };
-
-        self.set(SDL_PROP_APP_METADATA_TYPE_STRING, cs)
+        self.set(SDL_PROP_APP_METADATA_TYPE_STRING, value.to_sdl())
     }
 }

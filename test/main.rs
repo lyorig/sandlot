@@ -17,6 +17,7 @@ mod color;
 mod error;
 mod event;
 mod fs;
+mod init;
 mod log;
 mod string;
 mod texture;

@@ -11,10 +11,9 @@
 //! that SDL might have allocated, and crucially, it'll make sure that the display's resolution
 //! is back to what the user expects if you had previously changed it for your game.
 //!
-//! SDL3 apps are strongly encouraged to call `SDL_SetAppMetadata` at startup to fill in details
+//! Sandlot apps are strongly encouraged to call [`Context::builder`] at startup to fill in details
 //! about the program. This is completely optional, but it helps in small ways (we can provide
 //! an About dialog box for the macOS menu, we can name the app in the system's audio mixer, etc).
-//! Those that want to provide a lot of information should look at the more-detailed `SDL_SetAppMetadataProperty`.
 
 use std::{marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
 
@@ -38,6 +37,7 @@ use crate::{
 };
 
 mod_reexport!(builder);
+mod_reexport!(metadata);
 
 /// A zero-sized type that only exists to call [`SDL_Quit`].
 /// As such, think of it as a guard that creates a scope for
@@ -100,6 +100,16 @@ impl Context {
     #[doc(alias = "SDL_SetAppMetadataProperty")]
     pub fn builder() -> ContextBuilder {
         ContextBuilder::new()
+    }
+
+    /// Read the app metadata set via [`Self::builder`].
+    ///
+    /// The metadata lives in the global property group, so the returned
+    /// [`ContextMetadata`] is zero-sized and borrows this [`Context`].
+    ///
+    /// All metadata string values are UTF-8.
+    pub fn metadata(&self) -> ContextMetadata<'_> {
+        ContextMetadata::new()
     }
 
     /// Get the directory where the application was run from.
