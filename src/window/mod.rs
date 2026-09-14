@@ -517,7 +517,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     ///
     /// Returns the display containing the center of the window.
     #[doc(alias = "SDL_GetDisplayForWindow")]
-    pub fn display(&self) -> Result<Display> {
+    pub fn display(&self) -> Result<Display<'ctx, 'vid>> {
         let raw = unsafe { SDL_GetDisplayForWindow(self.as_raw()) };
         Display::from_sdl(raw)
     }

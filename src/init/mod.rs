@@ -30,19 +30,21 @@
 use std::{marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
 
 use sdl3_sys::{
-    events::{SDL_Event, SDL_PumpEvents, SDL_PushEvent, SDL_WaitEvent},
+    events::*,
     filesystem::{SDL_GetBasePath, SDL_GetUserFolder},
-    init::{SDL_Init, SDL_InitFlags, SDL_Quit},
+    init::*,
     keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
-    video::{SDL_GetGrabbedWindow, SDL_GetWindowFromID, SDL_GetWindows},
+    video::*,
 };
 
 use crate::{
     Result,
     boxed::Box,
+    display::Display,
     error::Error,
     event::{Event, EventIter},
     fs::Folder,
+    rect::{PointI32, RectI32},
     resource,
     util::{c_ptr_to_str, mod_reexport, opt2res_map, to_result},
     window::{Window, WindowHandle, WindowId},
@@ -228,10 +230,7 @@ pub struct Ref<'sub, T: Subsystem> {
 
 impl<T: Subsystem> Clone for Ref<'_, T> {
     fn clone(&self) -> Self {
-        Self {
-            handle: self.handle,
-            marker: self.marker,
-        }
+        *self
     }
 }
 
@@ -403,7 +402,7 @@ impl<'ctx> VideoHandle<'ctx> {
     ///
     /// # Remarks
     ///
-    /// The numeric ID is what [`SDL_WindowEvent`](sdl3_sys::events::SDL_WindowEvent) references, and is necessary
+    /// The numeric ID is what [`SDL_WindowEvent`] references, and is necessary
     /// to map these events to specific window objects.
     #[doc(alias = "SDL_GetWindowFromID")]
     pub unsafe fn window_from_id<'a>(
@@ -412,6 +411,36 @@ impl<'ctx> VideoHandle<'ctx> {
     ) -> Option<resource::Ref<'a, Window<'ctx, '_>>> {
         let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
         WindowHandle::from_ptr(ptr).map(|h| unsafe { resource::Ref::from_handle(h) })
+    }
+
+    /// Get a list of currently connected displays.
+    #[doc(alias = "SDL_GetDisplays")]
+    pub fn displays_all(&self) -> Result<Box<[Display<'ctx, '_>]>> {
+        let mut count = MaybeUninit::uninit();
+        let ptr = unsafe { SDL_GetDisplays(count.as_mut_ptr()) };
+
+        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
+    }
+
+    /// Return the primary display.
+    #[doc(alias = "SDL_GetPrimaryDisplay")]
+    pub fn display_primary(&self) -> Result<Display<'ctx, '_>> {
+        Display::from_sdl(unsafe { SDL_GetPrimaryDisplay() })
+    }
+
+    /// Get the display containing a point.
+    #[doc(alias = "SDL_GetDisplayForPoint")]
+    pub fn display_for_point(&self, point: PointI32) -> Result<Display<'ctx, '_>> {
+        Display::from_sdl(unsafe { SDL_GetDisplayForPoint(point.as_sdl_ptr()) })
+    }
+
+    /// Get the display primarily containing a rect.
+    ///
+    /// Returns the display entirely containing the rect, or closest to the
+    /// center of the rect.
+    #[doc(alias = "SDL_GetDisplayForRect")]
+    pub fn display_for_rect(&self, rect: RectI32) -> Result<Display<'ctx, '_>> {
+        Display::from_sdl(unsafe { SDL_GetDisplayForRect(rect.as_sdl_ptr()) })
     }
 }
 

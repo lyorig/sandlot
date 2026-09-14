@@ -21,14 +21,13 @@ use crate::{
     Result,
     boxed::Box,
     error::Error,
+    init,
     rect::{PointI32, RectI32},
-    util::boolenum,
-    util::impl_enum_transmute,
-    util::opt2res_map,
+    util::{boolenum, impl_enum_transmute, opt2res_map},
 };
 
 use sdl3_sys::video::*;
-use std::{ffi::CStr, mem::MaybeUninit, num::NonZero, ptr::NonNull};
+use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, num::NonZero, ptr::NonNull};
 
 boolenum!(
     /// Whether to include high-density display modes in enumeration.
@@ -70,49 +69,23 @@ impl std::fmt::Display for DisplayOrientation {
 /// in Rust (owing to lifetimes), so instead, the raw pointer is provided,
 /// offloading the risk to you.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
-pub struct Display {
+#[derive(Clone, Copy)]
+pub struct Display<'ctx, 'vid> {
     id: NonZero<u32>,
+    marker: PhantomData<init::Ref<'vid, init::Video<'ctx>>>,
 }
 
-impl Display {
+impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// Accepts [`NonZero`], since zero is an invalid display ID.
-    pub fn new(id: NonZero<u32>) -> Self {
-        Self { id }
+    pub(crate) fn new(id: NonZero<u32>) -> Self {
+        Self {
+            id,
+            marker: PhantomData,
+        }
     }
 
     pub(crate) fn from_sdl(id: SDL_DisplayID) -> Result<Self> {
-        opt2res_map(NonZero::new(id.0), |id| Self { id })
-    }
-
-    /// Get a list of currently connected displays.
-    #[doc(alias = "SDL_GetDisplays")]
-    pub fn all() -> Result<Box<[Self]>> {
-        let mut count = MaybeUninit::uninit();
-        let ptr = unsafe { SDL_GetDisplays(count.as_mut_ptr()) };
-
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
-    }
-
-    /// Return the primary display.
-    #[doc(alias = "SDL_GetPrimaryDisplay")]
-    pub fn primary() -> Result<Self> {
-        Self::from_sdl(unsafe { SDL_GetPrimaryDisplay() })
-    }
-
-    /// Get the display containing a point.
-    #[doc(alias = "SDL_GetDisplayForPoint")]
-    pub fn for_point(point: PointI32) -> Result<Self> {
-        Self::from_sdl(unsafe { SDL_GetDisplayForPoint(point.as_sdl_ptr()) })
-    }
-
-    /// Get the display primarily containing a rect.
-    ///
-    /// Returns the display entirely containing the rect, or closest to the
-    /// center of the rect.
-    #[doc(alias = "SDL_GetDisplayForRect")]
-    pub fn for_rect(rect: RectI32) -> Result<Self> {
-        Self::from_sdl(unsafe { SDL_GetDisplayForRect(rect.as_sdl_ptr()) })
+        opt2res_map(NonZero::new(id.0), |id| Self::new(id))
     }
 
     /// Returns the "raw" SDL handle type. Intended for interfacing with
@@ -121,9 +94,9 @@ impl Display {
         unsafe { std::mem::transmute(self.id) }
     }
 
-    /// Get the name of a display in UTF-8 encoding.
+    /// Get the name of a display.
     ///
-    /// The returned string is guaranteed to be valid UTF-8.
+    /// Although returned as a [`&CStr`](std::ffi::CStr), the returned string is guaranteed to be valid UTF-8.
     #[doc(alias = "SDL_GetDisplayName")]
     pub fn name(&self) -> Result<&CStr> {
         let ptr = unsafe { SDL_GetDisplayName(self.id()) };
@@ -247,7 +220,7 @@ impl Display {
     /// to be twice as big on this display, to aid in readability.
     ///
     /// After window creation,
-    /// [`crate::window::WindowHandle::display_scale`] should be used to query the content
+    /// [`WindowHandle::display_scale`](crate::window::WindowHandle::display_scale) should be used to query the content
     /// scale factor for individual windows instead of querying the display
     /// for a window and calling this function, as the per-window content
     /// scale factor may differ from the base value of the display it is on,

@@ -1,10 +1,10 @@
-use sandlot::{Result, display::Display, init::Context, init::Video};
+use sandlot::{Result, init::Context, init::Video};
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let _vid = Video::init(ctx.as_ref())?;
+    let vid = Video::init(ctx.as_ref())?;
 
-    for (i, disp) in Display::all()?.iter().copied().enumerate() {
+    for (i, disp) in vid.displays_all()?.iter().copied().enumerate() {
         println!(
             "Display #{}: \"{}\", bounds {} (usable {}), content scale = {:.2}",
             i,
@@ -15,7 +15,7 @@ fn run() -> Result<()> {
         )
     }
 
-    let p = Display::primary()?;
+    let p = vid.display_primary()?;
 
     println!("All primary desktop display modes:");
     for (x, y, hz) in p.fullscreen_modes()?.iter().map(|dm| {
