@@ -158,7 +158,7 @@ impl TextHandle {
     /// If the text looks blocky use linear filtering.
     #[doc(alias = "TTF_GetGPUTextDrawData")]
     pub unsafe fn gpu_draw_data(&self) -> Result<NonNull<TTF_GPUAtlasDrawSequence>> {
-        let data = unsafe { TTF_GetGPUTextDrawData(self.as_ptr()) };
+        let data = unsafe { TTF_GetGPUTextDrawData(self.as_raw()) };
         opt2res(NonNull::new(data))
     }
 
@@ -174,7 +174,7 @@ impl TextHandle {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            TTF_GetTextSize(self.handle.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            TTF_GetTextSize(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -187,7 +187,7 @@ impl TextHandle {
 
         unsafe {
             TTF_GetTextColor(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 &raw mut (*ptr).rgb.r,
                 &raw mut (*ptr).rgb.g,
                 &raw mut (*ptr).rgb.b,
@@ -207,7 +207,7 @@ impl TextHandle {
     pub fn set_color(&self, color: RgbaU8) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColor(
-                self.as_ptr(),
+                self.as_raw(),
                 color.rgb.r,
                 color.rgb.g,
                 color.rgb.b,
@@ -224,7 +224,7 @@ impl TextHandle {
         let ptr = color.as_mut_ptr();
         unsafe {
             TTF_GetTextColorFloat(
-                self.as_ptr(),
+                self.as_raw(),
                 &raw mut (*ptr).rgb.r,
                 &raw mut (*ptr).rgb.g,
                 &raw mut (*ptr).rgb.b,
@@ -244,7 +244,7 @@ impl TextHandle {
     pub fn set_color_float(&self, color: RgbaF32) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColorFloat(
-                self.as_ptr(),
+                self.as_raw(),
                 color.rgb.r,
                 color.rgb.g,
                 color.rgb.b,
@@ -260,7 +260,7 @@ impl TextHandle {
     /// This defaults to the direction of the font used by the text object.
     #[doc(alias = "TTF_GetTextDirection")]
     pub fn direction(&self) -> Direction {
-        let dir = unsafe { TTF_GetTextDirection(self.as_ptr()) };
+        let dir = unsafe { TTF_GetTextDirection(self.as_raw()) };
         unsafe { Direction::from_sdl_unchecked(dir) }
     }
 
@@ -272,7 +272,7 @@ impl TextHandle {
     /// not built with HarfBuzz support.
     #[doc(alias = "TTF_SetTextDirection")]
     pub fn set_direction(&self, direction: Direction) -> Result<()> {
-        to_result(unsafe { TTF_SetTextDirection(self.as_ptr(), direction.to_sdl()) })
+        to_result(unsafe { TTF_SetTextDirection(self.as_raw(), direction.to_sdl()) })
     }
 
     /// Get the script used for text shaping a text object.
@@ -287,7 +287,7 @@ impl TextHandle {
     /// This defaults to the script of the font used by the text object.
     #[doc(alias = "TTF_GetTextScript")]
     pub fn script(&self) -> u32 {
-        unsafe { TTF_GetTextScript(self.as_ptr()) }
+        unsafe { TTF_GetTextScript(self.as_raw()) }
     }
 
     /// Set the script to be used for text shaping a text object.
@@ -300,7 +300,7 @@ impl TextHandle {
     /// This function fails if SDL_ttf isn't built with HarfBuzz support.
     #[doc(alias = "TTF_SetTextScript")]
     pub fn set_script(&self, script: u32) -> Result<()> {
-        to_result(unsafe { TTF_SetTextScript(self.as_ptr(), script) })
+        to_result(unsafe { TTF_SetTextScript(self.as_raw(), script) })
     }
 
     /// Get the position of a text object.
@@ -311,7 +311,7 @@ impl TextHandle {
         let mut position = MaybeUninit::<PointI32>::uninit();
         let ptr = position.as_mut_ptr();
         to_result(unsafe {
-            TTF_GetTextPosition(self.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y)
+            TTF_GetTextPosition(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y)
         })?;
         Ok(unsafe { position.assume_init() })
     }
@@ -330,7 +330,7 @@ impl TextHandle {
     /// rebuilt.
     #[doc(alias = "TTF_SetTextPosition")]
     pub fn set_position(&self, position: PointI32) -> Result<()> {
-        to_result(unsafe { TTF_SetTextPosition(self.as_ptr(), position.x, position.y) })
+        to_result(unsafe { TTF_SetTextPosition(self.as_raw(), position.x, position.y) })
     }
 
     /// Get whether wrapping is enabled on a text object.
@@ -340,7 +340,7 @@ impl TextHandle {
     #[doc(alias = "TTF_GetTextWrapWidth")]
     pub fn wrap_width(&self) -> Result<i32> {
         let mut width = 0;
-        to_result(unsafe { TTF_GetTextWrapWidth(self.as_ptr(), &raw mut width) })?;
+        to_result(unsafe { TTF_GetTextWrapWidth(self.as_raw(), &raw mut width) })?;
         Ok(width)
     }
 
@@ -355,13 +355,13 @@ impl TextHandle {
     /// rebuilt.
     #[doc(alias = "TTF_SetTextWrapWidth")]
     pub fn set_wrap_width(&self, width: i32) -> Result<()> {
-        to_result(unsafe { TTF_SetTextWrapWidth(self.as_ptr(), width) })
+        to_result(unsafe { TTF_SetTextWrapWidth(self.as_raw(), width) })
     }
 
     /// Return whether whitespace is shown when wrapping a text object.
     #[doc(alias = "TTF_TextWrapWhitespaceVisible")]
     pub fn wrap_whitespace_visible(&self) -> bool {
-        unsafe { TTF_TextWrapWhitespaceVisible(self.as_ptr()) }
+        unsafe { TTF_TextWrapWhitespaceVisible(self.as_raw()) }
     }
 
     /// Set whether whitespace should be visible when wrapping a text object.
@@ -377,13 +377,13 @@ impl TextHandle {
     /// rebuilt.
     #[doc(alias = "TTF_SetTextWrapWhitespaceVisible")]
     pub fn set_wrap_whitespace_visible(&self, visible: bool) -> Result<()> {
-        to_result(unsafe { TTF_SetTextWrapWhitespaceVisible(self.as_ptr(), visible) })
+        to_result(unsafe { TTF_SetTextWrapWhitespaceVisible(self.as_raw(), visible) })
     }
 
     /// Get the font used by a text object.
     #[doc(alias = "TTF_GetTextFont")]
     pub fn font(&self) -> Result<Ref<'_, Font<'_>>> {
-        let font = unsafe { TTF_GetTextFont(self.as_ptr()) };
+        let font = unsafe { TTF_GetTextFont(self.as_raw()) };
         let handle = FontHandle::from_ptr(font).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
     }
@@ -401,14 +401,14 @@ impl TextHandle {
     /// rebuilt.
     #[doc(alias = "TTF_SetTextFont")]
     pub fn set_font<'a>(&self, font: Option<Ref<'a, Font<'a>>>) -> Result<()> {
-        let font = font.map_or(std::ptr::null_mut(), |font| font.as_ptr());
-        to_result(unsafe { TTF_SetTextFont(self.as_ptr(), font) })
+        let font = font.map_or(std::ptr::null_mut(), |font| font.as_raw());
+        to_result(unsafe { TTF_SetTextFont(self.as_raw(), font) })
     }
 
     /// Get the properties associated with a text object.
     #[doc(alias = "TTF_GetTextProperties")]
     pub fn properties(&self) -> Result<Ref<'_, Properties>> {
-        let id = unsafe { TTF_GetTextProperties(self.as_ptr()) };
+        let id = unsafe { TTF_GetTextProperties(self.as_raw()) };
         let handle = PropertiesHandle::from_id(id).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
     }
@@ -427,7 +427,7 @@ impl TextHandle {
     #[doc(alias = "TTF_GetTextSubString")]
     pub fn substring(&self, offset: i32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
-        to_result(unsafe { TTF_GetTextSubString(self.as_ptr(), offset, value.as_mut_ptr()) })?;
+        to_result(unsafe { TTF_GetTextSubString(self.as_raw(), offset, value.as_mut_ptr()) })?;
         Ok(SubString::from(unsafe { value.assume_init() }))
     }
 
@@ -446,7 +446,7 @@ impl TextHandle {
     #[doc(alias = "TTF_GetTextSubStringForLine")]
     pub fn substring_for_line(&self, line: i32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
-        to_result(unsafe { TTF_GetTextSubStringForLine(self.as_ptr(), line, value.as_mut_ptr()) })?;
+        to_result(unsafe { TTF_GetTextSubStringForLine(self.as_raw(), line, value.as_mut_ptr()) })?;
         Ok(SubString::from(unsafe { value.assume_init() }))
     }
 
@@ -458,7 +458,7 @@ impl TextHandle {
     pub fn substring_for_point(&self, point: PointI32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
         to_result(unsafe {
-            TTF_GetTextSubStringForPoint(self.as_ptr(), point.x, point.y, value.as_mut_ptr())
+            TTF_GetTextSubStringForPoint(self.as_raw(), point.x, point.y, value.as_mut_ptr())
         })?;
         Ok(SubString::from(unsafe { value.assume_init() }))
     }
@@ -474,7 +474,7 @@ impl TextHandle {
         let mut previous = MaybeUninit::uninit();
         let value: TTF_SubString = unsafe { std::mem::transmute(value) };
         to_result(unsafe {
-            TTF_GetPreviousTextSubString(self.as_ptr(), &raw const value, previous.as_mut_ptr())
+            TTF_GetPreviousTextSubString(self.as_raw(), &raw const value, previous.as_mut_ptr())
         })?;
         Ok(SubString::from(unsafe { previous.assume_init() }))
     }
@@ -490,7 +490,7 @@ impl TextHandle {
         let mut next = MaybeUninit::uninit();
         let value: TTF_SubString = unsafe { std::mem::transmute(value) };
         to_result(unsafe {
-            TTF_GetNextTextSubString(self.as_ptr(), &raw const value, next.as_mut_ptr())
+            TTF_GetNextTextSubString(self.as_raw(), &raw const value, next.as_mut_ptr())
         })?;
         Ok(SubString::from(unsafe { next.assume_init() }))
     }
@@ -504,7 +504,8 @@ impl TextHandle {
     pub fn substrings_for_range(&self, offset: i32, length: i32) -> Result<Vec<SubString>> {
         let mut count = 0;
         let values =
-            unsafe { TTF_GetTextSubStringsForRange(self.as_ptr(), offset, length, &raw mut count) };
+            unsafe { TTF_GetTextSubStringsForRange(self.as_raw(), offset, length, &raw mut count) };
+
         let values = NonNull::new(values).ok_or_else(Error::current)?;
         let values = unsafe { std::slice::from_raw_parts(values.as_ptr(), count.max(0) as usize) };
         let result = values
@@ -513,7 +514,9 @@ impl TextHandle {
             .copied()
             .map(SubString::from)
             .collect();
+
         unsafe { SDL_free(values.as_ptr().cast_mut().cast()) };
+
         Ok(result)
     }
 
@@ -526,7 +529,7 @@ impl TextHandle {
     /// timing of when the layout and text engine representation are updated.
     #[doc(alias = "TTF_UpdateText")]
     pub fn update(&self) -> Result<()> {
-        to_result(unsafe { TTF_UpdateText(self.as_ptr()) })
+        to_result(unsafe { TTF_UpdateText(self.as_raw()) })
     }
 
     /// Draw text to an SDL surface.
@@ -542,7 +545,7 @@ impl TextHandle {
     /// [`SurfaceEngine::new`](crate::ttf::SurfaceEngine::new).
     #[doc(alias = "TTF_DrawSurfaceText")]
     pub fn draw_to_surface(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
-        to_result(unsafe { TTF_DrawSurfaceText(self.as_ptr(), pos.x, pos.y, surf.handle.as_ptr()) })
+        to_result(unsafe { TTF_DrawSurfaceText(self.as_raw(), pos.x, pos.y, surf.as_raw()) })
     }
 
     /// Draw text to an SDL renderer.
@@ -556,7 +559,7 @@ impl TextHandle {
     /// draw using the renderer passed to that engine.
     #[doc(alias = "TTF_DrawRendererText")]
     pub fn draw_to_renderer(&self, pos: PointF32) -> Result<()> {
-        to_result(unsafe { TTF_DrawRendererText(self.as_ptr(), pos.x, pos.y) })
+        to_result(unsafe { TTF_DrawRendererText(self.as_raw(), pos.x, pos.y) })
     }
 
     /// Set the text engine used by this text object.
@@ -571,7 +574,7 @@ impl TextHandle {
         H: Handle<Raw = *mut TTF_TextEngine>,
         R: Resource<Handle = H>,
     {
-        to_result(unsafe { TTF_SetTextEngine(self.as_ptr(), engine.as_raw()) })
+        to_result(unsafe { TTF_SetTextEngine(self.as_raw(), engine.as_raw()) })
     }
 
     /// # Safety
@@ -581,7 +584,7 @@ impl TextHandle {
     /// Get the text engine used by a text object.
     #[doc(alias = "TTF_GetTextEngine")]
     pub unsafe fn engine(&self) -> Result<NonNull<TTF_TextEngine>> {
-        let eng = unsafe { TTF_GetTextEngine(self.as_ptr()) };
+        let eng = unsafe { TTF_GetTextEngine(self.as_raw()) };
         opt2res(NonNull::new(eng))
     }
 }
@@ -596,7 +599,7 @@ impl Text {
         Self::from_ptr(unsafe {
             TTF_CreateText(
                 std::ptr::null_mut(),
-                font.handle.as_ptr(),
+                font.as_raw(),
                 text.as_ptr(),
                 text.len(),
             )
@@ -612,7 +615,7 @@ impl Text {
     #[doc(alias = "TTF_SetTextString")]
     pub fn set_string(&self, text: &str) -> Result<()> {
         let text = RtStr::new(text);
-        to_result(unsafe { TTF_SetTextString(self.as_ptr(), text.as_ptr(), text.len()) })
+        to_result(unsafe { TTF_SetTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
     /// Insert UTF-8 text into a text object.
@@ -629,7 +632,7 @@ impl Text {
     #[doc(alias = "TTF_InsertTextString")]
     pub fn insert_string(&self, offset: i32, text: &str) -> Result<()> {
         let text = RtStr::new(text);
-        to_result(unsafe { TTF_InsertTextString(self.as_ptr(), offset, text.as_ptr(), text.len()) })
+        to_result(unsafe { TTF_InsertTextString(self.as_raw(), offset, text.as_ptr(), text.len()) })
     }
 
     /// Append UTF-8 text to a text object.
@@ -641,7 +644,7 @@ impl Text {
     #[doc(alias = "TTF_AppendTextString")]
     pub fn append_string(&self, text: &str) -> Result<()> {
         let text = RtStr::new(text);
-        to_result(unsafe { TTF_AppendTextString(self.as_ptr(), text.as_ptr(), text.len()) })
+        to_result(unsafe { TTF_AppendTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
     /// Delete UTF-8 text from a text object.
@@ -658,6 +661,6 @@ impl Text {
     /// rebuilt.
     #[doc(alias = "TTF_DeleteTextString")]
     pub fn delete_string(&self, offset: i32, length: i32) -> Result<()> {
-        to_result(unsafe { TTF_DeleteTextString(self.as_ptr(), offset, length) })
+        to_result(unsafe { TTF_DeleteTextString(self.as_raw(), offset, length) })
     }
 }

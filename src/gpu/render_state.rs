@@ -60,7 +60,7 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
     ) -> Self {
         Self(
             SDL_GPURenderStateCreateInfo {
-                fragment_shader: fragment_shader.as_ptr(),
+                fragment_shader: fragment_shader.as_raw(),
                 num_sampler_bindings: sampler_bindings.len() as _,
                 sampler_bindings: sampler_bindings.as_ptr().cast(),
                 num_storage_textures: storage_textures.len() as _,
@@ -100,7 +100,7 @@ impl RenderStateHandle {
     pub fn set_fragment_uniforms(&self, slot_index: u32, data: &[u8]) -> Result<()> {
         to_result(unsafe {
             SDL_SetGPURenderStateFragmentUniforms(
-                self.as_ptr(),
+                self.as_raw(),
                 slot_index,
                 data.as_ptr().cast(),
                 data.len() as _,
@@ -118,6 +118,6 @@ impl RenderState {
     /// Returns [`Err`] if SDL cannot create the render state.
     #[doc(alias = "SDL_CreateGPURenderState")]
     pub fn new(rnd: Ref<Renderer>, ci: &RenderStateCreateInfo) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateGPURenderState(rnd.as_ptr(), &raw const ci.0) })
+        Self::from_ptr(unsafe { SDL_CreateGPURenderState(rnd.as_raw(), &raw const ci.0) })
     }
 }

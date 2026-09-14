@@ -397,8 +397,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_RenderTexture(
-                self.handle.as_ptr(),
-                tex.handle.as_ptr(),
+                self.as_raw(),
+                tex.as_raw(),
                 opt2ptr(src).cast(),
                 opt2ptr(dst).cast(),
             )
@@ -429,8 +429,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_RenderTextureAffine(
-                self.handle.as_ptr(),
-                tex.handle.as_ptr(),
+                self.as_raw(),
+                tex.as_raw(),
                 opt2ptr(src).cast(),
                 opt2ptr(origin).cast(),
                 opt2ptr(right).cast(),
@@ -464,8 +464,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_RenderTextureTiled(
-                self.handle.as_ptr(),
-                tex.handle.as_ptr(),
+                self.as_raw(),
+                tex.as_raw(),
                 opt2ptr(src).cast(),
                 scale,
                 opt2ptr(dst).cast(),
@@ -506,8 +506,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_RenderTexture9Grid(
-                self.handle.as_ptr(),
-                tex.handle.as_ptr(),
+                self.as_raw(),
+                tex.as_raw(),
                 opt2ptr(src).cast(),
                 width_left,
                 width_right,
@@ -778,7 +778,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
             SDL_SetRenderTarget(
                 self.handle.as_ptr(),
                 match tgt {
-                    Some(h) => h.handle.as_ptr(),
+                    Some(h) => h.as_raw(),
                     None => std::ptr::null_mut(),
                 },
             )
@@ -893,14 +893,14 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     }
 
     pub fn set_render_state(&self, rs: Ref<RenderState>) -> Result<()> {
-        to_result(unsafe { SDL_SetGPURenderState(self.as_ptr(), rs.as_ptr()) })
+        to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), rs.as_raw()) })
     }
 
     /// Clear custom GPU render state, reverting to the default rendering
     /// behavior.
     #[doc(alias = "SDL_SetGPURenderState")]
     pub fn clear_render_state(&self) -> Result<()> {
-        to_result(unsafe { SDL_SetGPURenderState(self.as_ptr(), std::ptr::null_mut()) })
+        to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), std::ptr::null_mut()) })
     }
 }
 
@@ -967,10 +967,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_CreateRenderer")]
     pub fn new(wnd: Ref<Window>, name: Option<&CStr>) -> Result<Self> {
         Self::from_ptr(unsafe {
-            SDL_CreateRenderer(
-                wnd.handle.as_ptr(),
-                name.map_or(std::ptr::null(), CStr::as_ptr),
-            )
+            SDL_CreateRenderer(wnd.as_raw(), name.map_or(std::ptr::null(), CStr::as_ptr))
         })
     }
 
@@ -987,7 +984,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// complete drawing a frame.
     #[doc(alias = "SDL_CreateGPURenderer")]
     pub fn new_gpu(device: Ref<Device>, wnd: Ref<Window>) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateGPURenderer(device.as_ptr(), wnd.as_ptr()) })
+        Self::from_ptr(unsafe { SDL_CreateGPURenderer(device.as_raw(), wnd.as_raw()) })
     }
 
     /// Get the number of 2D rendering drivers available for the current

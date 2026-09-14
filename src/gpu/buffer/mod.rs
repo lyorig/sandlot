@@ -91,7 +91,7 @@ impl<'b, 'ctx, 'vid, 'dev> BufferRegion<'b, 'ctx, 'vid, 'dev> {
     /// Describe a region of `buffer` beginning at `offset` and extending for
     /// `size` bytes.
     pub fn new(buffer: Ref<'b, Buffer>, offset: u32, size: u32) -> Self {
-        let buffer = buffer.handle.as_ptr();
+        let buffer = buffer.as_raw();
         let inner = SDL_GPUBufferRegion {
             buffer,
             offset,
@@ -124,7 +124,7 @@ impl<'b, 'ctx, 'vid, 'dev> BufferBinding<'b, 'ctx, 'vid, 'dev> {
     pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, offset: u32) -> Self {
         Self(
             SDL_GPUBufferBinding {
-                buffer: buffer.handle.as_ptr(),
+                buffer: buffer.as_raw(),
                 offset,
             },
             PhantomData,
@@ -148,7 +148,7 @@ impl<'b, 'ctx, 'vid, 'dev> BufferLocation<'b, 'ctx, 'vid, 'dev> {
     pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, offset: u32) -> Self {
         Self(
             SDL_GPUBufferLocation {
-                buffer: buffer.handle.as_ptr(),
+                buffer: buffer.as_raw(),
                 offset,
             },
             PhantomData,
@@ -178,7 +178,7 @@ impl<'b, 'ctx, 'vid, 'dev> StorageBufferReadWriteBinding<'b, 'ctx, 'vid, 'dev> {
     pub fn new(buffer: Ref<'b, Buffer<'ctx, 'vid, 'dev>>, cycle: Cycle) -> Self {
         Self(
             SDL_GPUStorageBufferReadWriteBinding {
-                buffer: buffer.handle.as_ptr(),
+                buffer: buffer.as_raw(),
                 cycle: cycle.into(),
                 ..Default::default()
             },
@@ -214,8 +214,7 @@ impl<'ctx, 'vid, 'dev> Buffer<'ctx, 'vid, 'dev> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &BufferCreateInfo,
     ) -> Result<Self> {
-        let handle =
-            unsafe { SDL_CreateGPUBuffer(device.handle.as_ptr(), &raw const create_info.0) };
+        let handle = unsafe { SDL_CreateGPUBuffer(device.as_raw(), &raw const create_info.0) };
 
         Self::from_ptr(handle)
     }
@@ -228,7 +227,7 @@ impl<'ctx, 'vid, 'dev> Buffer<'ctx, 'vid, 'dev> {
     /// so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUBuffer")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
-        unsafe { SDL_ReleaseGPUBuffer(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_ReleaseGPUBuffer(device.as_raw(), self.handle.as_ptr()) };
     }
 }
 
@@ -252,7 +251,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     ) {
         unsafe {
             SDL_UploadToGPUBuffer(
-                copy_pass.handle.as_ptr(),
+                copy_pass.as_raw(),
                 &raw const src.0,
                 &raw const dst.0,
                 cycle.into(),
@@ -276,11 +275,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
         dst: &TransferBufferLocation,
     ) {
         unsafe {
-            SDL_DownloadFromGPUBuffer(
-                copy_pass.handle.as_ptr(),
-                &raw const src.0,
-                &raw const dst.0,
-            );
+            SDL_DownloadFromGPUBuffer(copy_pass.as_raw(), &raw const src.0, &raw const dst.0);
         };
     }
 
@@ -292,7 +287,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     #[doc(alias = "SDL_SetGPUBufferName")]
     pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
-            SDL_SetGPUBufferName(device.handle.as_ptr(), self.handle.as_ptr(), name.as_ptr());
+            SDL_SetGPUBufferName(device.as_raw(), self.handle.as_ptr(), name.as_ptr());
         };
     }
 }

@@ -121,9 +121,8 @@ impl<'ctx, 'vid, 'dev> ComputePipeline<'ctx, 'vid, 'dev> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &ComputePipelineCreateInfo,
     ) -> Result<Self> {
-        let handle = unsafe {
-            SDL_CreateGPUComputePipeline(device.handle.as_ptr(), &raw const create_info.0)
-        };
+        let handle =
+            unsafe { SDL_CreateGPUComputePipeline(device.as_raw(), &raw const create_info.0) };
 
         Self::from_ptr(handle)
     }
@@ -136,6 +135,6 @@ impl<'ctx, 'vid, 'dev> ComputePipeline<'ctx, 'vid, 'dev> {
     /// automatic destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUComputePipeline")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
-        unsafe { SDL_ReleaseGPUComputePipeline(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_ReleaseGPUComputePipeline(device.as_raw(), self.as_raw()) };
     }
 }

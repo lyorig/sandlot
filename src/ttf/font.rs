@@ -413,7 +413,7 @@ impl FontHandle<'_> {
     /// the rest of the font, when the font is closed.
     #[doc(alias = "TTF_GetFontFamilyName")]
     pub fn family(&self) -> &str {
-        unsafe { c_ptr_to_str(TTF_GetFontFamilyName(self.as_ptr())) }
+        unsafe { c_ptr_to_str(TTF_GetFontFamilyName(self.as_raw())) }
     }
 
     /// Query whether a font is fixed-width.
@@ -428,7 +428,7 @@ impl FontHandle<'_> {
     /// most cases.
     #[doc(alias = "TTF_FontIsFixedWidth")]
     pub fn is_mono(&self) -> bool {
-        unsafe { TTF_FontIsFixedWidth(self.as_ptr()) }
+        unsafe { TTF_FontIsFixedWidth(self.as_raw()) }
     }
 
     /// Query whether a font is scalable or not.
@@ -438,7 +438,7 @@ impl FontHandle<'_> {
     /// Scalability lets us distinguish between outline and bitmap fonts.
     #[doc(alias = "TTF_FontIsScalable")]
     pub fn is_scalable(&self) -> bool {
-        unsafe { TTF_FontIsScalable(self.as_ptr()) }
+        unsafe { TTF_FontIsScalable(self.as_raw()) }
     }
 }
 

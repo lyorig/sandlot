@@ -22,7 +22,7 @@ impl<'ctx, 'vid, 'dev> Fence<'ctx, 'vid, 'dev> {
     /// fence; it must not be referenced after this call.
     #[doc(alias = "SDL_ReleaseGPUFence")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
-        unsafe { SDL_ReleaseGPUFence(device.handle.as_ptr(), self.handle.as_ptr()) }
+        unsafe { SDL_ReleaseGPUFence(device.as_raw(), self.as_raw()) }
     }
 }
 
@@ -33,6 +33,6 @@ impl<'ctx, 'vid, 'dev> Fence<'ctx, 'vid, 'dev> {
     /// the submitted work has signaled the fence, or `false` otherwise.
     #[doc(alias = "SDL_QueryGPUFence")]
     pub fn is_signaled(&self, device: Ref<'dev, Device<'ctx, 'vid>>) -> bool {
-        unsafe { SDL_QueryGPUFence(device.handle.as_ptr(), self.handle.as_ptr()) }
+        unsafe { SDL_QueryGPUFence(device.as_raw(), self.as_raw()) }
     }
 }

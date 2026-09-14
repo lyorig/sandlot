@@ -406,13 +406,13 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// On windowing systems where changes are immediate, this does nothing.
     #[doc(alias = "SDL_SyncWindow")]
     pub fn sync(&self) -> Result<()> {
-        to_result(unsafe { SDL_SyncWindow(self.handle.as_ptr()) })
+        to_result(unsafe { SDL_SyncWindow(self.as_raw()) })
     }
 
     /// Request a window to demand attention from the user.
     #[doc(alias = "SDL_FlashWindow")]
     pub fn flash(&self, op: FlashOp) -> Result<()> {
-        to_result(unsafe { SDL_FlashWindow(self.handle.as_ptr(), op.into()) })
+        to_result(unsafe { SDL_FlashWindow(self.as_raw(), op.into()) })
     }
 
     /// Get the size of a window's client area.
@@ -430,7 +430,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            SDL_GetWindowSize(self.handle.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            SDL_GetWindowSize(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -442,7 +442,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            SDL_GetWindowSizeInPixels(self.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            SDL_GetWindowSizeInPixels(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -454,7 +454,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            SDL_GetWindowMinimumSize(self.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            SDL_GetWindowMinimumSize(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -466,7 +466,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            SDL_GetWindowMaximumSize(self.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            SDL_GetWindowMaximumSize(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -483,7 +483,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = ret.as_mut_ptr();
 
         unsafe {
-            SDL_GetWindowPosition(self.handle.as_ptr(), &raw mut (*ptr).x, &raw mut (*ptr).y);
+            SDL_GetWindowPosition(self.as_raw(), &raw mut (*ptr).x, &raw mut (*ptr).y);
             ret.assume_init()
         }
     }
@@ -494,9 +494,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// no title.
     #[doc(alias = "SDL_GetWindowTitle")]
     pub fn title(&self) -> NonNull<c_char> {
-        unsafe {
-            NonNull::new(SDL_GetWindowTitle(self.handle.as_ptr()).cast_mut()).unwrap_unchecked()
-        }
+        unsafe { NonNull::new(SDL_GetWindowTitle(self.as_raw()).cast_mut()).unwrap_unchecked() }
     }
 
     /// Get the window flags.
@@ -504,7 +502,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns a mask of the [`WindowFlags`] associated with this window.
     #[doc(alias = "SDL_GetWindowFlags")]
     pub fn flags(&self) -> WindowFlags {
-        unsafe { WindowFlags::from_sdl_unchecked(SDL_GetWindowFlags(self.handle.as_ptr())) }
+        unsafe { WindowFlags::from_sdl_unchecked(SDL_GetWindowFlags(self.as_raw())) }
     }
 
     /// Get the renderer associated with a window.
@@ -512,7 +510,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRenderer")]
     pub fn renderer(&self) -> Option<RendererHandle<'ctx, 'vid, '_>> {
-        RendererHandle::from_ptr(unsafe { SDL_GetRenderer(self.handle.as_ptr()) })
+        RendererHandle::from_ptr(unsafe { SDL_GetRenderer(self.as_raw()) })
     }
 
     /// Get the display associated with a window.
@@ -520,7 +518,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns the display containing the center of the window.
     #[doc(alias = "SDL_GetDisplayForWindow")]
     pub fn display(&self) -> Result<Display> {
-        let raw = unsafe { SDL_GetDisplayForWindow(self.handle.as_ptr()) };
+        let raw = unsafe { SDL_GetDisplayForWindow(self.as_raw()) };
         Display::from_sdl(raw)
     }
 
@@ -529,7 +527,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns [`None`] if the window has no parent.
     #[doc(alias = "SDL_GetWindowParent")]
     pub fn parent(&self) -> Option<WindowHandle<'ctx, 'vid>> {
-        WindowHandle::from_ptr(unsafe { SDL_GetWindowParent(self.as_ptr()) })
+        WindowHandle::from_ptr(unsafe { SDL_GetWindowParent(self.as_raw()) })
     }
 
     /// Get the pixel density of a window.
@@ -541,7 +539,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// 3840x2160 pixels, it would have a pixel density of 2.0.
     #[doc(alias = "SDL_GetWindowPixelDensity")]
     pub fn pixel_density(&self) -> Result<f32> {
-        let ret = unsafe { SDL_GetWindowPixelDensity(self.as_ptr()) };
+        let ret = unsafe { SDL_GetWindowPixelDensity(self.as_raw()) };
         if ret == 0. {
             Err(Error::current())
         } else {
@@ -565,7 +563,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// a display with a different scale setting.
     #[doc(alias = "SDL_GetWindowDisplayScale")]
     pub fn display_scale(&self) -> Result<f32> {
-        let ret = unsafe { SDL_GetWindowDisplayScale(self.as_ptr()) };
+        let ret = unsafe { SDL_GetWindowDisplayScale(self.as_raw()) };
         if ret == 0. {
             Err(Error::current())
         } else {
@@ -583,7 +581,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// returned as 1.0 without error.
     #[doc(alias = "SDL_GetWindowOpacity")]
     pub fn opacity(&self) -> Result<f32> {
-        let ret = unsafe { SDL_GetWindowOpacity(self.as_ptr()) };
+        let ret = unsafe { SDL_GetWindowOpacity(self.as_raw()) };
         if ret < 0. {
             Err(Error::current())
         } else {
@@ -594,7 +592,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Get the pixel format associated with the window.
     #[doc(alias = "SDL_GetWindowPixelFormat")]
     pub fn pixel_format(&self) -> SDL_PixelFormat {
-        unsafe { SDL_GetWindowPixelFormat(self.as_ptr()) }
+        unsafe { SDL_GetWindowPixelFormat(self.as_raw()) }
     }
 
     /// Query the display mode to use when a window is visible at fullscreen.
@@ -606,7 +604,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// window is fullscreen.
     #[doc(alias = "SDL_GetWindowFullscreenMode")]
     pub fn fullscreen_mode(&self) -> Option<NonNull<SDL_DisplayMode>> {
-        NonNull::new(unsafe { SDL_GetWindowFullscreenMode(self.as_ptr()) }.cast_mut())
+        NonNull::new(unsafe { SDL_GetWindowFullscreenMode(self.as_raw()) }.cast_mut())
     }
 
     /// Get the raw ICC profile data for the screen the window is currently
@@ -614,7 +612,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     #[doc(alias = "SDL_GetWindowICCProfile")]
     pub fn icc_profile(&self) -> Result<Box<[u8]>> {
         let mut size = MaybeUninit::uninit();
-        let ptr = unsafe { SDL_GetWindowICCProfile(self.as_ptr(), size.as_mut_ptr()) };
+        let ptr = unsafe { SDL_GetWindowICCProfile(self.as_raw(), size.as_mut_ptr()) };
 
         // SAFETY: On success, SDL allocates `size` bytes.
         unsafe { Box::from_raw_parts_nullck(ptr.cast(), size.assume_init()) }
@@ -629,7 +627,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let mut max = MaybeUninit::uninit();
 
         unsafe {
-            if SDL_GetWindowAspectRatio(self.as_ptr(), min.as_mut_ptr(), max.as_mut_ptr()) {
+            if SDL_GetWindowAspectRatio(self.as_raw(), min.as_mut_ptr(), max.as_mut_ptr()) {
                 Ok((min.assume_init(), max.assume_init()))
             } else {
                 Err(Error::current())
@@ -664,7 +662,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
 
         unsafe {
             if SDL_GetWindowBordersSize(
-                self.as_ptr(),
+                self.as_raw(),
                 top.as_mut_ptr(),
                 left.as_mut_ptr(),
                 bottom.as_mut_ptr(),
@@ -697,7 +695,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let mut ret = MaybeUninit::uninit();
 
         unsafe {
-            if SDL_GetWindowSafeArea(self.as_ptr(), ret.as_mut_ptr()) {
+            if SDL_GetWindowSafeArea(self.as_raw(), ret.as_mut_ptr()) {
                 Ok(std::mem::transmute_copy(ret.assume_init_ref()))
             } else {
                 Err(Error::current())
@@ -712,7 +710,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// The returned pointer is managed by SDL and is owned by the window.
     #[doc(alias = "SDL_GetWindowMouseRect")]
     pub fn mouse_rect(&self) -> Option<NonNull<RectI32>> {
-        NonNull::new(unsafe { SDL_GetWindowMouseRect(self.as_ptr()).cast::<RectI32>() }.cast_mut())
+        NonNull::new(unsafe { SDL_GetWindowMouseRect(self.as_raw()).cast::<RectI32>() }.cast_mut())
     }
 
     /// Get the SDL surface associated with the window.
@@ -732,7 +730,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// This function is affected by `SDL_HINT_FRAMEBUFFER_ACCELERATION`.
     #[doc(alias = "SDL_GetWindowSurface")]
     pub fn surface(&self) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_GetWindowSurface(self.as_ptr()) })
+        Surface::from_ptr(unsafe { SDL_GetWindowSurface(self.as_raw()) })
     }
 
     /// Get VSync for the window surface.
@@ -744,7 +742,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let mut ret = MaybeUninit::uninit();
 
         unsafe {
-            if SDL_GetWindowSurfaceVSync(self.as_ptr(), ret.as_mut_ptr()) {
+            if SDL_GetWindowSurfaceVSync(self.as_raw(), ret.as_mut_ptr()) {
                 Ok(ret.assume_init())
             } else {
                 Err(Error::current())
@@ -755,20 +753,20 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Get a window's keyboard grab mode.
     #[doc(alias = "SDL_GetWindowKeyboardGrab")]
     pub fn keyboard_grabbed(&self) -> bool {
-        unsafe { SDL_GetWindowKeyboardGrab(self.as_ptr()) }
+        unsafe { SDL_GetWindowKeyboardGrab(self.as_raw()) }
     }
 
     /// Get a window's mouse grab mode.
     #[doc(alias = "SDL_GetWindowMouseGrab")]
     pub fn mouse_grabbed(&self) -> bool {
-        unsafe { SDL_GetWindowMouseGrab(self.as_ptr()) }
+        unsafe { SDL_GetWindowMouseGrab(self.as_raw()) }
     }
 
     /// Get the state of the progress bar for the given window's taskbar
     /// icon.
     #[doc(alias = "SDL_GetWindowProgressState")]
     pub fn progress_state(&self) -> Result<ProgressState> {
-        let ps = unsafe { SDL_GetWindowProgressState(self.as_ptr()) };
+        let ps = unsafe { SDL_GetWindowProgressState(self.as_raw()) };
         ProgressState::from_sdl(ps).ok_or_else(Error::current)
     }
 
@@ -779,13 +777,13 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// on failure.
     #[doc(alias = "SDL_GetWindowProgressValue")]
     pub fn progress_value(&self) -> f32 {
-        unsafe { SDL_GetWindowProgressValue(self.as_ptr()) }
+        unsafe { SDL_GetWindowProgressValue(self.as_raw()) }
     }
 
     /// Return whether the window has a surface associated with it.
     #[doc(alias = "SDL_WindowHasSurface")]
     pub fn has_surface(&self) -> bool {
-        unsafe { SDL_WindowHasSurface(self.as_ptr()) }
+        unsafe { SDL_WindowHasSurface(self.as_raw()) }
     }
 
     /// Request that the size of a window's client area be set.
@@ -812,7 +810,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// can be denied by the windowing system.
     #[doc(alias = "SDL_SetWindowSize")]
     pub fn set_size(&self, size: PointI32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowSize(self.as_ptr(), size.x, size.y) })
+        to_result(unsafe { SDL_SetWindowSize(self.as_raw(), size.x, size.y) })
     }
 
     /// Set the minimum size of a window's client area.
@@ -820,7 +818,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// A dimension of 0 means no limit.
     #[doc(alias = "SDL_SetWindowMinimumSize")]
     pub fn set_min_size(&self, size: PointI32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowMinimumSize(self.as_ptr(), size.x, size.y) })
+        to_result(unsafe { SDL_SetWindowMinimumSize(self.as_raw(), size.x, size.y) })
     }
 
     /// Set the maximum size of a window's client area.
@@ -828,7 +826,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// A dimension of 0 means no limit.
     #[doc(alias = "SDL_SetWindowMaximumSize")]
     pub fn set_max_size(&self, size: PointI32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowMaximumSize(self.as_ptr(), size.x, size.y) })
+        to_result(unsafe { SDL_SetWindowMaximumSize(self.as_raw(), size.x, size.y) })
     }
 
     /// Request that the window's position be set.
@@ -859,13 +857,13 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// by the windowing system.
     #[doc(alias = "SDL_SetWindowPosition")]
     pub fn set_pos(&self, pos: PointI32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowPosition(self.as_ptr(), pos.x, pos.y) })
+        to_result(unsafe { SDL_SetWindowPosition(self.as_raw(), pos.x, pos.y) })
     }
 
     /// Set the title of a window, in UTF-8 encoding.
     #[doc(alias = "SDL_SetWindowTitle")]
     pub fn set_title(&self, title: &CStr) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowTitle(self.as_ptr(), title.as_ptr()) })
+        to_result(unsafe { SDL_SetWindowTitle(self.as_raw(), title.as_ptr()) })
     }
 
     /// Set the icon for a window.
@@ -884,7 +882,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// closest smaller image will be upscaled and be used instead.
     #[doc(alias = "SDL_SetWindowIcon")]
     pub fn set_icon(&self, icon: Ref<Surface>) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowIcon(self.as_ptr(), icon.handle.as_ptr()) })
+        to_result(unsafe { SDL_SetWindowIcon(self.as_raw(), icon.as_raw()) })
     }
 
     /// Set the shape of a transparent window.
@@ -905,7 +903,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// The window must have been created with the  [`WindowFlags::TRANSPARENT`] flag.
     #[doc(alias = "SDL_SetWindowShape")]
     pub fn set_shape(&self, shape: Ref<Surface>) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowShape(self.as_ptr(), shape.handle.as_ptr()) })
+        to_result(unsafe { SDL_SetWindowShape(self.as_raw(), shape.as_raw()) })
     }
 
     /// Request that the aspect ratio of a window's client area be set.
@@ -928,7 +926,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// [`WindowHandle::sync`] to block until the changes have taken effect.
     #[doc(alias = "SDL_SetWindowAspectRatio")]
     pub fn set_aspect_ratio(&self, min: f32, max: f32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowAspectRatio(self.as_ptr(), min, max) })
+        to_result(unsafe { SDL_SetWindowAspectRatio(self.as_raw(), min, max) })
     }
 
     /// Set the border state of a window.
@@ -942,7 +940,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// You can't change the border state of a fullscreen window.
     #[doc(alias = "SDL_SetWindowBordered")]
     pub fn set_bordered(&self, bordered: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowBordered(self.as_ptr(), bordered) })
+        to_result(unsafe { SDL_SetWindowBordered(self.as_raw(), bordered) })
     }
 
     /// Set the user-resizable state of a window.
@@ -968,7 +966,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// the rest.
     #[doc(alias = "SDL_SetWindowAlwaysOnTop")]
     pub fn set_always_on_top(&self, on_top: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowAlwaysOnTop(self.as_ptr(), on_top) })
+        to_result(unsafe { SDL_SetWindowAlwaysOnTop(self.as_raw(), on_top) })
     }
 
     /// Request that the window's fullscreen state be changed.
@@ -990,7 +988,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// system.
     #[doc(alias = "SDL_SetWindowFullscreen")]
     pub fn set_fullscreen(&self, fullscreen: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowFullscreen(self.as_ptr(), fullscreen) })
+        to_result(unsafe { SDL_SetWindowFullscreen(self.as_raw(), fullscreen) })
     }
 
     /// Set the display mode to use when a window is visible and fullscreen.
@@ -1016,7 +1014,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// the new mode dimensions.
     #[doc(alias = "SDL_SetWindowFullscreenMode")]
     pub fn set_fullscreen_mode(&self, mode: Option<&SDL_DisplayMode>) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowFullscreenMode(self.as_ptr(), opt2ptr(mode)) })
+        to_result(unsafe { SDL_SetWindowFullscreenMode(self.as_raw(), opt2ptr(mode)) })
     }
 
     /// Set a window's keyboard grab mode.
@@ -1042,7 +1040,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// window.
     #[doc(alias = "SDL_SetWindowKeyboardGrab")]
     pub fn set_keyboard_grab(&self, grabbed: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowKeyboardGrab(self.as_ptr(), grabbed) })
+        to_result(unsafe { SDL_SetWindowKeyboardGrab(self.as_raw(), grabbed) })
     }
 
     /// Set a window's mouse grab mode.
@@ -1052,7 +1050,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Mouse grab confines the mouse cursor to the window.
     #[doc(alias = "SDL_SetWindowMouseGrab")]
     pub fn set_mouse_grab(&self, grabbed: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowMouseGrab(self.as_ptr(), grabbed) })
+        to_result(unsafe { SDL_SetWindowMouseGrab(self.as_raw(), grabbed) })
     }
 
     /// Confines the cursor to the specified area of a window.
@@ -1066,7 +1064,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// cursor is restricted to when the window has mouse focus.
     #[doc(alias = "SDL_SetWindowMouseRect")]
     pub fn set_mouse_rect(&self, rect: Option<&RectI32>) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowMouseRect(self.as_ptr(), opt2ptr(rect).cast()) })
+        to_result(unsafe { SDL_SetWindowMouseRect(self.as_raw(), opt2ptr(rect).cast()) })
     }
 
     /// Set the opacity for a window.
@@ -1077,7 +1075,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// This function fails if setting the opacity isn't supported.
     #[doc(alias = "SDL_SetWindowOpacity")]
     pub fn set_opacity(&self, opacity: f32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowOpacity(self.as_ptr(), opacity) })
+        to_result(unsafe { SDL_SetWindowOpacity(self.as_raw(), opacity) })
     }
 
     /// Set the window as a child of a parent window.
@@ -1105,8 +1103,8 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// of the child window results in undefined behavior.
     #[doc(alias = "SDL_SetWindowParent")]
     pub fn set_parent(&self, parent: Option<Ref<Window>>) -> Result<()> {
-        let ptr = parent.map_or(std::ptr::null_mut(), |p| p.handle.as_ptr());
-        to_result(unsafe { SDL_SetWindowParent(self.as_ptr(), ptr) })
+        let ptr = parent.map_or(std::ptr::null_mut(), |p| p.as_raw());
+        to_result(unsafe { SDL_SetWindowParent(self.as_raw(), ptr) })
     }
 
     /// Toggle the state of the window as modal.
@@ -1117,13 +1115,13 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// child window of a parent, or toggling modal status on will fail.
     #[doc(alias = "SDL_SetWindowModal")]
     pub fn set_modal(&self, modal: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowModal(self.as_ptr(), modal) })
+        to_result(unsafe { SDL_SetWindowModal(self.as_raw(), modal) })
     }
 
     /// Set whether the window may have input focus.
     #[doc(alias = "SDL_SetWindowFocusable")]
     pub fn set_focusable(&self, focusable: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowFocusable(self.as_ptr(), focusable) })
+        to_result(unsafe { SDL_SetWindowFocusable(self.as_raw(), focusable) })
     }
 
     /// Display the system-level window menu.
@@ -1141,7 +1139,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// does nothing.
     #[doc(alias = "SDL_ShowWindowSystemMenu")]
     pub fn show_system_menu(&self, pos: PointI32) -> Result<()> {
-        to_result(unsafe { SDL_ShowWindowSystemMenu(self.as_ptr(), pos.x, pos.y) })
+        to_result(unsafe { SDL_ShowWindowSystemMenu(self.as_raw(), pos.x, pos.y) })
     }
 
     /// Toggle VSync for the window surface.
@@ -1160,7 +1158,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// When a window surface is created, vsync defaults to disabled.
     #[doc(alias = "SDL_SetWindowSurfaceVSync")]
     pub fn set_surface_vsync(&self, vsync: i32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowSurfaceVSync(self.as_ptr(), vsync) })
+        to_result(unsafe { SDL_SetWindowSurfaceVSync(self.as_raw(), vsync) })
     }
 
     /// Copy the window surface to the screen.
@@ -1169,7 +1167,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// the screen.
     #[doc(alias = "SDL_UpdateWindowSurface")]
     pub fn update_surface(&self) -> Result<()> {
-        to_result(unsafe { SDL_UpdateWindowSurface(self.as_ptr()) })
+        to_result(unsafe { SDL_UpdateWindowSurface(self.as_raw()) })
     }
 
     /// Copy areas of the window surface to the screen.
@@ -1186,26 +1184,26 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     #[doc(alias = "SDL_UpdateWindowSurfaceRects")]
     pub fn update_surface_rects(&self, rects: &[RectI32]) -> Result<()> {
         to_result(unsafe {
-            SDL_UpdateWindowSurfaceRects(self.as_ptr(), rects.as_ptr().cast(), rects.len() as i32)
+            SDL_UpdateWindowSurfaceRects(self.as_raw(), rects.as_ptr().cast(), rects.len() as i32)
         })
     }
 
     /// Destroy the surface associated with the window.
     #[doc(alias = "SDL_DestroyWindowSurface")]
     pub fn destroy_surface(&self) -> Result<()> {
-        to_result(unsafe { SDL_DestroyWindowSurface(self.as_ptr()) })
+        to_result(unsafe { SDL_DestroyWindowSurface(self.as_raw()) })
     }
 
     /// Show a window.
     #[doc(alias = "SDL_ShowWindow")]
     pub fn show(&self) -> Result<()> {
-        to_result(unsafe { SDL_ShowWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_ShowWindow(self.as_raw()) })
     }
 
     /// Hide a window.
     #[doc(alias = "SDL_HideWindow")]
     pub fn hide(&self) -> Result<()> {
-        to_result(unsafe { SDL_HideWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_HideWindow(self.as_raw()) })
     }
 
     /// Request that a window be raised above other windows and gain the
@@ -1221,7 +1219,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// will have the [`WindowFlags::INPUT_FOCUS`] flag set.
     #[doc(alias = "SDL_RaiseWindow")]
     pub fn raise(&self) -> Result<()> {
-        to_result(unsafe { SDL_RaiseWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_RaiseWindow(self.as_raw()) })
     }
 
     /// Request that the window be made as large as possible.
@@ -1246,7 +1244,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// maximizing, while X11 and Wayland window managers may vary.
     #[doc(alias = "SDL_MaximizeWindow")]
     pub fn maximize(&self) -> Result<()> {
-        to_result(unsafe { SDL_MaximizeWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_MaximizeWindow(self.as_raw()) })
     }
 
     /// Request that the window be minimized to an iconic representation.
@@ -1267,7 +1265,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// system can deny the state change.
     #[doc(alias = "SDL_MinimizeWindow")]
     pub fn minimize(&self) -> Result<()> {
-        to_result(unsafe { SDL_MinimizeWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_MinimizeWindow(self.as_raw()) })
     }
 
     /// Request that the size and position of a minimized or maximized window
@@ -1289,7 +1287,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// system can deny the state change.
     #[doc(alias = "SDL_RestoreWindow")]
     pub fn restore(&self) -> Result<()> {
-        to_result(unsafe { SDL_RestoreWindow(self.as_ptr()) })
+        to_result(unsafe { SDL_RestoreWindow(self.as_raw()) })
     }
 
     /// Set the state of the progress bar for the given window's taskbar
@@ -1302,7 +1300,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         type Dst = SDL_ProgressState;
 
         to_result(unsafe {
-            SDL_SetWindowProgressState(self.as_ptr(), transmute::<Src, Dst>(state))
+            SDL_SetWindowProgressState(self.as_raw(), transmute::<Src, Dst>(state))
         })
     }
 
@@ -1313,7 +1311,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// range are clamped.
     #[doc(alias = "SDL_SetWindowProgressValue")]
     pub fn set_progress_value(&self, value: f32) -> Result<()> {
-        to_result(unsafe { SDL_SetWindowProgressValue(self.as_ptr(), value) })
+        to_result(unsafe { SDL_SetWindowProgressValue(self.as_raw(), value) })
     }
 
     /// Get the properties associated with a window.
@@ -1461,7 +1459,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     ) -> Result<Self> {
         Self::from_ptr(unsafe {
             SDL_CreatePopupWindow(
-                parent.handle.as_ptr(),
+                parent.as_raw(),
                 offset.x,
                 offset.y,
                 size.x,
@@ -1515,7 +1513,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// to map these events to specific window objects.
     #[doc(alias = "SDL_GetWindowID")]
     pub fn id(&self) -> WindowId {
-        let id = unsafe { SDL_GetWindowID(self.inner.handle.as_ptr()) }.0;
+        let id = unsafe { SDL_GetWindowID(self.as_raw()) }.0;
 
         // SAFETY: Valid windows should always have an ID.
         unsafe { WindowId::from_raw_unchecked(id) }

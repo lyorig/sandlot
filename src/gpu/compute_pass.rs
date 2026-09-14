@@ -86,7 +86,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> {
     ) -> Result<Self> {
         let handle = unsafe {
             SDL_BeginGPUComputePass(
-                cmdbuf.handle.as_ptr(),
+                cmdbuf.as_raw(),
                 storage_texture_bindings.as_ptr().cast(),
                 storage_texture_bindings.len() as _,
                 storage_buffer_bindings.as_ptr().cast(),
@@ -121,7 +121,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// before dispatching compute work.
     #[doc(alias = "SDL_BindGPUComputePipeline")]
     pub fn bind(&self, pipeline: Ref<ComputePipeline>) {
-        unsafe { SDL_BindGPUComputePipeline(self.handle.as_ptr(), pipeline.handle.as_ptr()) };
+        unsafe { SDL_BindGPUComputePipeline(self.handle.as_ptr(), pipeline.as_raw()) };
     }
 
     /// Bind texture-sampler pairs for use by the compute shader.
@@ -200,7 +200,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     #[doc(alias = "SDL_DispatchGPUComputeIndirect")]
     pub fn dispatch_indirect(&self, buffer: Ref<Buffer>, offset: u32) {
         unsafe {
-            SDL_DispatchGPUComputeIndirect(self.handle.as_ptr(), buffer.handle.as_ptr(), offset);
+            SDL_DispatchGPUComputeIndirect(self.handle.as_ptr(), buffer.as_raw(), offset);
         }
     }
 }

@@ -315,7 +315,7 @@ impl Handle for PropertiesHandle {
 impl Resource for Properties {
     type Handle = PropertiesHandle;
 
-    fn as_handle(&self) -> PropertiesHandle {
+    unsafe fn as_handle(&self) -> PropertiesHandle {
         self.inner
     }
 }

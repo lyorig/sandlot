@@ -155,10 +155,8 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
     #[doc(alias = "SDL_PROP_WINDOW_CREATE_PARENT_POINTER")]
     pub fn parent(&mut self, value: Ref<'parent, Window>) -> &mut Self {
         _ = unsafe {
-            self.inner.set_pointer(
-                SDL_PROP_WINDOW_CREATE_PARENT_POINTER,
-                value.handle.as_ptr().cast(),
-            )
+            self.inner
+                .set_pointer(SDL_PROP_WINDOW_CREATE_PARENT_POINTER, value.as_raw().cast())
         };
         self
     }

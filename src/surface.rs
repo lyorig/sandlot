@@ -129,9 +129,7 @@ impl SurfaceHandle {
     /// intersection of the clip rectangle and the whole surface.
     #[doc(alias = "SDL_FillSurfaceRect")]
     pub fn fill(&self, c: RgbaU8) -> Result<()> {
-        to_result(unsafe {
-            SDL_FillSurfaceRect(self.handle.as_ptr(), std::ptr::null(), self.map_rgba(c))
-        })
+        to_result(unsafe { SDL_FillSurfaceRect(self.as_raw(), std::ptr::null(), self.map_rgba(c)) })
     }
 
     /// Perform a fast fill of a rectangle with a specific color.
@@ -148,11 +146,7 @@ impl SurfaceHandle {
     #[doc(alias = "SDL_FillSurfaceRect")]
     pub fn fill_rect(&self, pos: RectI32, c: RgbaU8) -> Result<()> {
         to_result(unsafe {
-            SDL_FillSurfaceRect(
-                self.handle.as_ptr(),
-                (&raw const pos).cast(),
-                self.map_rgba(c),
-            )
+            SDL_FillSurfaceRect(self.as_raw(), (&raw const pos).cast(), self.map_rgba(c))
         })
     }
 
@@ -171,7 +165,7 @@ impl SurfaceHandle {
     pub fn fill_rects(&self, pos: &[RectI32], c: RgbaU8) -> Result<()> {
         to_result(unsafe {
             SDL_FillSurfaceRects(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 (&raw const pos).cast(),
                 pos.len() as i32,
                 self.map_rgba(c),
@@ -193,22 +187,20 @@ impl SurfaceHandle {
     /// the surface.
     #[doc(alias = "SDL_ClearSurface")]
     pub fn clear(&self, c: RgbaF32) -> Result<()> {
-        to_result(unsafe { SDL_ClearSurface(self.handle.as_ptr(), c.rgb.r, c.rgb.g, c.rgb.b, c.a) })
+        to_result(unsafe { SDL_ClearSurface(self.as_raw(), c.rgb.r, c.rgb.g, c.rgb.b, c.a) })
     }
 
     /// Flip a surface vertically or horizontally.
     #[doc(alias = "SDL_FlipSurface")]
     pub fn flip(&self, fm: SDL_FlipMode) -> Result<()> {
-        to_result(unsafe { SDL_FlipSurface(self.handle.as_ptr(), fm) })
+        to_result(unsafe { SDL_FlipSurface(self.as_raw(), fm) })
     }
 
     /// Create a new surface identical to the existing surface, scaled to
     /// the desired size.
     #[doc(alias = "SDL_ScaleSurface")]
     pub fn scale(&self, size: PointI32, sm: ScaleMode) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
-            SDL_ScaleSurface(self.handle.as_ptr(), size.x, size.y, sm.to_sdl())
-        })
+        Surface::from_ptr(unsafe { SDL_ScaleSurface(self.as_raw(), size.x, size.y, sm.to_sdl()) })
     }
 
     /// Map an RGB triple to an opaque pixel value for a surface.
@@ -231,7 +223,7 @@ impl SurfaceHandle {
     /// unused upper bits of the return value can safely be ignored.
     #[doc(alias = "SDL_MapSurfaceRGB")]
     pub fn map_rgb(&self, rgb: RgbU8) -> u32 {
-        unsafe { SDL_MapSurfaceRGB(self.handle.as_ptr(), rgb.r, rgb.g, rgb.b) }
+        unsafe { SDL_MapSurfaceRGB(self.as_raw(), rgb.r, rgb.g, rgb.b) }
     }
 
     /// Map an RGBA quadruple to a pixel value for a surface.
@@ -254,15 +246,7 @@ impl SurfaceHandle {
     /// unused upper bits of the return value can safely be ignored.
     #[doc(alias = "SDL_MapSurfaceRGBA")]
     pub fn map_rgba(&self, rgba: RgbaU8) -> u32 {
-        unsafe {
-            SDL_MapSurfaceRGBA(
-                self.handle.as_ptr(),
-                rgba.rgb.r,
-                rgba.rgb.g,
-                rgba.rgb.b,
-                rgba.a,
-            )
-        }
+        unsafe { SDL_MapSurfaceRGBA(self.as_raw(), rgba.rgb.r, rgba.rgb.g, rgba.rgb.b, rgba.a) }
     }
 
     /// Create a new surface identical to the existing surface.
@@ -273,7 +257,7 @@ impl SurfaceHandle {
     /// have a reference to them as well.
     #[doc(alias = "SDL_DuplicateSurface")]
     pub fn try_clone(&self) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_DuplicateSurface(self.handle.as_ptr()) })
+        Surface::from_ptr(unsafe { SDL_DuplicateSurface(self.as_raw()) })
     }
 
     /// Perform a stretched pixel copy from this surface to another.
@@ -291,9 +275,9 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_StretchSurface(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
                 scale_mode.to_sdl(),
             )
@@ -340,9 +324,9 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_BlitSurface(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
             )
         })
@@ -382,7 +366,7 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_BlitSurface9Grid(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
                 left_width,
                 right_width,
@@ -390,7 +374,7 @@ impl SurfaceHandle {
                 bottom_height,
                 scale,
                 scale_mode.to_sdl(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
             )
         })
@@ -412,9 +396,9 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_BlitSurfaceScaled(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
                 scale_mode.to_sdl(),
             )
@@ -441,9 +425,9 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_BlitSurfaceTiled(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
             )
         })
@@ -475,11 +459,11 @@ impl SurfaceHandle {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_BlitSurfaceTiledWithScale(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 opt2ptr(src).cast(),
                 scale,
                 scale_mode.to_sdl(),
-                target.handle.as_ptr(),
+                target.as_raw(),
                 opt2ptr(dst).cast(),
             )
         })
@@ -492,7 +476,7 @@ impl traits::BlendMode for SurfaceHandle {
     fn blend_mode(&self) -> BlendMode {
         let mut ret = MaybeUninit::uninit();
         unsafe {
-            SDL_GetSurfaceBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
+            SDL_GetSurfaceBlendMode(self.as_raw(), ret.as_mut_ptr());
             BlendMode::from_sdl_unchecked(ret.assume_init())
         }
     }
@@ -507,7 +491,7 @@ impl traits::BlendMode for SurfaceHandle {
     #[doc(alias = "SDL_SetSurfaceBlendMode")]
     fn set_blend_mode(&self, bm: BlendMode) {
         unsafe {
-            SDL_SetSurfaceBlendMode(self.handle.as_ptr(), bm.to_sdl());
+            SDL_SetSurfaceBlendMode(self.as_raw(), bm.to_sdl());
         }
     }
 }
@@ -521,7 +505,7 @@ impl traits::ColorModU8 for SurfaceHandle {
 
         unsafe {
             SDL_GetSurfaceColorMod(
-                self.handle.as_ptr(),
+                self.as_raw(),
                 &raw mut (*ptr).r,
                 &raw mut (*ptr).g,
                 &raw mut (*ptr).b,
@@ -536,7 +520,7 @@ impl traits::ColorModU8 for SurfaceHandle {
         let mut ret = MaybeUninit::uninit();
 
         unsafe {
-            SDL_GetSurfaceAlphaMod(self.handle.as_ptr(), ret.as_mut_ptr());
+            SDL_GetSurfaceAlphaMod(self.as_raw(), ret.as_mut_ptr());
             ret.assume_init()
         }
     }
@@ -552,7 +536,7 @@ impl traits::ColorModU8 for SurfaceHandle {
     /// `srcC = srcC * (color / 255)`
     #[doc(alias = "SDL_SetSurfaceColorMod")]
     fn set_rgb_mod_u8(&self, rm: RgbU8) {
-        unsafe { SDL_SetSurfaceColorMod(self.handle.as_ptr(), rm.r, rm.g, rm.b) };
+        unsafe { SDL_SetSurfaceColorMod(self.as_raw(), rm.r, rm.g, rm.b) };
     }
 
     /// Set an additional alpha value used in blit operations.
@@ -566,7 +550,7 @@ impl traits::ColorModU8 for SurfaceHandle {
     /// `srcA = srcA * (alpha / 255)`
     #[doc(alias = "SDL_SetSurfaceAlphaMod")]
     fn set_alpha_mod_u8(&self, am: u8) {
-        unsafe { SDL_SetSurfaceAlphaMod(self.handle.as_ptr(), am) };
+        unsafe { SDL_SetSurfaceAlphaMod(self.as_raw(), am) };
     }
 }
 

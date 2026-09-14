@@ -182,4 +182,8 @@ impl Drop for Context {
 
 impl init::Subsystem for Context {
     type Handle = ContextHandle;
+
+    unsafe fn as_handle(&self) -> Self::Handle {
+        self.handle
+    }
 }

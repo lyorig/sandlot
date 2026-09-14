@@ -421,7 +421,7 @@ impl<'tb> TextureTransferInfo<'tb> {
         pixels_per_row: u32,
         rows_per_layer: u32,
     ) -> Self {
-        let transfer_buffer = tb.handle.as_ptr();
+        let transfer_buffer = tb.as_raw();
         let inner = SDL_GPUTextureTransferInfo {
             transfer_buffer,
             offset,
@@ -452,7 +452,7 @@ impl<'t, 'ctx, 'vid, 'dev> TextureRegion<'t, 'ctx, 'vid, 'dev> {
         (x, y, z): (u32, u32, u32),
         (width, height, depth): (u32, u32, u32),
     ) -> Self {
-        let texture = tex.handle.as_ptr();
+        let texture = tex.as_raw();
         let inner = SDL_GPUTextureRegion {
             texture,
             mip_level,
@@ -492,7 +492,7 @@ impl<'t, 'ctx, 'vid, 'dev> TextureLocation<'t, 'ctx, 'vid, 'dev> {
         layer: u32,
         (x, y, z): (u32, u32, u32),
     ) -> Self {
-        let texture = tex.handle.as_ptr();
+        let texture = tex.as_raw();
         let inner = SDL_GPUTextureLocation {
             texture,
             mip_level,
@@ -530,8 +530,8 @@ impl<'t, 's, 'ctx, 'vid, 'dev> TextureSamplerBinding<'t, 's, 'ctx, 'vid, 'dev> {
     ) -> Self {
         Self(
             SDL_GPUTextureSamplerBinding {
-                texture: texture.handle.as_ptr(),
-                sampler: sampler.handle.as_ptr(),
+                texture: texture.as_raw(),
+                sampler: sampler.as_raw(),
             },
             PhantomData,
             PhantomData,
@@ -563,7 +563,7 @@ impl<'t, 'ctx, 'vid, 'dev> StorageTextureReadWriteBinding<'t, 'ctx, 'vid, 'dev> 
     ) -> Self {
         Self(
             SDL_GPUStorageTextureReadWriteBinding {
-                texture: texture.handle.as_ptr(),
+                texture: texture.as_raw(),
                 mip_level,
                 layer,
                 cycle: cycle.into(),
@@ -595,7 +595,7 @@ impl<'t, 'ctx, 'vid, 'dev> BlitRegion<'t, 'ctx, 'vid, 'dev> {
         layer_or_depth_plane: u32,
         (x, y, w, h): (u32, u32, u32, u32),
     ) -> Self {
-        let texture = tex.handle.as_ptr();
+        let texture = tex.as_raw();
         Self(
             SDL_GPUBlitRegion {
                 texture,
@@ -638,8 +638,7 @@ impl<'ctx, 'vid, 'dev> Texture<'ctx, 'vid, 'dev> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &TextureCreateInfo,
     ) -> Result<Self> {
-        let handle =
-            unsafe { SDL_CreateGPUTexture(device.handle.as_ptr(), &raw const create_info.0) };
+        let handle = unsafe { SDL_CreateGPUTexture(device.as_raw(), &raw const create_info.0) };
 
         Self::from_ptr(handle)
     }
@@ -652,7 +651,7 @@ impl<'ctx, 'vid, 'dev> Texture<'ctx, 'vid, 'dev> {
     /// destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUTexture")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
-        unsafe { SDL_ReleaseGPUTexture(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_ReleaseGPUTexture(device.as_raw(), self.as_raw()) };
     }
 }
 
@@ -673,11 +672,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
         dst: &TextureTransferInfo,
     ) {
         unsafe {
-            SDL_DownloadFromGPUTexture(
-                copy_pass.handle.as_ptr(),
-                &raw const src.0,
-                &raw const dst.0,
-            );
+            SDL_DownloadFromGPUTexture(copy_pass.as_raw(), &raw const src.0, &raw const dst.0);
         }
     }
 
@@ -701,7 +696,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     ) {
         unsafe {
             SDL_UploadToGPUTexture(
-                copy_pass.handle.as_ptr(),
+                copy_pass.as_raw(),
                 &raw const src.0,
                 &raw const dst.0,
                 cycle.into(),
@@ -717,7 +712,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     #[doc(alias = "SDL_SetGPUTextureName")]
     pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
-            SDL_SetGPUTextureName(device.handle.as_ptr(), self.handle.as_ptr(), name.as_ptr());
+            SDL_SetGPUTextureName(device.as_raw(), self.as_raw(), name.as_ptr());
         }
     }
 }

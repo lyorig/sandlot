@@ -17,7 +17,11 @@ pub trait Handle: Copy {
 pub trait Resource: Sized {
     type Handle: Handle;
 
-    fn as_handle(&self) -> Self::Handle;
+    /// # Safety
+    ///
+    /// The caller must only use the returned handle within
+    /// the lifetime of the backing resource.
+    unsafe fn as_handle(&self) -> Self::Handle;
 
     fn as_ref(&self) -> Ref<'_, Self> {
         unsafe { Ref::from_handle(self.as_handle()) }
@@ -178,12 +182,12 @@ macro_rules! resource_new {
                     })
                 }
 
-                pub fn as_ptr(&self) -> *mut $sdl {
-                    self.handle.as_ptr()
+                pub fn as_raw(self) -> *mut $sdl {
+                    $crate::resource::Handle::as_raw(self)
                 }
 
-                pub fn as_inner(&self) -> ::std::ptr::NonNull<$sdl> {
-                    self.handle
+                pub fn as_inner(self) -> ::std::ptr::NonNull<$sdl> {
+                    $crate::resource::Handle::as_inner(self)
                 }
             }
 
@@ -215,7 +219,7 @@ macro_rules! resource_new {
                 /// The caller must only use the returned handle within the lifetime
                 /// of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$owned Handle>]<$($lt),*> {
-                    self.inner
+                    unsafe { $crate::resource::Resource::as_handle(self) }
                 }
             }
 
@@ -249,7 +253,7 @@ macro_rules! resource_new {
             impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
                 type Handle = [<$owned Handle>]<$($lt),*>;
 
-                fn as_handle(&self) -> Self::Handle {
+                unsafe fn as_handle(&self) -> Self::Handle {
                     self.inner
                 }
             }

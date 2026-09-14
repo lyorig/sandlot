@@ -124,7 +124,7 @@ impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     /// Returns [`Err`] if a command buffer cannot be acquired.
     #[doc(alias = "SDL_AcquireGPUCommandBuffer")]
     pub fn new(device: Ref<'dev, Device<'ctx, 'vid>>) -> Result<Self> {
-        let handle = unsafe { SDL_AcquireGPUCommandBuffer(device.handle.as_ptr()) };
+        let handle = unsafe { SDL_AcquireGPUCommandBuffer(device.as_raw()) };
         Self::from_ptr(handle)
     }
 
@@ -218,7 +218,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
         let res = unsafe {
             SDL_AcquireGPUSwapchainTexture(
                 self.handle.as_ptr(),
-                wnd.handle.as_ptr(),
+                wnd.as_raw(),
                 tex.as_mut_ptr(),
                 opt2ptr_mut(tex_x),
                 opt2ptr_mut(tex_y),
@@ -251,7 +251,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
         let res = unsafe {
             SDL_WaitAndAcquireGPUSwapchainTexture(
                 self.handle.as_ptr(),
-                wnd.handle.as_ptr(),
+                wnd.as_raw(),
                 tex.as_mut_ptr(),
                 opt2ptr_mut(tex_x),
                 opt2ptr_mut(tex_y),
@@ -266,7 +266,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// This operation must be recorded outside any render, compute, or copy pass.
     #[doc(alias = "SDL_GenerateMipmapsForGPUTexture")]
     pub fn generate_mipmaps(&self, texture: Ref<Texture<'ctx, 'vid, 'dev>>) {
-        unsafe { SDL_GenerateMipmapsForGPUTexture(self.handle.as_ptr(), texture.handle.as_ptr()) }
+        unsafe { SDL_GenerateMipmapsForGPUTexture(self.handle.as_ptr(), texture.as_raw()) }
     }
 
     /// Insert a UTF-8 label into the command-buffer call stream for debugging.

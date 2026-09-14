@@ -34,10 +34,7 @@ impl<'p, 'dev, 'ctx, 'vid> GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
     /// The GPU device used to create textures and draw text.
     #[doc(alias = "TTF_PROP_GPU_TEXT_ENGINE_DEVICE")]
     pub fn device(&mut self, value: Ref<'dev, Device>) -> &mut Self {
-        self.set_pointer(
-            TTF_PROP_GPU_TEXT_ENGINE_DEVICE,
-            value.handle.as_ptr().cast(),
-        );
+        self.set_pointer(TTF_PROP_GPU_TEXT_ENGINE_DEVICE, value.as_raw().cast());
         self
     }
 
@@ -99,7 +96,7 @@ impl<'p, 'rnd, 'ctx, 'vid, 'wnd> RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wn
     pub fn renderer(&mut self, value: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>) -> &mut Self {
         self.set_pointer(
             TTF_PROP_RENDERER_TEXT_ENGINE_RENDERER,
-            value.handle.as_ptr().cast(),
+            value.as_raw().cast(),
         );
         self
     }

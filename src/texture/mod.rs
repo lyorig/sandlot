@@ -351,13 +351,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> Texture<'ctx, 'vid, 'wnd, 'rnd> {
         size: PointI32,
     ) -> Result<Self> {
         Self::from_ptr(unsafe {
-            SDL_CreateTexture(
-                rnd.handle.as_ptr(),
-                fmt.to_sdl(),
-                access.into(),
-                size.x,
-                size.y,
-            )
+            SDL_CreateTexture(rnd.as_raw(), fmt.to_sdl(), access.into(), size.x, size.y)
         })
     }
 
@@ -379,8 +373,6 @@ impl<'ctx, 'vid, 'wnd, 'rnd> Texture<'ctx, 'vid, 'wnd, 'rnd> {
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
         surf: Ref<Surface>,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe {
-            SDL_CreateTextureFromSurface(rnd.handle.as_ptr(), surf.handle.as_ptr())
-        })
+        Self::from_ptr(unsafe { SDL_CreateTextureFromSurface(rnd.as_raw(), surf.as_raw()) })
     }
 }

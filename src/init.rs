@@ -7,7 +7,7 @@
 //! for audio, and in this case you would just need to leave off `subsystem::Audio` (not yet implemented)
 //! to make sure that external library has complete control.
 //!
-//! When terminating, the [`Context`] will call `SDL_Quit`. This will clean up (nearly) everything
+//! When terminating, the [`Context`] will call [`SDL_Quit`]. This will clean up (nearly) everything
 //! that SDL might have allocated, and crucially, it'll make sure that the display's resolution
 //! is back to what the user expects if you had previously changed it for your game.
 //!
@@ -152,6 +152,16 @@ impl Drop for Context {
 
 pub trait Subsystem: Sized {
     type Handle: Copy;
+
+    /// # Safety
+    ///
+    /// The caller must only use the returned handle within
+    /// the lifetime of the backing subsystem.
+    unsafe fn as_handle(&self) -> Self::Handle;
+
+    fn as_ref(&self) -> Ref<'_, Self> {
+        unsafe { Ref::from_handle(self.as_handle()) }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -165,6 +175,7 @@ impl<T: Subsystem> Ref<'_, T> {
     /// This conversion is zero-cost.
     ///
     /// # Safety
+    ///
     /// The lifetime of the returned reference is inferred; functions building
     /// on this one should tie it to the handle's owning object, if possible.
     pub unsafe fn from_handle(handle: T::Handle) -> Self {
@@ -232,10 +243,10 @@ macro_rules! subsystem_new {
 
                 /// # Safety
                 ///
-                /// Think of this function as returning a pointer to `self`.
-                /// Handles are only valid as long as their owning objects.
+                /// The caller must only use the returned handle within
+                /// the lifetime of the backing subsystem.
                 pub unsafe fn as_handle(&self) -> [<$name Handle>]<'ctx> {
-                    self.handle
+                    unsafe { $crate::init::Subsystem::as_handle(self) }
                 }
 
                 pub fn as_ref(&self) -> $crate::init::Ref<'_, $name<'_>> {
@@ -252,6 +263,10 @@ macro_rules! subsystem_new {
 
             impl<'ctx> Subsystem for $name<'ctx> {
                 type Handle = [<$name Handle>]<'ctx>;
+
+                unsafe fn as_handle(&self) -> Self::Handle {
+                    self.handle
+                }
             }
 
             impl<'ctx> ::std::ops::Deref for $name<'ctx> {
@@ -412,13 +427,13 @@ impl EventsHandle<'_> {
     /// this function will hide it.
     #[doc(alias = "SDL_StopTextInput")]
     pub fn disable_text_input(self, wnd: resource::Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StopTextInput(wnd.handle.as_ptr()) })
+        to_result(unsafe { SDL_StopTextInput(wnd.as_raw()) })
     }
 
     /// Check whether or not Unicode text input events are enabled for a window.
     #[doc(alias = "SDL_TextInputActive")]
     pub fn is_text_input_enabled(self, wnd: resource::Ref<Window>) -> bool {
-        unsafe { SDL_TextInputActive(wnd.handle.as_ptr()) }
+        unsafe { SDL_TextInputActive(wnd.as_raw()) }
     }
 
     /// Start accepting Unicode text input events in a window.
@@ -436,7 +451,7 @@ impl EventsHandle<'_> {
     /// passed through.
     #[doc(alias = "SDL_StartTextInput")]
     pub fn enable_text_input(self, wnd: resource::Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StartTextInput(wnd.handle.as_ptr()) })
+        to_result(unsafe { SDL_StartTextInput(wnd.as_raw()) })
     }
 
     /// Returns an iterator over all [`Event`]s acquired since the last call

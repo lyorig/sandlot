@@ -31,7 +31,7 @@ pub struct TransferBufferLocation<'tb>(
 impl<'tb> TransferBufferLocation<'tb> {
     /// Refer to `tb` at `offset` bytes from the beginning of the buffer.
     pub fn new(tb: Ref<'tb, TransferBuffer>, offset: u32) -> Self {
-        let transfer_buffer = tb.handle.as_ptr();
+        let transfer_buffer = tb.as_raw();
         let inner = SDL_GPUTransferBufferLocation {
             transfer_buffer,
             offset,
@@ -110,9 +110,8 @@ impl TransferBuffer {
     /// Returns [`Err`] if the transfer buffer cannot be created.
     #[doc(alias = "SDL_CreateGPUTransferBuffer")]
     pub fn new(device: Ref<Device>, create_info: &TransferBufferCreateInfo) -> Result<Self> {
-        let handle = unsafe {
-            SDL_CreateGPUTransferBuffer(device.handle.as_ptr(), &raw const create_info.0)
-        };
+        let handle =
+            unsafe { SDL_CreateGPUTransferBuffer(device.as_raw(), &raw const create_info.0) };
         Self::from_ptr(handle)
     }
 
@@ -156,7 +155,7 @@ impl TransferBuffer {
     /// no automatic destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUTransferBuffer")]
     pub fn drop(self, device: Ref<Device>) {
-        unsafe { SDL_ReleaseGPUTransferBuffer(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_ReleaseGPUTransferBuffer(device.as_raw(), self.as_raw()) };
     }
 }
 
@@ -172,9 +171,7 @@ impl TransferBufferHandle {
     /// before encoding upload commands that use the buffer.
     #[doc(alias = "SDL_MapGPUTransferBuffer")]
     pub fn map(&self, device: Ref<Device>, cycle: Cycle) -> Result<NonNull<u8>> {
-        let ptr = unsafe {
-            SDL_MapGPUTransferBuffer(device.handle.as_ptr(), self.handle.as_ptr(), cycle.into())
-        };
+        let ptr = unsafe { SDL_MapGPUTransferBuffer(device.as_raw(), self.as_raw(), cycle.into()) };
         NonNull::new(ptr.cast()).ok_or_else(Error::current)
     }
 
@@ -184,6 +181,6 @@ impl TransferBufferHandle {
     /// be unmapped before encoding upload commands that use it.
     #[doc(alias = "SDL_UnmapGPUTransferBuffer")]
     pub fn unmap(&self, device: Ref<Device>) {
-        unsafe { SDL_UnmapGPUTransferBuffer(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_UnmapGPUTransferBuffer(device.as_raw(), self.as_raw()) };
     }
 }

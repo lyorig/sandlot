@@ -131,10 +131,10 @@ impl<'t, 'rt, 'ctx, 'vid, 'dev> ColorTargetInfo<'t, 'rt, 'ctx, 'vid, 'dev> {
         cycle: Cycle,
         crt: CycleResolveTexture,
     ) -> Self {
-        let resolve_texture = resolve_texture.map_or(std::ptr::null_mut(), |t| t.handle.as_ptr());
+        let resolve_texture = resolve_texture.map_or(std::ptr::null_mut(), |t| t.as_raw());
         Self(
             SDL_GPUColorTargetInfo {
-                texture: tex.handle.as_ptr(),
+                texture: tex.as_raw(),
                 mip_level,
                 layer_or_depth_plane,
                 clear_color: clear_color.into(),
@@ -177,7 +177,7 @@ impl<'t, 'ctx, 'vid, 'dev> DepthStencilTargetInfo<'t, 'ctx, 'vid, 'dev> {
         clear_stencil: u8,
         (mip_level, layer): (u8, u8),
     ) -> Self {
-        let texture = tex.handle.as_ptr();
+        let texture = tex.as_raw();
         Self(
             SDL_GPUDepthStencilTargetInfo {
                 texture,
@@ -326,7 +326,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> {
     ) -> Result<Self> {
         let handle = unsafe {
             SDL_BeginGPURenderPass(
-                cmdbuf.handle.as_ptr(),
+                cmdbuf.as_raw(),
                 color_targets.as_ptr().cast(),
                 color_targets.len() as _,
                 opt2ptr(depth_stencil_target).cast(),
@@ -528,12 +528,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     #[doc(alias = "SDL_DrawGPUPrimitivesIndirect")]
     pub fn draw_primitives_indirect(&self, buffer: Ref<Buffer>, offset: u32, draw_count: u32) {
         unsafe {
-            SDL_DrawGPUPrimitivesIndirect(
-                self.handle.as_ptr(),
-                buffer.handle.as_ptr(),
-                offset,
-                draw_count,
-            );
+            SDL_DrawGPUPrimitivesIndirect(self.as_raw(), buffer.as_raw(), offset, draw_count);
         }
     }
 
@@ -575,8 +570,8 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     ) {
         unsafe {
             SDL_DrawGPUIndexedPrimitivesIndirect(
-                self.handle.as_ptr(),
-                buffer.handle.as_ptr(),
+                self.as_raw(),
+                buffer.as_raw(),
                 offset,
                 draw_count,
             );

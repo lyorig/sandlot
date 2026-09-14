@@ -52,7 +52,7 @@ impl GpuEngine {
     /// `dev` is the GPU device to use for creating textures and drawing text.
     #[doc(alias = "TTF_CreateGPUTextEngine")]
     pub fn new(dev: Ref<Device>) -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_CreateGPUTextEngine(dev.as_ptr()) })
+        Self::from_ptr(unsafe { TTF_CreateGPUTextEngine(dev.as_raw()) })
     }
 
     /// Bind the builder to an existing property group.
@@ -68,7 +68,7 @@ impl GpuEngineHandle {
     /// Returns an error in case of failure.
     #[doc(alias = "TTF_GetGPUTextEngineWinding")]
     pub fn winding(&self) -> Result<Winding> {
-        let wind = unsafe { TTF_GetGPUTextEngineWinding(self.as_ptr()) };
+        let wind = unsafe { TTF_GetGPUTextEngineWinding(self.as_raw()) };
         Winding::from_sdl(wind).ok_or_else(Error::current)
     }
 
@@ -77,7 +77,7 @@ impl GpuEngineHandle {
     #[doc(alias = "TTF_SetGPUTextEngineWinding")]
     pub fn set_winding(&self, wind: Winding) {
         unsafe {
-            TTF_SetGPUTextEngineWinding(self.as_ptr(), wind.to_sdl());
+            TTF_SetGPUTextEngineWinding(self.as_raw(), wind.to_sdl());
         }
     }
 }
@@ -122,7 +122,7 @@ impl RendererEngine {
     /// `rnd` is the renderer to use for creating textures and drawing text.
     #[doc(alias = "TTF_CreateRendererTextEngine")]
     pub fn new(rnd: Ref<Renderer>) -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_CreateRendererTextEngine(rnd.as_ptr()) })
+        Self::from_ptr(unsafe { TTF_CreateRendererTextEngine(rnd.as_raw()) })
     }
 
     /// Bind the builder to an existing property group.

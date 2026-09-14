@@ -31,7 +31,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Returns [`Err`] if SDL cannot begin the pass.
     #[doc(alias = "SDL_BeginGPUCopyPass")]
     pub fn new(cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>) -> Result<Self> {
-        let handle = unsafe { SDL_BeginGPUCopyPass(cmdbuf.handle.as_ptr()) };
+        let handle = unsafe { SDL_BeginGPUCopyPass(cmdbuf.as_raw()) };
         Self::from_ptr(handle)
     }
 

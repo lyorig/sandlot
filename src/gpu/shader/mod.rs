@@ -131,8 +131,7 @@ impl<'ctx, 'vid, 'dev> Shader<'ctx, 'vid, 'dev> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &ShaderCreateInfo,
     ) -> Result<Self> {
-        let handle =
-            unsafe { SDL_CreateGPUShader(device.handle.as_ptr(), &raw const create_info.0) };
+        let handle = unsafe { SDL_CreateGPUShader(device.as_raw(), &raw const create_info.0) };
 
         Self::from_ptr(handle)
     }
@@ -146,7 +145,7 @@ impl<'ctx, 'vid, 'dev> Shader<'ctx, 'vid, 'dev> {
     #[doc(alias = "SDL_ReleaseGPUShader")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
         unsafe {
-            SDL_ReleaseGPUShader(device.handle.as_ptr(), self.handle.as_ptr());
+            SDL_ReleaseGPUShader(device.as_raw(), self.as_raw());
         }
     }
 }

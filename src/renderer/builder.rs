@@ -52,7 +52,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_RENDERER_CREATE_WINDOW_POINTER,
-                value.handle.as_ptr().cast(),
+                value.as_raw().cast(),
             )
         };
 
@@ -66,7 +66,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_RENDERER_CREATE_SURFACE_POINTER,
-                value.handle.as_ptr().cast(),
+                value.as_raw().cast(),
             )
         };
 

@@ -131,9 +131,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// Returns [`Err`] if the window cannot be claimed.
     #[doc(alias = "SDL_ClaimWindowForGPUDevice")]
     pub fn claim_window(&self, window: Ref<Window>) -> Result<()> {
-        to_result(unsafe {
-            SDL_ClaimWindowForGPUDevice(self.handle.as_ptr(), window.handle.as_ptr())
-        })
+        to_result(unsafe { SDL_ClaimWindowForGPUDevice(self.as_raw(), window.as_raw()) })
     }
 
     /// Unclaim a window and destroy its swapchain structure.
@@ -141,7 +139,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// `window` must be a window currently claimed by this device.
     #[doc(alias = "SDL_ReleaseWindowFromGPUDevice")]
     pub fn release_window(&self, window: Ref<Window>) {
-        unsafe { SDL_ReleaseWindowFromGPUDevice(self.handle.as_ptr(), window.handle.as_ptr()) };
+        unsafe { SDL_ReleaseWindowFromGPUDevice(self.as_raw(), window.as_raw()) };
     }
 
     /// Determine whether a presentation mode is supported by a window.
@@ -150,13 +148,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// mode to check. Returns `true` when the mode is supported.
     #[doc(alias = "SDL_WindowSupportsGPUPresentMode")]
     pub fn window_supports_gpu_present_mode(&self, window: Ref<Window>, pm: PresentMode) -> bool {
-        unsafe {
-            SDL_WindowSupportsGPUPresentMode(
-                self.handle.as_ptr(),
-                window.handle.as_ptr(),
-                pm.into(),
-            )
-        }
+        unsafe { SDL_WindowSupportsGPUPresentMode(self.as_raw(), window.as_raw(), pm.into()) }
     }
 
     /// Determine whether a swapchain composition is supported by a window.
@@ -171,8 +163,8 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ) -> bool {
         unsafe {
             SDL_WindowSupportsGPUSwapchainComposition(
-                self.handle.as_ptr(),
-                window.handle.as_ptr(),
+                self.as_raw(),
+                window.as_raw(),
                 SDL_GPUSwapchainComposition::new(sc as _),
             )
         }
@@ -193,7 +185,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// Returns [`Err`] if SDL cannot wait for the window's presenting work.
     #[doc(alias = "SDL_WaitForGPUSwapchain")]
     pub fn wait_swapchain(&self, window: Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_WaitForGPUSwapchain(self.handle.as_ptr(), window.handle.as_ptr()) })
+        to_result(unsafe { SDL_WaitForGPUSwapchain(self.as_raw(), window.as_raw()) })
     }
 
     /// Block until the given fences are signaled.
@@ -251,8 +243,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     #[doc(alias = "SDL_GetGPUSwapchainTextureFormat")]
     pub fn swapchain_texture_format(&self, window: Ref<Window>) -> TextureFormat {
         unsafe {
-            let fmt =
-                SDL_GetGPUSwapchainTextureFormat(self.handle.as_ptr(), window.handle.as_ptr());
+            let fmt = SDL_GetGPUSwapchainTextureFormat(self.as_raw(), window.as_raw());
             TextureFormat::from_sdl_unchecked(fmt)
         }
     }
@@ -321,8 +312,8 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ) -> Result<()> {
         to_result(unsafe {
             SDL_SetGPUSwapchainParameters(
-                self.handle.as_ptr(),
-                window.handle.as_ptr(),
+                self.as_raw(),
+                window.as_raw(),
                 SDL_GPUSwapchainComposition::new(composition as _),
                 SDL_GPUPresentMode::new(present_mode as _),
             )

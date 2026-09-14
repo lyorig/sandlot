@@ -97,8 +97,8 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>
     ) -> Self {
         Self(
             SDL_GPUGraphicsPipelineCreateInfo {
-                vertex_shader: vertex_shader.handle.as_ptr(),
-                fragment_shader: fragment_shader.handle.as_ptr(),
+                vertex_shader: vertex_shader.as_raw(),
+                fragment_shader: fragment_shader.as_raw(),
                 vertex_input_state: vertex_input_state.0,
                 primitive_type: SDL_GPUPrimitiveType::new(primitive_type as _),
                 rasterizer_state: rasterizer_state.0,
@@ -142,9 +142,8 @@ impl<'ctx, 'vid, 'dev> GraphicsPipeline<'ctx, 'vid, 'dev> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: &GraphicsPipelineCreateInfo,
     ) -> Result<Self> {
-        let handle = unsafe {
-            SDL_CreateGPUGraphicsPipeline(device.handle.as_ptr(), &raw const create_info.0)
-        };
+        let handle =
+            unsafe { SDL_CreateGPUGraphicsPipeline(device.as_raw(), &raw const create_info.0) };
 
         Self::from_ptr(handle)
     }
@@ -175,7 +174,7 @@ impl<'ctx, 'vid, 'dev> GraphicsPipeline<'ctx, 'vid, 'dev> {
     /// automatic destructor, so this method must be called explicitly.
     #[doc(alias = "SDL_ReleaseGPUGraphicsPipeline")]
     pub fn drop(self, device: Ref<'dev, Device<'ctx, 'vid>>) {
-        unsafe { SDL_ReleaseGPUGraphicsPipeline(device.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_ReleaseGPUGraphicsPipeline(device.as_raw(), self.handle.as_ptr()) };
     }
 }
 
@@ -186,6 +185,6 @@ impl<'ctx, 'vid, 'dev> GraphicsPipelineHandle<'ctx, 'vid, 'dev> {
     /// pipeline must be bound before making draw calls.
     #[doc(alias = "SDL_BindGPUGraphicsPipeline")]
     pub fn bind(&self, render_pass: Ref<RenderPass>) {
-        unsafe { SDL_BindGPUGraphicsPipeline(render_pass.handle.as_ptr(), self.handle.as_ptr()) };
+        unsafe { SDL_BindGPUGraphicsPipeline(render_pass.as_raw(), self.handle.as_ptr()) };
     }
 }
