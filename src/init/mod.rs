@@ -153,6 +153,8 @@ impl Context {
     /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
     ///
     /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
+    /// Although it **doesn't seem to be used** by SDL by version 3.4.16, specifying it is
+    /// still recommended, as future versions may make use of it.
     ///
     /// # Remarks
     ///
@@ -219,11 +221,21 @@ pub trait Subsystem: Sized {
     }
 }
 
-#[derive(Clone, Copy)]
 pub struct Ref<'sub, T: Subsystem> {
     handle: T::Handle,
     marker: PhantomData<&'sub T>,
 }
+
+impl<T: Subsystem> Clone for Ref<'_, T> {
+    fn clone(&self) -> Self {
+        Self {
+            handle: self.handle,
+            marker: self.marker,
+        }
+    }
+}
+
+impl<T: Subsystem> Copy for Ref<'_, T> {}
 
 impl<T: Subsystem> Ref<'_, T> {
     /// Construct a new reference from a handle, assuming it is valid.
