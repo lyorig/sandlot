@@ -59,7 +59,7 @@ Run `cargo check --all-targets` and `cargo doc --no-deps` to verify your changes
 ```rust
 /// Get the name of the platform.
 ///
-/// ## Remarks
+/// # Remarks
 /// Here are the names returned for some (but not all) supported platforms:
 /// - "Windows"
 /// - "macOS"
@@ -87,7 +87,7 @@ pub fn has_data(mime_type: &CStr) -> bool {
 /// Returns [`Ok(None)`] if the swapchain texture is unavailable, e.g. when the
 /// window is minimized (this is not an error!).
 /// 
-/// ## Remarks
+/// # Remarks
 /// 
 /// When a swapchain texture is acquired on a command buffer, it will automatically be submitted
 /// for presentation when the command buffer is submitted. The swapchain texture should only be referenced

@@ -50,6 +50,8 @@ pub enum IndexElementSize {
     Bits32 = SDL_GPUIndexElementSize::_32BIT.0,
 }
 
+impl_enum_transmute!(SDL_GPUIndexElementSize, IndexElementSize);
+
 /// How an attached texture is treated at the start of a render pass.
 #[repr(i32)]
 #[derive(Clone, Copy)]
@@ -62,6 +64,8 @@ pub enum LoadOp {
     /// The previous contents need not be preserved and become undefined.
     DontCare = SDL_GPULoadOp::DONT_CARE.0,
 }
+
+impl_enum_transmute!(SDL_GPULoadOp, LoadOp);
 
 /// How an attached texture is treated at the end of a render pass.
 #[repr(i32)]
@@ -79,8 +83,6 @@ pub enum StoreOp {
     ResolveAndStore = SDL_GPUStoreOp::RESOLVE_AND_STORE.0,
 }
 
-impl_enum_transmute!(SDL_GPUIndexElementSize, IndexElementSize);
-impl_enum_transmute!(SDL_GPULoadOp, LoadOp);
 impl_enum_transmute!(SDL_GPUStoreOp, StoreOp);
 
 /// A viewport used by a render pass.

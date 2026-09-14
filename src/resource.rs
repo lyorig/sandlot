@@ -3,6 +3,22 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
+/// A non-owning handle to a resource.
+///
+/// These exist to enable Sandlot's custom references. They're analogous to a Rust pointer,
+/// as they aren't lifetime-bound to any particular resource, so obtaining them directly is unsafe.
+///
+/// Both the owned type and [`Ref`]/[`RefMut`] contain this handle and [`Deref`] to it, the difference being:
+/// - the owned type [`Drop`]s the handle
+/// - the references are tied to the owned type via [`PhantomData`]
+///
+/// # Getting into specifics
+///
+/// This design prevents double indirection, which using "standard" Rust references would incur, because
+/// SDL uses the [PImpl](https://en.cppreference.com/cpp/language/pimpl) idiom for most of its structures.
+/// This way, SDL only exposes pointers (often called "handles" in many APIs) to these objects, and manipulation
+/// is only possible via API functions themselves. As such, taking a reference to an SDL object would be a reference
+/// to a pointer, incurring an unnecessary double indirection.
 pub trait Handle: Copy {
     /// The "raw" type, i.e. `*mut SDL_Surface`.
     type Raw: Copy;
@@ -10,23 +26,38 @@ pub trait Handle: Copy {
     /// The actual type contained within the handle, i.e. `NonZero<SDL_Surface>`.
     type Inner: Copy;
 
+    /// Get this type's "raw" representation,
+    /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
+    /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
     fn as_raw(self) -> Self::Raw;
+
+    /// Get this type's "inner" representation,
+    /// i.e. `NonNull<SDL_Surface>` for [`Surface`](crate::surface::Surface),
+    /// or `NonZero<u32>` for [`Properties`](crate::properties::Properties).
     fn as_inner(self) -> Self::Inner;
 }
 
+/// An owning handle to a resource.
+///
+///
 pub trait Resource: Sized {
     type Handle: Handle;
 
+    /// Get this type's underlying handle. See the [`Handle`] trait's
+    /// documentation for what this represents.
+    ///
     /// # Safety
     ///
     /// The caller must only use the returned handle within
     /// the lifetime of the backing resource.
     unsafe fn as_handle(&self) -> Self::Handle;
 
+    /// Create a new reference tied to this object.
     fn as_ref(&self) -> Ref<'_, Self> {
         unsafe { Ref::from_handle(self.as_handle()) }
     }
 
+    /// Create a new mutable reference tied to this object.
     fn as_mut(&mut self) -> RefMut<'_, Self> {
         unsafe { RefMut::from_handle(self.as_handle()) }
     }
@@ -130,6 +161,7 @@ macro_rules! expand_parens {
 /// use crate::{init::{Ref, Video}, resource::resource_new};
 ///
 /// resource_new! {
+///     /// Represents an OS window.
 ///     pub struct Window<'ctx, 'vid> : SDL_Window {
 ///         marker: PhantomData<(Ref<'vid, Video<'ctx>>)>,
 ///     }
@@ -146,6 +178,7 @@ macro_rules! expand_parens {
 /// use sdl3_sys::gpu::SDL_GPUTexture;
 ///
 /// resource_new! {
+///     /// Represents a GPU texture.
 ///     pub struct Texture<'dev> : SDL_GPUTexture {
 ///         marker: PhantomData<(Ref<'dev, Device>)>,
 ///     }
@@ -182,10 +215,16 @@ macro_rules! resource_new {
                     })
                 }
 
+                /// Get this type's "raw" representation,
+                /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
+                /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
                 pub fn as_raw(self) -> *mut $sdl {
                     $crate::resource::Handle::as_raw(self)
                 }
 
+                /// Get this type's "inner" representation,
+                /// i.e. `NonNull<SDL_Surface>` for [`Surface`](crate::surface::Surface),
+                /// or `NonZero<u32>` for [`Properties`](crate::properties::Properties).
                 pub fn as_inner(self) -> ::std::ptr::NonNull<$sdl> {
                     $crate::resource::Handle::as_inner(self)
                 }
