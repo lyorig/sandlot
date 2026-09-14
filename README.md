@@ -27,7 +27,7 @@ The general plan is:
 Most, but not all, functionality requires two things from the `init` module to be in scope:
 - `init::Context`
 - a relevant subsystem
-  - for example, `Window::new` may return `Err` if `init::Video` isn't in scope.
+  - for example, `init::Video` for `Window::new`
 
 ### Objects
 
@@ -35,7 +35,7 @@ Since SDL works with opaque pointers, using Rust references would cause unnecess
 To avoid this, Sandlot uses custom types with matching properties. For example:
 - a `Texture` is an owned object which will `Drop` the underlying handle upon going out of scope
 - `Ref<'a, Texture>` and `RefMut<'a, Texture>` mimic `&Texture` and `&mut Texture`
-  - these can be obtained from an owned object via the `as_ref()` method (requires the `sandlot::resource::Resource` trait to be in scope)
+  - these can be obtained from an owned object via the `as_ref()` method
   - the only difference between these two is that `Ref` only implements `Deref` for its handle, while `RefMut` also implements `DerefMut`
 - a `TextureHandle` is analogous to a pointer. It exposes all methods, but is not lifetime-bound to anything
 
