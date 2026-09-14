@@ -1,7 +1,7 @@
 use sandlot::{Result, display::Display, init::Context, init::Video};
 
 fn run() -> Result<()> {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let _vid = Video::init(&ctx)?;
 
     for (i, disp) in Display::all()?.iter().copied().enumerate() {

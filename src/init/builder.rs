@@ -2,7 +2,7 @@ use std::ffi::{CStr, c_char};
 
 use sdl3_sys::init::*;
 
-use crate::init::Context;
+use crate::{Result, init::Context};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AppKind {
@@ -47,7 +47,7 @@ impl ContextBuilder {
     /// # Panics
     ///
     /// This method simply calls [`Context::new`]. Consult its documentation for panic conditions.
-    pub fn build(self) -> Context {
+    pub fn build(self) -> Result<Context> {
         Context::new()
     }
 

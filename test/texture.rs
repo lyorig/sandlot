@@ -13,7 +13,7 @@ use sdl3_sys::render::SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER;
 /// `Texture::builder` with `SDL_CreateTextureWithProperties`.
 #[test]
 fn texture_builder() -> Result {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let vid = Video::init(&ctx)?;
 
     let props = Properties::new()?;
@@ -41,7 +41,7 @@ fn texture_builder() -> Result {
 /// `Texture::properties` reflects what was used at creation.
 #[test]
 fn texture_properties() -> Result {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let vid = Video::init(&ctx)?;
 
     let props = Properties::new()?;
@@ -73,7 +73,7 @@ fn texture_properties() -> Result {
 /// `build_cleanup` clears the texture creation properties.
 #[test]
 fn texture_build_cleanup() -> Result {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let vid = Video::init(&ctx)?;
 
     let props = Properties::new()?;

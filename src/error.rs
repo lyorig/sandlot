@@ -2,7 +2,7 @@
 
 use std::ffi::{CStr, CString};
 
-use sdl3_sys::error::SDL_GetError;
+use sdl3_sys::error::{SDL_GetError, SDL_SetError};
 
 #[derive(Debug)]
 pub struct Error {
@@ -45,6 +45,13 @@ impl Error {
         reason.push_str(str);
 
         Self { reason }
+    }
+
+    /// Calls [`SDL_SetError`] with `reason`, then returns [`Error::current`].
+    #[doc(alias = "SDL_SetError")]
+    pub(crate) fn set(reason: &CStr) -> Self {
+        unsafe { SDL_SetError(reason.as_ptr()) };
+        Self::current()
     }
 
     pub fn as_str(&self) -> &str {

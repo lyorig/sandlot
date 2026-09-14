@@ -11,7 +11,7 @@ use sandlot::{
     init::Context,
 };
 
-use rustest::test;
+use rustest::{Result, test};
 
 /// Directory names must be unique per test run,
 /// since rustest may run tests in parallel.
@@ -32,15 +32,17 @@ fn cstr(path: &std::path::Path) -> CString {
 }
 
 #[test]
-fn fs_base_path_ends_with_separator() {
-    let ctx = Context::new();
+fn fs_base_path_ends_with_separator() -> Result {
+    let ctx = Context::new()?;
 
-    let path = ctx.base_path().unwrap();
+    let path = ctx.base_path()?;
     assert!(path.ends_with('/') || path.ends_with('\\'));
+
+    Ok(())
 }
 
 #[test]
-fn fs_pref_path_ends_with_separator() -> rustest::Result {
+fn fs_pref_path_ends_with_separator() -> Result {
     let path = fs::pref_path(c"sandlot", c"fs-test")?;
     let path = path.to_str();
 
@@ -50,8 +52,8 @@ fn fs_pref_path_ends_with_separator() -> rustest::Result {
 }
 
 #[test]
-fn fs_user_folder_home() -> rustest::Result {
-    let ctx = Context::new();
+fn fs_user_folder_home() -> Result {
+    let ctx = Context::new()?;
 
     let home = ctx.user_folder(Folder::Home)?;
     assert!(home.ends_with('/') || home.ends_with('\\'));
@@ -60,7 +62,7 @@ fn fs_user_folder_home() -> rustest::Result {
 }
 
 #[test]
-fn fs_directory_roundtrip() -> rustest::Result {
+fn fs_directory_roundtrip() -> Result {
     let dir = scratch_dir("roundtrip");
     let nested = dir.join("nested");
 
@@ -118,7 +120,7 @@ fn fs_directory_roundtrip() -> rustest::Result {
 }
 
 #[test]
-fn fs_enumeration_stops_early() -> rustest::Result {
+fn fs_enumeration_stops_early() -> Result {
     let dir = scratch_dir("stop-early");
     fs::create_directory(&cstr(&dir))?;
 
@@ -144,7 +146,7 @@ fn fs_enumeration_stops_early() -> rustest::Result {
 }
 
 #[test]
-fn fs_copy_file() -> rustest::Result {
+fn fs_copy_file() -> Result {
     let dir = scratch_dir("copy");
     fs::create_directory(&cstr(&dir))?;
 

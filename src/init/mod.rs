@@ -20,7 +20,7 @@ use std::{marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
 use sdl3_sys::{
     events::{SDL_Event, SDL_PumpEvents, SDL_PushEvent, SDL_WaitEvent},
     filesystem::{SDL_GetBasePath, SDL_GetUserFolder},
-    init::SDL_Quit,
+    init::{SDL_Init, SDL_InitFlags, SDL_Quit},
     keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
     video::{SDL_GetGrabbedWindow, SDL_GetWindowFromID, SDL_GetWindows},
 };
@@ -39,45 +39,26 @@ use crate::{
 mod_reexport!(builder);
 mod_reexport!(metadata);
 
-/// A zero-sized type that only exists to call [`SDL_Quit`].
+/// A zero-sized type that mainly exists to call [`SDL_Quit`].
 /// As such, think of it as a guard that creates a scope for
 /// the initialization of subsystems, ensuring they're properly
 /// quit once it goes out of scope.
 pub struct Context;
 
 impl Context {
-    /// Like [`Self::new`], without the safety checks.
-    ///
-    /// # Safety
-    /// Only call this on the main thread.
-    pub unsafe fn new_unchecked() -> Self {
-        Self {}
-    }
-
     /// Create a new context, enabling you to initialize individual subsystems.
     ///
-    /// # Panics
-    /// Panics if this function is not called on the main thread.
+    /// Returns [`Err`] if SDL fails basic initialization.
     ///
-    /// # Why doesn't this return a [`Result`] instead?
-    /// TL;DR: It's less error-prone.
-    /// Contexts are sometimes left unused, i.e.
-    /// ```
-    /// use sandlot::init::Context;
-    ///
-    /// let _ctx = Context::new();
-    /// ```
-    /// If [`Self::new`] returned [`Err`], this snippet would silently skip
-    /// the destructor and not quit SDL in case of an error. Not running on
-    /// the main thread isn't really something that can happen by chance and you
-    /// can recover from. If necessary, check yourself via [`crate::is_main_thread`].
-    ///
-    /// In addition, [`Result`] is only intended to originate from SDL API calls.
-    /// Since [`Context`] is a ZST providing an abstraction over SDL initialization,
-    /// this would newly require a way to create a "custom" error.
-    pub fn new() -> Self {
-        assert!(crate::is_main_thread(), "Context not on main thread");
-        Self {}
+    /// Only call this on the main thread!
+    pub fn new() -> Result<Self> {
+        // This initializes the main thread and other basic stuff,
+        // like setting app metadata.
+        if unsafe { SDL_Init(SDL_InitFlags::new(0)) } {
+            Ok(Self {})
+        } else {
+            Err(Error::current())
+        }
     }
 
     /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
@@ -167,12 +148,6 @@ impl Context {
                 c_ptr_to_str(ptr.as_ptr())
             })
         }
-    }
-}
-
-impl Default for Context {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

@@ -21,7 +21,8 @@ fn init_context_metadata() {
         .copyright(COPYRIGHT)
         .url(URL)
         .kind(AppKind::Game)
-        .build();
+        .build()
+        .unwrap();
 
     let md = ctx.metadata();
     assert_eq!(md.name(), NAME);
@@ -36,7 +37,7 @@ fn init_context_metadata() {
 /// `Context::metadata` provides default properties when not set explicitly.
 #[test]
 fn init_context_metadata_default() {
-    let ctx = Context::new();
+    let ctx = Context::new().unwrap();
 
     let md = ctx.metadata();
 

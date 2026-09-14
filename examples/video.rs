@@ -33,7 +33,7 @@ fn run() -> Result<()> {
         .url(c"https://github.com/lyorig/sandlot")
         .identifier(c"cz.lyorig.SandlotVideoExample")
         .kind(AppKind::Application)
-        .build();
+        .build()?;
 
     let video = ManuallyDrop::new(Video::init(&ctx)?);
     let events = video.events();

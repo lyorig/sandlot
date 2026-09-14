@@ -1,4 +1,4 @@
-use rustest::test;
+use rustest::{Result, test};
 use sdl3_sys::events::*;
 
 use sandlot::{event::Event, init::Context, init::Events};
@@ -52,16 +52,18 @@ fn event_timestamp() {
 
 /// [`EventsHandle::push`] testing.
 #[test]
-fn event_push() {
+fn event_push() -> Result {
     // Initialize events.
-    let ctx = Context::new();
-    let evts = Events::init(&ctx).unwrap();
+    let ctx = Context::new()?;
+    let evts = Events::init(&ctx)?;
 
     // Should work now.
-    evts.push(&Event::Quit).unwrap();
+    evts.push(&Event::Quit)?;
 
-    let evt = evts.iter().next().unwrap();
+    let evt = evts.iter().next().ok_or("Expected event")?;
     let Event::Quit = evt else {
         panic!("Expected quit event");
     };
+
+    Ok(())
 }

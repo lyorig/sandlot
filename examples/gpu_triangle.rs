@@ -45,7 +45,7 @@ fn print_properties(props: DeviceProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let video = ManuallyDrop::new(Video::init(&ctx)?);
     let events = video.events();
 

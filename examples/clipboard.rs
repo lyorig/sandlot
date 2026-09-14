@@ -5,7 +5,7 @@ use sandlot::{Result, clipboard, init::Context, init::Video};
 const DESIRED_MIME: &CStr = c"image/png";
 
 fn run() -> Result<()> {
-    let ctx = Context::new();
+    let ctx = Context::new()?;
     let _vid = Video::init(&ctx)?;
 
     if clipboard::has_data(DESIRED_MIME) {
