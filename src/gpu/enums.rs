@@ -3,11 +3,16 @@
 
 use crate::util::boolenum;
 
+// doc-only
 #[expect(unused_imports)]
-use crate::gpu::StoreOp;
+use crate::gpu::{ColorTargetInfo, LoadOp, StoreOp};
 
 boolenum!(
     /// Whether to cycle resources.
+    ///
+    /// # Remarks
+    ///
+    /// For [`ColorTargetInfo`], the texture is only cycled if it is bound and `load_op` is not [`LoadOp::Load`]
     ///
     /// # Resources
     /// [SDL GPU API Concepts: Data Transfer and Cycling](https://moonside.games/posts/sdl-gpu-concepts-cycling/)

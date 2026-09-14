@@ -6,7 +6,7 @@ use sandlot::{
     Result,
     color::Rgba,
     event::Event,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
@@ -28,7 +28,13 @@ fn print_properties(props: RendererProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::new();
+    let ctx = Context::builder()
+        .name(c"Sandlot Video Example")
+        .url(c"https://github.com/lyorig/sandlot")
+        .identifier(c"cz.lyorig.SandlotVideoExample")
+        .kind(AppKind::Application)
+        .build();
+
     let video = ManuallyDrop::new(Video::init(&ctx)?);
     let events = video.events();
 

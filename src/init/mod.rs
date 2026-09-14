@@ -33,9 +33,11 @@ use crate::{
     event::{Event, EventIter},
     fs::Folder,
     resource,
-    util::{c_ptr_to_str, opt2res_map, to_result},
+    util::{c_ptr_to_str, mod_reexport, opt2res_map, to_result},
     window::{Window, WindowHandle, WindowId},
 };
+
+mod_reexport!(builder);
 
 /// A zero-sized type that only exists to call [`SDL_Quit`].
 /// As such, think of it as a guard that creates a scope for
@@ -76,6 +78,28 @@ impl Context {
     pub fn new() -> Self {
         assert!(crate::is_main_thread(), "Context not on main thread");
         Self {}
+    }
+
+    /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
+    ///
+    /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
+    ///
+    /// # Remarks
+    ///
+    /// You can optionally provide metadata about your app to SDL. This is not required, but strongly encouraged.
+    ///
+    /// There are several locations where SDL can make use of metadata (an "About" box in the macOS menu bar,
+    /// the name of the app can be shown on some audio mixers, etc). Any piece of metadata can be left out,
+    /// if a specific detail doesn't make sense for the app.
+    ///
+    /// This function should be called as early as possible, before `SDL_Init`.
+    /// Multiple calls to this function are allowed, but various state might not change once it has been set up
+    /// with a previous call to this function.
+    ///
+    /// Once set, this metadata can be read using `SDL_GetAppMetadataProperty`.
+    #[doc(alias = "SDL_SetAppMetadataProperty")]
+    pub fn builder() -> ContextBuilder {
+        ContextBuilder::new()
     }
 
     /// Get the directory where the application was run from.
