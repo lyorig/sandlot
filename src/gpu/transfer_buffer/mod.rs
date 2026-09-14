@@ -75,7 +75,7 @@ impl TransferBufferCreateInfo {
     /// resources, and `size` is the buffer size in bytes.
     pub const fn new(usage: TransferBufferUsage, size: u32) -> Self {
         Self(SDL_GPUTransferBufferCreateInfo {
-            usage: SDL_GPUTransferBufferUsage::new(usage as _),
+            usage: usage.to_sdl(),
             size,
             props: SDL_PropertiesID::new(0),
         })

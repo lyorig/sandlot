@@ -96,7 +96,11 @@
 
 use std::mem::{self, MaybeUninit};
 
-use sdl3_sys::{blendmode::*, pixels::*, surface::SDL_ScaleMode};
+use sdl3_sys::{
+    blendmode::*,
+    pixels::*,
+    surface::{SDL_FlipMode, SDL_ScaleMode},
+};
 
 use crate::{
     Result,
@@ -291,6 +295,23 @@ pub enum ScaleMode {
 
 impl_enum_transmute!(SDL_ScaleMode, ScaleMode, INVALID);
 
+/// The flip applied to a source region during a blit.
+#[repr(i32)]
+#[derive(Clone, Copy)]
+#[doc(alias = "SDL_FlipMode")]
+pub enum FlipMode {
+    /// Do not flip the source region.
+    None = SDL_FlipMode::NONE.0,
+    /// Flip the source region horizontally.
+    Horizontal = SDL_FlipMode::HORIZONTAL.0,
+    /// Flip the source region vertically.
+    Vertical = SDL_FlipMode::VERTICAL.0,
+    /// Flip the source region horizontally and vertically.
+    HorizontalAndVertical = SDL_FlipMode::HORIZONTAL_AND_VERTICAL.0,
+}
+
+impl_enum_transmute!(SDL_FlipMode, FlipMode);
+
 /// Colorspace definitions.
 ///
 /// # Remarks
@@ -336,9 +357,11 @@ pub enum Colorspace {
 
 impl Colorspace {
     /// The default colorspace for RGB surfaces if no colorspace is specified.
-    pub const RGB_DEFAULT: Self = unsafe { mem::transmute(SDL_Colorspace::RGB_DEFAULT) };
+    pub const RGB_DEFAULT: Self =
+        unsafe { Colorspace::from_sdl_unchecked(SDL_Colorspace::RGB_DEFAULT) };
     /// The default colorspace for YUV surfaces if no colorspace is specified.
-    pub const YUV_DEFAULT: Self = unsafe { mem::transmute(SDL_Colorspace::YUV_DEFAULT) };
+    pub const YUV_DEFAULT: Self =
+        unsafe { Colorspace::from_sdl_unchecked(SDL_Colorspace::YUV_DEFAULT) };
 }
 
 impl_enum_transmute!(SDL_Colorspace, Colorspace, UNKNOWN);

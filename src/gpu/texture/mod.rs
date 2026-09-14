@@ -380,14 +380,14 @@ impl TextureCreateInfo {
         samples: SampleCount,
     ) -> Self {
         let inner = SDL_GPUTextureCreateInfo {
-            r#type: SDL_GPUTextureType::new(kind as _),
-            format: SDL_GPUTextureFormat::new(format as _),
-            usage: SDL_GPUTextureUsageFlags::new(usage.bits()),
+            r#type: kind.to_sdl(),
+            format: format.to_sdl(),
+            usage: usage.to_sdl(),
             width: size.x,
             height: size.y,
             layer_count_or_depth,
             num_levels,
-            sample_count: SDL_GPUSampleCount::new(samples as _),
+            sample_count: samples.to_sdl(),
             props: SDL_PropertiesID::new(0),
         };
 

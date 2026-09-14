@@ -219,7 +219,7 @@ impl VertexBufferDescription {
         Self(SDL_GPUVertexBufferDescription {
             slot,
             pitch,
-            input_rate: SDL_GPUVertexInputRate::new(input_rate as _),
+            input_rate: input_rate.into(),
             instance_step_rate: 0, // "Reserved for future use. Must be set to 0."
         })
     }
@@ -237,7 +237,7 @@ impl VertexAttribute {
         Self(SDL_GPUVertexAttribute {
             location,
             buffer_slot,
-            format: SDL_GPUVertexElementFormat::new(format as _),
+            format: format.into(),
             offset,
         })
     }
@@ -297,9 +297,9 @@ impl RasterizerState {
         dc: EnableDepthClip,
     ) -> Self {
         Self(SDL_GPURasterizerState {
-            fill_mode: SDL_GPUFillMode::new(fill_mode as _),
-            cull_mode: SDL_GPUCullMode::new(cull_mode as _),
-            front_face: SDL_GPUFrontFace::new(front_face as _),
+            fill_mode: fill_mode.into(),
+            cull_mode: cull_mode.into(),
+            front_face: front_face.into(),
             depth_bias_constant_factor,
             depth_bias_clamp,
             depth_bias_slope_factor,
@@ -319,7 +319,7 @@ impl MultisampleState {
     /// Reserved SDL fields are initialized to their required zero/false values.
     pub fn new(sample_count: SampleCount, eatc: EnableAlphaToCoverage) -> Self {
         Self(SDL_GPUMultisampleState {
-            sample_count: SDL_GPUSampleCount::new(sample_count as _),
+            sample_count: sample_count.into(),
             sample_mask: 0,     // "Reserved for future use. Must be set to 0."
             enable_mask: false, // "Reserved for future use. Must be set to false."
             enable_alpha_to_coverage: eatc.into(),
@@ -342,10 +342,10 @@ impl StencilOpState {
         compare_op: CompareOp,
     ) -> Self {
         Self(SDL_GPUStencilOpState {
-            fail_op: SDL_GPUStencilOp::new(fail_op as _),
-            pass_op: SDL_GPUStencilOp::new(pass_op as _),
-            depth_fail_op: SDL_GPUStencilOp::new(depth_fail_op as _),
-            compare_op: SDL_GPUCompareOp::new(compare_op as _),
+            fail_op: fail_op.into(),
+            pass_op: pass_op.into(),
+            depth_fail_op: depth_fail_op.into(),
+            compare_op: compare_op.into(),
         })
     }
 }
@@ -371,7 +371,7 @@ impl DepthStencilState {
         est: EnableStencilTest,
     ) -> Self {
         Self(SDL_GPUDepthStencilState {
-            compare_op: SDL_GPUCompareOp::new(compare_op as _),
+            compare_op: compare_op.into(),
             back_stencil_state: back_stencil_state.0,
             front_stencil_state: front_stencil_state.0,
             compare_mask,
@@ -402,13 +402,13 @@ impl ColorTargetBlendState {
         ecwm: EnableColorWriteMask,
     ) -> Self {
         Self(SDL_GPUColorTargetBlendState {
-            src_color_blendfactor: SDL_GPUBlendFactor::new(src_color_bf as _),
-            dst_color_blendfactor: SDL_GPUBlendFactor::new(dst_color_bf as _),
-            color_blend_op: SDL_GPUBlendOp::new(color_blend_op as _),
-            src_alpha_blendfactor: SDL_GPUBlendFactor::new(src_alpha_bf as _),
-            dst_alpha_blendfactor: SDL_GPUBlendFactor::new(dst_alpha_bf as _),
-            alpha_blend_op: SDL_GPUBlendOp::new(alpha_blend_op as _),
-            color_write_mask: SDL_GPUColorComponentFlags::new(color_write_mask.bits()),
+            src_color_blendfactor: src_color_bf.into(),
+            dst_color_blendfactor: dst_color_bf.into(),
+            color_blend_op: color_blend_op.into(),
+            src_alpha_blendfactor: src_alpha_bf.into(),
+            dst_alpha_blendfactor: dst_alpha_bf.into(),
+            alpha_blend_op: alpha_blend_op.into(),
+            color_write_mask: color_write_mask.into(),
             enable_blend: eb.into(),
             enable_color_write_mask: ecwm.into(),
             ..Default::default()
@@ -424,7 +424,7 @@ impl ColorTargetDescription {
     /// Describe the target texture format and blend state.
     pub fn new(format: TextureFormat, blend_state: ColorTargetBlendState) -> Self {
         Self(SDL_GPUColorTargetDescription {
-            format: SDL_GPUTextureFormat::new(format as _),
+            format: format.into(),
             blend_state: blend_state.0,
         })
     }

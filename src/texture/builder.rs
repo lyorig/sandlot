@@ -39,9 +39,9 @@ impl<'a> TextureBuilder<'a> {
     }
 
     /// A [`Colorspace`] value describing the texture colorspace. Defaults
-    /// to `SDL_COLORSPACE_SRGB_LINEAR` for floating point textures,
-    /// `SDL_COLORSPACE_HDR10` for 10-bit textures, `SDL_COLORSPACE_SRGB` for
-    /// other RGB textures and `SDL_COLORSPACE_JPEG` for YUV textures.
+    /// to [`Colorspace::SrgbLinear`] for floating point textures,
+    /// [`Colorspace::Hdr10`] for 10-bit textures, [`Colorspace::Srgb`] for
+    /// other RGB textures and [`Colorspace::Jpeg`] for YUV textures.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER")]
     pub fn colorspace(&mut self, value: Colorspace) -> &mut Self {
         self.set_number(

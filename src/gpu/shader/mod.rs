@@ -7,7 +7,10 @@ use std::{ffi::CStr, marker::PhantomData};
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, properties::Properties, resource::Ref, resource::resource_new, util::mod_reexport,
+    Result,
+    properties::Properties,
+    resource::{Ref, resource_new},
+    util::{impl_enum_transmute, mod_reexport},
 };
 
 use super::{ShaderFormat, device::Device};
@@ -24,6 +27,8 @@ pub enum ShaderStage {
     /// A fragment shader stage.
     Fragment = SDL_GPUShaderStage::FRAGMENT.0,
 }
+
+impl_enum_transmute!(SDL_GPUShaderStage, ShaderStage);
 
 /// Code and metadata for creating a shader object.
 ///
@@ -82,8 +87,8 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
             code_size: code.len(),
             code: code.as_ptr(),
             entrypoint: entrypoint.as_ptr(),
-            format: SDL_GPUShaderFormat::new(fmt as _),
-            stage: SDL_GPUShaderStage::new(stage as _),
+            format: fmt.to_sdl(),
+            stage: stage.to_sdl(),
             num_samplers,
             num_storage_textures,
             num_storage_buffers,

@@ -11,7 +11,7 @@ use sdl3_sys::{
 
 use crate::{
     gpu::{Device, DeviceHandle},
-    pixels::PixelFormat,
+    pixels::{Colorspace, PixelFormat},
     properties::{Properties, PropertiesHandle},
     resource::Ref,
     surface::{Surface, SurfaceHandle},
@@ -118,11 +118,13 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
     }
 
     #[doc(alias = "SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER")]
-    pub fn output_colorspace(&self) -> SDL_Colorspace {
-        SDL_Colorspace(unsafe {
+    pub fn output_colorspace(&self) -> Colorspace {
+        let cs = SDL_Colorspace::new(unsafe {
             self.inner
                 .number(SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER, 0) as u32
-        })
+        });
+
+        unsafe { Colorspace::from_sdl_unchecked(cs) }
     }
 
     #[doc(alias = "SDL_PROP_RENDERER_HDR_ENABLED_BOOLEAN")]

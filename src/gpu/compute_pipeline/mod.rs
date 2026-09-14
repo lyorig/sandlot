@@ -77,7 +77,7 @@ impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
             code_size: code.len(),
             code: code.as_ptr(),
             entrypoint: entrypoint.as_ptr(),
-            format: SDL_GPUShaderFormat::new(fmt as _),
+            format: fmt.to_sdl(),
             num_samplers: sampler_count,
             num_readonly_storage_textures: readonly_storage_texture_count,
             num_readonly_storage_buffers: readonly_storage_buffer_count,

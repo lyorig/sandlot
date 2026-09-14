@@ -100,7 +100,7 @@ impl<'vs, 'fs, 'vbd, 'va, 'ctd, 'ctx, 'vid, 'dev>
                 vertex_shader: vertex_shader.as_raw(),
                 fragment_shader: fragment_shader.as_raw(),
                 vertex_input_state: vertex_input_state.0,
-                primitive_type: SDL_GPUPrimitiveType::new(primitive_type as _),
+                primitive_type: primitive_type.into(),
                 rasterizer_state: rasterizer_state.0,
                 multisample_state: multisample_state.0,
                 depth_stencil_state: depth_stencil_state.0,

@@ -65,10 +65,9 @@ use std::mem::MaybeUninit;
 use crate::{
     Result,
     color::{RgbU8, RgbaF32, RgbaU8},
-    pixels::{BlendMode, PixelFormat, ScaleMode},
+    pixels::{BlendMode, FlipMode, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
-    resource::Ref,
-    resource::resource_new,
+    resource::{Ref, resource_new},
     traits,
     util::{opt2ptr, to_result},
 };
@@ -192,8 +191,8 @@ impl SurfaceHandle {
 
     /// Flip a surface vertically or horizontally.
     #[doc(alias = "SDL_FlipSurface")]
-    pub fn flip(&self, fm: SDL_FlipMode) -> Result<()> {
-        to_result(unsafe { SDL_FlipSurface(self.as_raw(), fm) })
+    pub fn flip(&self, fm: FlipMode) -> Result<()> {
+        to_result(unsafe { SDL_FlipSurface(self.as_raw(), fm.into()) })
     }
 
     /// Create a new surface identical to the existing surface, scaled to

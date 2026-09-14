@@ -27,7 +27,7 @@
 //! data and what formats it can support.
 //!
 //! Setting the clipboard ("copying") to arbitrary data is done with
-//! `SDL_SetClipboardData`. The app does not provide the data in this call,
+//! [`SDL_SetClipboardData`]. The app does not provide the data in this call,
 //! but rather the mimetypes it is willing to provide and a callback function.
 //! During the callback, the app will generate the data. This allows massive
 //! data sets to be provided to the clipboard, without any data being copied
@@ -42,8 +42,8 @@
 //! The X11 and Wayland video targets have a concept of the "primary
 //! selection" in addition to the usual clipboard. This is generally
 //! highlighted (but not explicitly copied) text from various apps. SDL offers
-//! APIs for this through `SDL_GetPrimarySelectionText` and
-//! `SDL_SetPrimarySelectionText`. SDL offers these APIs on platforms without
+//! APIs for this through [`SDL_GetPrimarySelectionText`] and
+//! [`SDL_SetPrimarySelectionText`]. SDL offers these APIs on platforms without
 //! this concept, too, but only so far that it will keep a copy of a string
 //! that the app sets for later retrieval; the operating system will not ever
 //! attempt to change the string externally if it doesn't support a primary

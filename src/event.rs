@@ -13,7 +13,7 @@
 //! `SDL_AppIterate`; in this scenario, the app does not poll at all.)
 //!
 //! There are other forms of control, too: `SDL_PeepEvents` has more
-//! functionality at the cost of more complexity, and `SDL_WaitEvent` can block
+//! functionality at the cost of more complexity, and [`EventsHandle::wait`] can block
 //! the process until something interesting happens, which might be beneficial
 //! for certain types of programs on low-power hardware. One may also call
 //! `SDL_AddEventWatch` to set a callback when new events arrive.

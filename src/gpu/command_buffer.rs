@@ -16,15 +16,14 @@
 
 use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit};
 
-use sdl3_sys::{gpu::*, surface::SDL_FlipMode};
+use sdl3_sys::gpu::*;
 
 use crate::{
     Result,
     color::RgbaF32,
     gpu::Cycle,
-    resource::Ref,
-    resource::resource_new,
-    util::impl_enum_transmute,
+    pixels::FlipMode,
+    resource::{Ref, resource_new},
     util::{opt2ptr_mut, to_result},
     window::Window,
 };
@@ -44,23 +43,6 @@ fn swapchain_texture<'a, 'ctx, 'vid, 'dev>(
 ) -> Option<Ref<'a, Texture<'ctx, 'vid, 'dev>>> {
     TextureHandle::from_ptr(ptr).map(|handle| unsafe { Ref::from_handle(handle) })
 }
-
-/// The flip applied to a source region during a blit.
-#[repr(i32)]
-#[derive(Clone, Copy)]
-#[doc(alias = "SDL_FlipMode")]
-pub enum FlipMode {
-    /// Do not flip the source region.
-    None = SDL_FlipMode::NONE.0,
-    /// Flip the source region horizontally.
-    Horizontal = SDL_FlipMode::HORIZONTAL.0,
-    /// Flip the source region vertically.
-    Vertical = SDL_FlipMode::VERTICAL.0,
-    /// Flip the source region horizontally and vertically.
-    HorizontalAndVertical = SDL_FlipMode::HORIZONTAL_AND_VERTICAL.0,
-}
-
-impl_enum_transmute!(SDL_FlipMode, FlipMode);
 
 /// Parameters for a texture blit command.
 ///
@@ -93,10 +75,10 @@ impl<'s, 'd, 'ctx, 'vid, 'dev> BlitInfo<'s, 'd, 'ctx, 'vid, 'dev> {
             SDL_GPUBlitInfo {
                 source: source.0,
                 destination: destination.0,
-                load_op: SDL_GPULoadOp::new(load_op as _),
+                load_op: load_op.into(),
                 clear_color: clear_color.into(),
-                flip_mode: SDL_FlipMode::new(flip_mode as _),
-                filter: SDL_GPUFilter::new(filter as _),
+                flip_mode: flip_mode.into(),
+                filter: filter.into(),
                 cycle: cycle.into(),
                 ..Default::default()
             },

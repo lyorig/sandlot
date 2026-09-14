@@ -50,11 +50,11 @@ const NUM_SCANCODES: usize = SDL_SCANCODE_COUNT.0 as usize;
 /// # Warning
 ///
 /// The returned name is by design not stable across platforms,
-/// e.g. the name for `SDL_SCANCODE_LGUI` is "Left GUI" under Linux but
+/// e.g. the name for [`SDL_Scancode::LGUI`] is "Left GUI" under Linux but
 /// "Left Windows" under Microsoft Windows, and some scancodes like
-/// `SDL_SCANCODE_NONUSBACKSLASH` don't have any name at all. There are even
-/// scancodes that share names, e.g. `SDL_SCANCODE_RETURN` and
-/// `SDL_SCANCODE_RETURN2` (both called "Return"). This function is
+/// [`SDL_Scancode::NONUSBACKSLASH`] don't have any name at all. There are even
+/// scancodes that share names, e.g. [`SDL_Scancode::RETURN`] and
+/// [`SDL_Scancode::RETURN2`] (both called "Return"). This function is
 /// therefore unsuitable for creating a stable cross-platform two-way
 /// mapping between strings and scancodes.
 #[doc(alias = "SDL_GetScancodeName")]
@@ -91,7 +91,7 @@ pub fn key_name(key: SDL_Keycode) -> &'static str {
 /// the whole lifetime of the application and should not be freed by the
 /// caller.
 ///
-/// Use `SDL_PumpEvents` to update the state array.
+/// Use [`EventsHandle::pump`] to update the state array.
 ///
 /// This function gives you the current state after all events have been
 /// processed, so if a key or button has been pressed and released before you

@@ -208,16 +208,16 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
         self.set_number(SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, value)
     }
 
-    /// The x position of the window, or `SDL_WINDOWPOS_CENTERED`. Defaults to
-    /// `SDL_WINDOWPOS_UNDEFINED`. Relative to the parent for windows with the
+    /// The x position of the window, or [`Window::POS_CENTERED`]. Defaults to
+    /// [`Window::POS_UNDEFINED`]. Relative to the parent for windows with the
     /// "tooltip" or "menu" property set.
     #[doc(alias = "SDL_PROP_WINDOW_CREATE_X_NUMBER")]
     pub fn x(&mut self, value: i64) -> &mut Self {
         self.set_number(SDL_PROP_WINDOW_CREATE_X_NUMBER, value)
     }
 
-    /// The y position of the window, or `SDL_WINDOWPOS_CENTERED`. Defaults to
-    /// `SDL_WINDOWPOS_UNDEFINED`. Relative to the parent for windows with the
+    /// The y position of the window, or [`Window::POS_CENTERED`]. Defaults to
+    /// [`Window::POS_UNDEFINED`]. Relative to the parent for windows with the
     /// "tooltip" or "menu" property set.
     #[doc(alias = "SDL_PROP_WINDOW_CREATE_Y_NUMBER")]
     pub fn y(&mut self, value: i64) -> &mut Self {

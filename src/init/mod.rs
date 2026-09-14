@@ -391,7 +391,7 @@ impl<'ctx> VideoHandle<'ctx> {
     ///
     /// # Remarks
     ///
-    /// The numeric ID is what `SDL_WindowEvent` references, and is necessary
+    /// The numeric ID is what [`SDL_WindowEvent`](sdl3_sys::events::SDL_WindowEvent) references, and is necessary
     /// to map these events to specific window objects.
     #[doc(alias = "SDL_GetWindowFromID")]
     pub unsafe fn window_from_id<'a>(

@@ -119,7 +119,7 @@ impl_enum_transmute!(SDL_PathType, PathType);
 
 /// Information about a path on the filesystem.
 ///
-/// This mirrors `SDL_PathInfo`. The C field `type` is named [`PathInfo::path_type`]
+/// This mirrors [`SDL_PathInfo`]. The C field `type` is named [`PathInfo::path_type`]
 /// to avoid clashing with the Rust keyword.
 #[doc(alias = "SDL_PathInfo")]
 #[repr(C)]

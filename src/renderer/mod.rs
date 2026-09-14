@@ -752,8 +752,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Set a texture as the current rendering target.
     ///
     /// The targeted texture must be created with the
-    /// `SDL_TEXTUREACCESS_TARGET` flag; [`None`] renders to the window
-    /// instead of a texture.
+    /// [`TextureAccess::Target`](crate::texture::TextureAccess::Target) flag;
+    /// [`None`] renders to the window instead of a texture.
     ///
     /// For use with [`RendererHandle::xchg_target`]. Otherwise, prefer using
     /// [`RendererHandle::set_target`] or [`RendererHandle::reset_target`].
@@ -787,7 +787,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Set a texture as the current rendering target.
     ///
-    /// The targeted texture must be created with the `SDL_TEXTUREACCESS_TARGET`
+    /// The targeted texture must be created with the [`TextureAccess::Target`](crate::texture::TextureAccess::Target)
     /// flag. See [`RendererHandle::set_target_opt`] for more details.
     #[doc(alias = "SDL_SetRenderTarget")]
     pub fn set_target(&self, tgt: Ref<Texture>) -> Result<()> {

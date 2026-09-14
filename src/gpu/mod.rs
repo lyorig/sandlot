@@ -32,7 +32,7 @@ mod_reexport!(texture);
 mod_reexport!(transfer_buffer);
 
 use bitflags::bitflags;
-use sdl3_sys::{gpu::*, pixels::SDL_PixelFormat};
+use sdl3_sys::gpu::*;
 
 use crate::{
     pixels::PixelFormat,
@@ -42,7 +42,7 @@ use crate::{
     util::{c_ptr_to_str, impl_enum_transmute},
 };
 
-/// Non-bitmask variant of `SDL_GPUShaderFormat`.
+/// Non-bitmask variant of [`SDL_GPUShaderFormat`].
 /// A shader-code format accepted by a specific GPU backend.
 #[repr(u32)]
 #[derive(Clone, Copy)]
@@ -163,8 +163,8 @@ pub fn texture_format_texel_block_size(format: TextureFormat) -> u32 {
 /// `pixel_format` is the SDL pixel format to convert. Returns
 /// [`None`] when no corresponding GPU format exists.
 #[doc(alias = "SDL_GetGPUTextureFormatFromPixelFormat")]
-pub fn texture_format_from_pixel_format(pixel_format: SDL_PixelFormat) -> Option<TextureFormat> {
-    let fmt = SDL_GetGPUTextureFormatFromPixelFormat(pixel_format);
+pub fn texture_format_from_pixel_format(pixel_format: PixelFormat) -> Option<TextureFormat> {
+    let fmt = SDL_GetGPUTextureFormatFromPixelFormat(pixel_format.into());
     TextureFormat::from_sdl(fmt)
 }
 

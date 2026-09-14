@@ -54,7 +54,7 @@ pub(crate) use boolenum;
 /// Intended for use with Sandlot's SDL enum wrappers.
 ///
 /// Defines two `const fn`s:
-/// - `$wrap::from_sdl(self)`, which is `unsafe` since SDL often has "invalid" enum variants (i.e. `SDL_ScaleMode::INVALID`)
+/// - `$wrap::from_sdl(self)`, which is `unsafe` since SDL often has "invalid" enum variants (i.e. [`SDL_ScaleMode::INVALID`](sdl3_sys::surface::SDL_ScaleMode::INVALID))
 ///   for marking error states in functions etc. Sandlot leaves these out, instead opting to use [`None`] or [`Err`] to indicate errors.
 /// - `$wrap::to_sdl($sdl)`, which is infallible since Sandlot enums are always a subset of their SDL counterparts.
 ///
@@ -104,7 +104,7 @@ of [`" $sdl "`]."]
             /// Construct this enum from its SDL equivalent.
             ///
             /// Returns [`None`] if `value` is the "invalid" sentinel value
-            /// (e.g. `SDL_PixelFormat::UNKNOWN`).
+            /// (e.g. [`SDL_PixelFormat::UNKNOWN`](sdl3_sys::pixels::SDL_PixelFormat::UNKNOWN)).
             pub fn from_sdl(value: $sdl) -> Option<Self> {
                 if value == $sdl::$invalid {
                     None

@@ -111,6 +111,7 @@ use crate::{
     display::Display,
     error::Error,
     init,
+    pixels::PixelFormat,
     properties::{Properties, PropertiesHandle},
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
@@ -125,7 +126,6 @@ use crate::event::Event;
 
 use bitflags::bitflags;
 use sdl3_sys::{
-    pixels::SDL_PixelFormat,
     render::{SDL_CreateWindowAndRenderer, SDL_GetRenderer, SDL_Renderer},
     video::*,
 };
@@ -591,8 +591,11 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
 
     /// Get the pixel format associated with the window.
     #[doc(alias = "SDL_GetWindowPixelFormat")]
-    pub fn pixel_format(&self) -> SDL_PixelFormat {
-        unsafe { SDL_GetWindowPixelFormat(self.as_raw()) }
+    pub fn pixel_format(&self) -> PixelFormat {
+        unsafe {
+            let pf = SDL_GetWindowPixelFormat(self.as_raw());
+            PixelFormat::from_sdl_unchecked(pf)
+        }
     }
 
     /// Query the display mode to use when a window is visible at fullscreen.

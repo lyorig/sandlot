@@ -3,12 +3,15 @@ use std::{
     marker::PhantomData,
 };
 
-use sdl3_sys::{pixels::SDL_Colorspace, render::*};
+use sdl3_sys::render::*;
 
 use crate::{
-    Result, properties::Properties, renderer::Renderer, resource::Ref, surface::Surface,
-    window::Window,
+    Result, pixels::Colorspace, properties::Properties, renderer::Renderer, resource::Ref,
+    surface::Surface, window::Window,
 };
+
+#[expect(unused_imports)]
+use crate::renderer::RendererHandle;
 
 const CREATE_PROPERTIES: [*const c_char; 5] = [
     SDL_PROP_RENDERER_CREATE_NAME_STRING,
@@ -73,14 +76,14 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
         self
     }
 
-    /// An [`SDL_Colorspace`] value describing the colorspace for output to the
-    /// display. Defaults to `SDL_COLORSPACE_SRGB`.
+    /// A [`Colorspace`] value describing the colorspace for output to the
+    /// display. Defaults to [`Colorspace::Srgb`].
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_OUTPUT_COLORSPACE_NUMBER")]
-    pub fn colorspace(&mut self, value: SDL_Colorspace) -> &mut Self {
+    pub fn colorspace(&mut self, value: Colorspace) -> &mut Self {
         _ = unsafe {
             self.inner.set_number(
                 SDL_PROP_RENDERER_CREATE_OUTPUT_COLORSPACE_NUMBER,
-                value.0.into(),
+                value.to_sdl().0.into(),
             )
         };
 
@@ -88,7 +91,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     }
 
     /// Non-zero if you want present synchronized with the refresh rate. This
-    /// property can take any value that is supported by `SDL_SetRenderVSync`
+    /// property can take any value that is supported by [`RendererHandle::set_vsync`]
     /// for the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER")]
     pub fn vsync(&mut self, value: i64) -> &mut Self {

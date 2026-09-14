@@ -65,7 +65,7 @@ pub fn platform() -> &'static str {
 ///
 /// On Apple platforms, the main thread is the thread that runs your
 /// program's `main()` entry point. On other platforms, the main thread is
-/// the one that calls `SDL_Init(SDL_INIT_VIDEO)`, which should usually be
+/// the one that calls [`Video::init`](init::Video::init), which should usually be
 /// the one that runs your program's `main()` entry point. If you are using
 /// the main callbacks, `SDL_AppInit`, `SDL_AppIterate`, and `SDL_AppQuit`
 /// are all called on the main thread.

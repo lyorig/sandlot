@@ -83,7 +83,7 @@ impl GpuEngineHandle {
 }
 
 resource_new!(
-    /// A text engine that draws text objects to an `SDL_Surface`.
+    /// A text engine that draws text objects to a [`Surface`](crate::surface::Surface).
     pub struct SurfaceEngine<> : TTF_TextEngine {
         marker: PhantomData<()>,
     }

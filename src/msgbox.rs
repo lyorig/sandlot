@@ -5,7 +5,7 @@
 //!
 //! These message boxes are native system dialogs where possible.
 //!
-//! There is both a customizable function (`SDL_ShowMessageBox`) that offers
+//! There is both a customizable function ([`SDL_ShowMessageBox`]) that offers
 //! lots of options for what to display and reports on what choice the user
 //! made, and also a much-simplified version ([`show`]), which merely takes a
 //! text message and title, and waits until the user presses a single "OK" UI

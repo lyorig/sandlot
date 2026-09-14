@@ -32,8 +32,7 @@ const CREATE_PROPERTIES: [*const c_char; 21] = [
     SDL_PROP_GPU_DEVICE_CREATE_METAL_ALLOW_MACFAMILY1_BOOLEAN,
 ];
 
-/// Builder for [`Device`], using
-/// [`SDL_CreateGPUDeviceWithProperties`](https://wiki.libsdl.org/SDL3/SDL_CreateGPUDeviceWithProperties).
+/// Builder for [`Device`], using [`SDL_CreateGPUDeviceWithProperties`].
 pub struct DeviceBuilder<'p, 'vo> {
     inner: Ref<'p, Properties>,
     marker: PhantomData<&'vo SDL_GPUVulkanOptions>,
