@@ -27,7 +27,7 @@ mod ttf;
 #[test]
 fn main_init() -> Result {
     let ctx = Context::init()?;
-    let vid = Video::init(&ctx)?;
+    let vid = Video::init(ctx.as_ref())?;
 
     const WINDOW_SIZE: PointI32 = Point::new(128, 128);
 
@@ -60,7 +60,7 @@ fn main_subsystems() -> Result {
     let ctx = Context::init()?;
 
     {
-        let _vid = Video::init(&ctx)?;
+        let _vid = Video::init(ctx.as_ref())?;
         assert!(Video::is_init());
     }
 
@@ -75,7 +75,7 @@ fn main_manually_drop() -> Result {
         let ctx = Context::init()?;
 
         {
-            let _vid = ManuallyDrop::new(Video::init(&ctx)?);
+            let _vid = ManuallyDrop::new(Video::init(ctx.as_ref())?);
             assert!(Video::is_init());
         }
 

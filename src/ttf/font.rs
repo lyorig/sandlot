@@ -15,7 +15,7 @@ use crate::{
 resource_new! {
     /// A font loaded from a TTF file.
     pub struct Font<'ttf> : TTF_Font {
-        marker: PhantomData<(&'ttf Context)>,
+        marker: PhantomData<(init::Ref<'ttf, Context>)>,
     }
 
     /// Disposes of a previously-created font.

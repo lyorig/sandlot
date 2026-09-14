@@ -21,7 +21,7 @@ cfg_select! {
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let video = Video::init(&ctx)?;
+    let video = Video::init(ctx.as_ref())?;
 
     let props = Properties::global()?;
 

@@ -35,7 +35,7 @@ fn run() -> Result<()> {
         .kind(AppKind::Application)
         .build()?;
 
-    let video = ManuallyDrop::new(Video::init(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
     let events = video.events();
 
     let props = Properties::global()?;

@@ -46,7 +46,7 @@ fn print_properties(props: DeviceProperties) {
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let video = ManuallyDrop::new(Video::init(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
     let events = video.events();
 
     // SDL provides an existing property set, which we can conveniently abuse.

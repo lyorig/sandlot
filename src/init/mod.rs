@@ -280,7 +280,7 @@ macro_rules! subsystem_new {
                 /// Upon going out of scope, the subsystem will be deinitialized.
                 ///
                 /// Returns [`Err`] if initialization fails.
-                pub fn init(_ctx: &'ctx $crate::init::Context) -> $crate::Result<Self> {
+                pub fn init(_ctx: $crate::init::Ref<'ctx, $crate::init::Context>) -> $crate::Result<Self> {
                     if unsafe { ::sdl3_sys::init::SDL_InitSubSystem(::sdl3_sys::init::SDL_InitFlags::$flag) } {
                         Ok(Self {
                             handle: [<$name Handle>] {

@@ -203,7 +203,7 @@ fn pick_depth_format(device: Ref<Device>) -> TextureFormat {
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let video = ManuallyDrop::new(Video::init(&ctx)?);
+    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
 
     // SDL provides an existing property set, which we can conveniently abuse.
     let props = Properties::global()?;

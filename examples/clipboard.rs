@@ -6,7 +6,7 @@ const DESIRED_MIME: &CStr = c"image/png";
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let _vid = Video::init(&ctx)?;
+    let _vid = Video::init(ctx.as_ref())?;
 
     if clipboard::has_data(DESIRED_MIME) {
         println!("Clipboard has MIME data");

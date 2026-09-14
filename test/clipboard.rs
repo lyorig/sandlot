@@ -17,7 +17,7 @@ fn clipboard_set_text_fails_before_video_init() {
 #[test]
 fn clipboard_set_text_succeeds_after_video_init() -> Result {
     let ctx = Context::init()?;
-    let _video = Video::init(&ctx)?;
+    let _video = Video::init(ctx.as_ref())?;
 
     set_text(c"clipboard test payload")?;
 
@@ -31,7 +31,7 @@ fn clipboard_set_text_succeeds_after_video_init() -> Result {
 #[test]
 fn clipboard_has_text_after_video_init() -> Result {
     let ctx = Context::init()?;
-    let _video = Video::init(&ctx)?;
+    let _video = Video::init(ctx.as_ref())?;
 
     set_text(c"exists")?;
     assert!(has_text());

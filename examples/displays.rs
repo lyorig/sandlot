@@ -2,7 +2,7 @@ use sandlot::{Result, display::Display, init::Context, init::Video};
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-    let _vid = Video::init(&ctx)?;
+    let _vid = Video::init(ctx.as_ref())?;
 
     for (i, disp) in Display::all()?.iter().copied().enumerate() {
         println!(
