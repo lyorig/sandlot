@@ -249,7 +249,7 @@ macro_rules! resource_new {
                     }
                 }
 
-                pub fn as_ref(&self) -> $crate::resource::Ref<'_, $owned<$($lt),*>> {
+                pub fn as_ref(&self) -> $crate::resource::Ref<'_, Self> {
                     unsafe { $crate::resource::Ref::from_handle(self.inner) }
                 }
 
