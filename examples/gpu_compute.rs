@@ -2,7 +2,12 @@
 
 #![windows_subsystem = "windows"]
 
-use sandlot::{Result, gpu::*, init::Context, init::Video, properties::Properties};
+use sandlot::{
+    Result,
+    gpu::*,
+    init::{AppKind, Context, Video},
+    properties::Properties,
+};
 
 cfg_select! {
     target_os = "macos" => {
@@ -20,7 +25,15 @@ cfg_select! {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(c"Sandlot GPU Compute")
+        .creator(c"lyorig")
+        .kind(AppKind::Application)
+        .version(c"v0.1.4")
+        .identifier(c"cz.lyorig.gpucompute")
+        .url(c"https://github.com/lyorig/sandlot")
+        .build()?;
+
     let video = Video::init(ctx.as_ref())?;
 
     let props = Properties::global()?;

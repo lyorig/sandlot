@@ -9,7 +9,7 @@ use sandlot::{
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     properties::Properties,
     rect::Point,
     resource::Ref,
@@ -202,7 +202,15 @@ fn pick_depth_format(device: Ref<Device>) -> TextureFormat {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(c"Sandlot GPU Teapot")
+        .creator(c"lyorig")
+        .kind(AppKind::Game)
+        .version(c"v0.1.4")
+        .identifier(c"cz.lyorig.gputeapot")
+        .url(c"https://github.com/lyorig/sandlot")
+        .build()?;
+
     let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
 
     // SDL provides an existing property set, which we can conveniently abuse.

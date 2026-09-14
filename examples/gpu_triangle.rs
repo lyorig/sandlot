@@ -9,7 +9,7 @@ use sandlot::{
     color::RgbaF32,
     event::Event,
     gpu::*,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     properties::Properties,
     rect::Point,
     window::Window,
@@ -45,7 +45,15 @@ fn print_properties(props: DeviceProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(c"Sandlot GPU Triangle")
+        .creator(c"lyorig")
+        .kind(AppKind::Game)
+        .version(c"v0.1.4")
+        .identifier(c"cz.lyorig.gpu3angle")
+        .url(c"https://github.com/lyorig/sandlot")
+        .build()?;
+
     let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
     let events = video.events();
 
