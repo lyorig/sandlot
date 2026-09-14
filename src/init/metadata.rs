@@ -38,6 +38,7 @@ impl<'ctx> ContextMetadata<'ctx> {
     /// The human-readable name of the application.
     ///
     /// Defaults to the application binary's name, or "SDL Application" if that isn't available.
+    #[doc(alias = "SDL_PROP_APP_METADATA_NAME_STRING")]
     pub fn name(&self) -> &'ctx CStr {
         let opt = self.opt_str(SDL_PROP_APP_METADATA_NAME_STRING);
 
@@ -46,26 +47,31 @@ impl<'ctx> ContextMetadata<'ctx> {
     }
 
     /// The version of the app that is running.
+    #[doc(alias = "SDL_PROP_APP_METADATA_VERSION_STRING")]
     pub fn version(&self) -> Option<&'ctx CStr> {
         self.opt_str(SDL_PROP_APP_METADATA_VERSION_STRING)
     }
 
     /// A unique string that identifies this app, in reverse-domain format.
+    #[doc(alias = "SDL_PROP_APP_METADATA_IDENTIFIER_STRING")]
     pub fn identifier(&self) -> Option<&'ctx CStr> {
         self.opt_str(SDL_PROP_APP_METADATA_IDENTIFIER_STRING)
     }
 
     /// The human-readable name of the creator/developer/maker of this app.
+    #[doc(alias = "SDL_PROP_APP_METADATA_CREATOR_STRING")]
     pub fn creator(&self) -> Option<&'ctx CStr> {
         self.opt_str(SDL_PROP_APP_METADATA_CREATOR_STRING)
     }
 
     /// The human-readable copyright notice.
+    #[doc(alias = "SDL_PROP_APP_METADATA_COPYRIGHT_STRING")]
     pub fn copyright(&self) -> Option<&'ctx CStr> {
         self.opt_str(SDL_PROP_APP_METADATA_COPYRIGHT_STRING)
     }
 
     /// A URL to the app on the web.
+    #[doc(alias = "SDL_PROP_APP_METADATA_URL_STRING")]
     pub fn url(&self) -> Option<&'ctx CStr> {
         self.opt_str(SDL_PROP_APP_METADATA_URL_STRING)
     }
@@ -73,6 +79,7 @@ impl<'ctx> ContextMetadata<'ctx> {
     /// The kind of application this is.
     ///
     /// Defaults to [`AppKind::Application`].
+    #[doc(alias = "SDL_PROP_APP_METADATA_TYPE_STRING")]
     pub fn kind(&self) -> AppKind {
         let cs = self.opt_str(SDL_PROP_APP_METADATA_TYPE_STRING);
 

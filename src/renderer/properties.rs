@@ -54,10 +54,12 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         NonNull::new(p)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_NAME_STRING")]
     pub fn name(&self) -> &str {
         self.get_str(SDL_PROP_RENDERER_NAME_STRING)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_WINDOW_POINTER")]
     pub fn window(&self) -> Option<Ref<'wnd, Window<'ctx, 'vid>>> {
         let p = unsafe {
             self.inner
@@ -67,6 +69,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         WindowHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_SURFACE_POINTER")]
     pub fn surface(&self) -> Option<Ref<'a, Surface>> {
         let p = unsafe {
             self.inner
@@ -76,10 +79,12 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         SurfaceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VSYNC_NUMBER")]
     pub fn vsync(&self) -> i64 {
         unsafe { self.inner.number(SDL_PROP_RENDERER_VSYNC_NUMBER, 0) }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER")]
     pub fn max_texture_size(&self) -> i64 {
         unsafe {
             self.inner
@@ -87,6 +92,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER")]
     pub fn texture_formats(&self) -> &[PixelFormat] {
         let begin = unsafe {
             self.inner.pointer(
@@ -103,6 +109,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         unsafe { std::slice::from_raw_parts(begin.cast::<PixelFormat>(), len) }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_TEXTURE_WRAPPING_BOOLEAN")]
     pub fn texture_wrapping(&self) -> bool {
         unsafe {
             self.inner
@@ -110,6 +117,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER")]
     pub fn output_colorspace(&self) -> SDL_Colorspace {
         SDL_Colorspace(unsafe {
             self.inner
@@ -117,6 +125,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         })
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_HDR_ENABLED_BOOLEAN")]
     pub fn hdr_enabled(&self) -> bool {
         unsafe {
             self.inner
@@ -124,6 +133,7 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_SDR_WHITE_POINT_FLOAT")]
     pub fn sdr_white_point(&self) -> f32 {
         unsafe {
             self.inner
@@ -131,62 +141,77 @@ impl<'a, 'ctx, 'vid, 'wnd> RendererProperties<'a, 'ctx, 'vid, 'wnd> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT")]
     pub fn hdr_headroom(&self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT, 0.) }
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D9_DEVICE_POINTER")]
     pub fn d3d9_device(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D9_DEVICE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D11_DEVICE_POINTER")]
     pub fn d3d11_device(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D11_DEVICE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D11_SWAPCHAIN_POINTER")]
     pub fn d3d11_swapchain(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D11_SWAPCHAIN_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D12_DEVICE_POINTER")]
     pub fn d3d12_device(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_DEVICE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D12_SWAPCHAIN_POINTER")]
     pub fn d3d12_swapchain(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_SWAPCHAIN_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_D3D12_COMMAND_QUEUE_POINTER")]
     pub fn d3d12_command_queue(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_COMMAND_QUEUE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_INSTANCE_POINTER")]
     pub fn vulkan_instance(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_INSTANCE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_SURFACE_NUMBER")]
     pub fn vulkan_surface(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_SURFACE_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_PHYSICAL_DEVICE_POINTER")]
     pub fn vulkan_physical_device(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_PHYSICAL_DEVICE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_DEVICE_POINTER")]
     pub fn vulkan_device(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_DEVICE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER")]
     pub fn vulkan_graphics_queue_family_index(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER")]
     pub fn vulkan_present_queue_family_index(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER")]
     pub fn vulkan_swapchain_image_count(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_RENDERER_GPU_DEVICE_POINTER")]
     pub fn gpu_device(&self) -> Option<Ref<'a, Device<'ctx, 'vid>>> {
         let p = unsafe {
             self.inner

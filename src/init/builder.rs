@@ -62,6 +62,7 @@ impl ContextBuilder {
     /// such as volume control applets, etc.
     ///
     /// This defaults to the application's binary name, or "SDL Application" if that isn't available.
+    #[doc(alias = "SDL_PROP_APP_METADATA_NAME_STRING")]
     pub fn name(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_NAME_STRING, value)
     }
@@ -72,6 +73,7 @@ impl ContextBuilder {
     /// and a git hash are all valid options.
     ///
     /// This has no default.
+    #[doc(alias = "SDL_PROP_APP_METADATA_VERSION_STRING")]
     pub fn version(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_VERSION_STRING, value)
     }
@@ -86,6 +88,7 @@ impl ContextBuilder {
     /// the app ID should match the name of your Flatpak container as well.
     ///
     /// This has no default.
+    #[doc(alias = "SDL_PROP_APP_METADATA_IDENTIFIER_STRING")]
     pub fn identifier(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_IDENTIFIER_STRING, value)
     }
@@ -93,6 +96,7 @@ impl ContextBuilder {
     /// The human-readable name of the creator/developer/maker of this app, like "MojoWorkshop, LLC".
     ///
     /// This has no default.
+    #[doc(alias = "SDL_PROP_APP_METADATA_CREATOR_STRING")]
     pub fn creator(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_CREATOR_STRING, value)
     }
@@ -102,6 +106,7 @@ impl ContextBuilder {
     /// Keep this to one line, don't paste a copy of a whole software license in here.
     ///
     /// This has no default.
+    #[doc(alias = "SDL_PROP_APP_METADATA_COPYRIGHT_STRING")]
     pub fn copyright(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_COPYRIGHT_STRING, value)
     }
@@ -111,6 +116,7 @@ impl ContextBuilder {
     /// Maybe a product page, or a storefront, or even a GitHub repository, for user's further information.
     ///
     /// This has no default.
+    #[doc(alias = "SDL_PROP_APP_METADATA_URL_STRING")]
     pub fn url(self, value: &CStr) -> Self {
         self.set(SDL_PROP_APP_METADATA_URL_STRING, value)
     }
@@ -123,6 +129,7 @@ impl ContextBuilder {
     /// Sandlot will keep the [`AppKind`] enum in sync with the SDL-provided types.
     ///
     /// Defaults to [`AppKind::Application`].
+    #[doc(alias = "SDL_PROP_APP_METADATA_TYPE_STRING")]
     pub fn kind(self, value: AppKind) -> Self {
         self.set(SDL_PROP_APP_METADATA_TYPE_STRING, value.to_sdl())
     }

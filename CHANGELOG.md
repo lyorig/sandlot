@@ -11,6 +11,8 @@
   - `Context::{new` -> `init}`
 - `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
 - `init::Context` and `ttf::Context` both implement `Subsystem` and are segmented into handles and owned types, enabling usage with `init::Ref`
+  - places which previously used `&Context` have migrated to `Ref<Context>`
+- Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
 
 ## v0.1.3
 - Lifetimes!

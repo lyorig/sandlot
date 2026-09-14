@@ -45,6 +45,7 @@ impl<'a> TextureProperties<'a> {
         NonNull::new(p)
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_COLORSPACE_NUMBER")]
     pub fn colorspace(&self) -> Colorspace {
         unsafe {
             let cs =
@@ -53,6 +54,7 @@ impl<'a> TextureProperties<'a> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_FORMAT_NUMBER")]
     pub fn format(&self) -> PixelFormat {
         unsafe {
             let pf = SDL_PixelFormat(self.inner.number(SDL_PROP_TEXTURE_FORMAT_NUMBER, 0) as c_int);
@@ -60,6 +62,7 @@ impl<'a> TextureProperties<'a> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_ACCESS_NUMBER")]
     pub fn access(&self) -> TextureAccess {
         unsafe {
             let ta =
@@ -68,38 +71,47 @@ impl<'a> TextureProperties<'a> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_WIDTH_NUMBER")]
     pub fn width(&self) -> i64 {
         unsafe { self.inner.number(SDL_PROP_TEXTURE_WIDTH_NUMBER, 0) }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_HEIGHT_NUMBER")]
     pub fn height(&self) -> i64 {
         unsafe { self.inner.number(SDL_PROP_TEXTURE_HEIGHT_NUMBER, 0) }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_SDR_WHITE_POINT_FLOAT")]
     pub fn sdr_white_point(&self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_TEXTURE_SDR_WHITE_POINT_FLOAT, 0.) }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_HDR_HEADROOM_FLOAT")]
     pub fn hdr_headroom(&self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_TEXTURE_HDR_HEADROOM_FLOAT, 0.) }
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_D3D11_TEXTURE_POINTER")]
     pub fn d3d11_texture(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_TEXTURE_D3D11_TEXTURE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_D3D12_TEXTURE_POINTER")]
     pub fn d3d12_texture(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_TEXTURE_D3D12_TEXTURE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_OPENGL_TEXTURE_NUMBER")]
     pub fn opengl_texture(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_TEXTURE_OPENGL_TEXTURE_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_VULKAN_TEXTURE_NUMBER")]
     pub fn vulkan_texture(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_TEXTURE_VULKAN_TEXTURE_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_TEXTURE_GPU_TEXTURE_POINTER")]
     pub fn gpu_texture(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_TEXTURE_GPU_TEXTURE_POINTER)
     }

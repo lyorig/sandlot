@@ -29,18 +29,22 @@ impl<'a> DeviceProperties<'a> {
         }
     }
 
+    #[doc(alias = "SDL_PROP_GPU_DEVICE_NAME_STRING")]
     pub fn device_name(&self) -> Option<&str> {
         self.get(SDL_PROP_GPU_DEVICE_NAME_STRING)
     }
 
+    #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING")]
     pub fn driver_name(&self) -> Option<&str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING)
     }
 
+    #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING")]
     pub fn driver_version(&self) -> Option<&str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING)
     }
 
+    #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING")]
     pub fn driver_info(&self) -> Option<&str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING)
     }

@@ -42,6 +42,7 @@ impl<'a> WindowProperties<'a> {
         NonNull::new(p)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_SHAPE_POINTER")]
     pub fn shape(&self) -> Option<Ref<'a, Surface>> {
         let p = unsafe {
             self.inner
@@ -51,82 +52,102 @@ impl<'a> WindowProperties<'a> {
         SurfaceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN")]
     pub fn hdr_enabled(&self) -> bool {
         unsafe { self.inner.bool(SDL_PROP_WINDOW_HDR_ENABLED_BOOLEAN, false) }
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT")]
     pub fn sdr_white_level(&self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_WINDOW_SDR_WHITE_LEVEL_FLOAT, 0.) }
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_HDR_HEADROOM_FLOAT")]
     pub fn hdr_headroom(&self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_WINDOW_HDR_HEADROOM_FLOAT, 0.) }
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_COCOA_WINDOW_POINTER")]
     pub fn cocoa_window(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_COCOA_WINDOW_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_COCOA_METAL_VIEW_TAG_NUMBER")]
     pub fn cocoa_metal_view_tag(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_WINDOW_COCOA_METAL_VIEW_TAG_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WIN32_HWND_POINTER")]
     pub fn win32_hwnd(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WIN32_HWND_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WIN32_HDC_POINTER")]
     pub fn win32_hdc(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WIN32_HDC_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER")]
     pub fn win32_instance(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WIN32_INSTANCE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_X11_DISPLAY_POINTER")]
     pub fn x11_display(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_X11_DISPLAY_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_X11_SCREEN_NUMBER")]
     pub fn x11_screen(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_WINDOW_X11_SCREEN_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_X11_WINDOW_NUMBER")]
     pub fn x11_window(&self) -> Option<i64> {
         self.opt_number(SDL_PROP_WINDOW_X11_WINDOW_NUMBER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER")]
     pub fn wayland_display(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER")]
     pub fn wayland_surface(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_VIEWPORT_POINTER")]
     pub fn wayland_viewport(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_VIEWPORT_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_EGL_WINDOW_POINTER")]
     pub fn wayland_egl_window(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_EGL_WINDOW_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_SURFACE_POINTER")]
     pub fn wayland_xdg_surface(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_XDG_SURFACE_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_POINTER")]
     pub fn wayland_xdg_toplevel(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING")]
     pub fn wayland_xdg_toplevel_export_handle(&self) -> Option<&str> {
         self.opt_str(SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_POPUP_POINTER")]
     pub fn wayland_xdg_popup(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_XDG_POPUP_POINTER)
     }
 
+    #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_POSITIONER_POINTER")]
     pub fn wayland_xdg_positioner(&self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_XDG_POSITIONER_POINTER)
     }
