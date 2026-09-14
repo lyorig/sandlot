@@ -5,6 +5,7 @@ use sdl3_ttf_sys::ttf::*;
 use crate::{
     Result,
     color::RgbaU8,
+    init,
     resource::resource_new,
     surface::Surface,
     ttf::{Context, RtStr},
@@ -444,20 +445,23 @@ impl FontHandle<'_> {
 impl<'ttf> Font<'ttf> {
     /// Create a font from a file, using a specified point size.
     ///
-    /// See [`Context::open`] for remarks.
+    /// # Remarks
+    ///
+    /// Some .fon fonts will have several sizes embedded in the file, so the
+    /// point size becomes the index of choosing which size. If the value is
+    /// too high, the last indexed size will be the default.
     #[doc(alias = "TTF_OpenFont")]
-    pub fn open(_ctx: &'ttf Context, file: &CStr, point_size: f32) -> Result<Self> {
+    pub fn open(_ctx: init::Ref<'ttf, Context>, file: &CStr, point_size: f32) -> Result<Self> {
         unsafe { Self::new_unchecked(file, point_size) }
     }
 
+    /// Create a font from a file, using a specified point size.
+    ///
     /// # Safety
+    ///
     /// Ensure a [`Context`] will exist for the entire lifetime of the returned font.
     /// That includes the point at which it's dropped. A segfault will probably
     /// happen otherwise.
-    ///
-    /// Create a font from a file, using a specified point size.
-    ///
-    /// See [`Context::open`] for remarks.
     #[doc(alias = "TTF_OpenFont")]
     pub unsafe fn new_unchecked(file: &CStr, point_size: f32) -> Result<Self> {
         Self::from_ptr(unsafe { TTF_OpenFont(file.as_ptr(), point_size) })

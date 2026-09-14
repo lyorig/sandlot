@@ -16,12 +16,7 @@
 //! an About dialog box for the macOS menu, we can name the app in the system's audio mixer, etc).
 //! Those that want to provide a lot of information should look at the more-detailed `SDL_SetAppMetadataProperty`.
 
-use std::{
-    marker::PhantomData,
-    mem::MaybeUninit,
-    ops::{Deref, DerefMut},
-    ptr::NonNull,
-};
+use std::{marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
 
 use sdl3_sys::{
     events::{SDL_Event, SDL_PumpEvents, SDL_PushEvent, SDL_WaitEvent},
@@ -188,40 +183,6 @@ impl<T: Subsystem> Deref for Ref<'_, T> {
     }
 }
 
-pub struct RefMut<'sub, T: Subsystem> {
-    handle: T::Handle,
-    marker: PhantomData<&'sub mut T>,
-}
-
-impl<T: Subsystem> Deref for RefMut<'_, T> {
-    type Target = T::Handle;
-
-    fn deref(&self) -> &Self::Target {
-        &self.handle
-    }
-}
-
-impl<T: Subsystem> RefMut<'_, T> {
-    /// Construct a new mutable reference from a handle, assuming it is valid.
-    /// This conversion is zero-cost.
-    ///
-    /// # Safety
-    /// The lifetime of the returned reference is inferred; functions building
-    /// on this one should tie it to the handle's owning object, if possible.
-    pub unsafe fn from_handle(handle: T::Handle) -> Self {
-        Self {
-            handle,
-            marker: PhantomData,
-        }
-    }
-}
-
-impl<T: Subsystem> DerefMut for RefMut<'_, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.handle
-    }
-}
-
 macro_rules! subsystem_new {
     ($(#[$meta:meta])* $name:ident, $flag:ident $(, $implied:ident => $accessor:ident)*) => {
         paste::paste! {
@@ -236,11 +197,6 @@ macro_rules! subsystem_new {
                     #[doc = "Get a reference to the implicitly initialized [`" $implied "`] subsystem."]
                     pub fn $accessor(&self) -> $crate::init::Ref<'_, $implied<'ctx>> {
                         unsafe { $crate::init::Ref::from_handle(self.$accessor) }
-                    }
-
-                    #[doc = "Get a mutable reference to the implicitly initialized [`" $implied "`] subsystem."]
-                    pub fn [<$accessor _mut>](&mut self) -> $crate::init::RefMut<'_, $implied<'ctx>> {
-                        unsafe { $crate::init::RefMut::from_handle(self.$accessor) }
                     }
                 )*
             }
@@ -284,10 +240,6 @@ macro_rules! subsystem_new {
 
                 pub fn as_ref(&self) -> $crate::init::Ref<'_, $name<'_>> {
                     unsafe { $crate::init::Ref::from_handle(self.as_handle()) }
-                }
-
-                pub fn as_mut(&mut self) -> $crate::init::RefMut<'_, $name<'_>> {
-                    unsafe { $crate::init::RefMut::from_handle(self.as_handle()) }
                 }
 
                 /// Get whether this subsystem is currently initialized.

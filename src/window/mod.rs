@@ -1344,15 +1344,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// Used to indicate that the window position is undefined.
     pub const POS_UNDEFINED: i32 = SDL_WINDOWPOS_UNDEFINED;
 
-    /// Bind the builder to an existing property group.
-    ///
-    /// A single [`Properties`] can be shared between the window, renderer
-    /// and GPU device builders, since their creation properties
-    /// (`SDL_PROP_WINDOW_CREATE_*`, `SDL_PROP_RENDERER_CREATE_*`,
-    /// `SDL_PROP_GPU_DEVICE_CREATE_*`) never collide with each other.
-    /// They do collide with themselves, however: creating a second window
-    /// from the same group inherits any leftover window properties, so use
-    /// one [`Properties`] per window.
+    /// Configure a [`Window`] via a property group.
     pub fn builder(props: Ref<Properties>) -> WindowBuilder {
         WindowBuilder::new(props)
     }

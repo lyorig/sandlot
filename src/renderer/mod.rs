@@ -939,11 +939,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// Adaptive vsync (late swap tearing). See [`RendererHandle::set_vsync`].
     pub const VSYNC_ADAPTIVE: i32 = SDL_RENDERER_VSYNC_ADAPTIVE;
 
-    /// Bind the builder to an existing property group.
-    ///
-    /// The renderer creation properties (`SDL_PROP_RENDERER_CREATE_*`)
-    /// never collide with the window or GPU device ones, so a single
-    /// [`Properties`] can be shared between the three builders.
+    /// Configure a [`Renderer`] via a property group.
     pub fn builder(props: Ref<Properties>) -> RendererBuilder {
         RendererBuilder::new(props)
     }
