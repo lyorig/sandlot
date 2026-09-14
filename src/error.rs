@@ -2,7 +2,7 @@
 
 use std::ffi::{CStr, CString};
 
-use sdl3_sys::error::{SDL_GetError, SDL_SetError};
+use sdl3_sys::error::{SDL_ClearError, SDL_GetError, SDL_SetError};
 
 #[derive(Debug)]
 pub struct Error {
@@ -47,11 +47,19 @@ impl Error {
         Self { reason }
     }
 
-    /// Calls [`SDL_SetError`] with `reason`, then returns [`Error::current`].
+    /// Sets the error message for the current thread, then returns [`Error::current`].
+    ///
+    /// Calling this function will replace any previous error message that was set.
     #[doc(alias = "SDL_SetError")]
-    pub(crate) fn set(reason: &CStr) -> Self {
+    pub fn set(reason: &CStr) -> Self {
         unsafe { SDL_SetError(reason.as_ptr()) };
         Self::current()
+    }
+
+    /// Clear any previous error message for this thread.
+    #[doc(alias = "SDL_ClearError")]
+    pub fn clear() {
+        SDL_ClearError();
     }
 
     pub fn as_str(&self) -> &str {
