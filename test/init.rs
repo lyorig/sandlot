@@ -37,7 +37,7 @@ fn init_context_metadata() {
 /// `Context::metadata` provides default properties when not set explicitly.
 #[test]
 fn init_context_metadata_default() {
-    let ctx = Context::new().unwrap();
+    let ctx = Context::init().unwrap();
 
     let md = ctx.metadata();
 

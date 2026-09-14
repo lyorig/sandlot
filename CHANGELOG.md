@@ -1,9 +1,21 @@
 # What's new!
 
+## v0.1.4
+
+- SDL functions
+  - `SDL_SetError` (`Error::set`)
+  - `SDL_ClearError` (`Error::clear`)
+  - `SDL_SetAppMetadataProperty` (`Context::builder`)
+  - `SDL_GetAppMetadataProperty` (`Context::metadata`)
+- Renames
+  - `Context::{new` -> `init}`
+- `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
+- `init::Context` and `ttf::Context` both implement `Subsystem` and are segmented into handles and owned types, enabling usage with `init::Ref`
+
 ## v0.1.3
 - Lifetimes!
   - several structs now have lifetimes representing the initialization hierarchy
-  - this adds a LOT of lifetimes to the source code (see `RenderStateCreateInfo` for the motherlode), but also shouldn't break **well-formed** existing code.
+  - this adds a LOT of lifetimes to the source code (see `RenderStateCreateInfo` for the motherlode), but also shouldn't break **well-formed** existing code
     - for example, examples required no changes aside from function arguments
     - structs which contained multiple tied objects have become self-referential and will require changes
 - Subsystems!

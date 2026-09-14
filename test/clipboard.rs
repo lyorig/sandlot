@@ -16,7 +16,7 @@ fn clipboard_set_text_fails_before_video_init() {
 /// `set_text` succeeds after the video subsystem is initialized.
 #[test]
 fn clipboard_set_text_succeeds_after_video_init() -> Result {
-    let ctx = Context::new()?;
+    let ctx = Context::init()?;
     let _video = Video::init(&ctx)?;
 
     set_text(c"clipboard test payload")?;
@@ -30,7 +30,7 @@ fn clipboard_set_text_succeeds_after_video_init() -> Result {
 /// `has_text` reflects clipboard state after init.
 #[test]
 fn clipboard_has_text_after_video_init() -> Result {
-    let ctx = Context::new()?;
+    let ctx = Context::init()?;
     let _video = Video::init(&ctx)?;
 
     set_text(c"exists")?;

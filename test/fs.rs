@@ -33,7 +33,7 @@ fn cstr(path: &std::path::Path) -> CString {
 
 #[test]
 fn fs_base_path_ends_with_separator() -> Result {
-    let ctx = Context::new()?;
+    let ctx = Context::init()?;
 
     let path = ctx.base_path()?;
     assert!(path.ends_with('/') || path.ends_with('\\'));
@@ -53,7 +53,7 @@ fn fs_pref_path_ends_with_separator() -> Result {
 
 #[test]
 fn fs_user_folder_home() -> Result {
-    let ctx = Context::new()?;
+    let ctx = Context::init()?;
 
     let home = ctx.user_folder(Folder::Home)?;
     assert!(home.ends_with('/') || home.ends_with('\\'));

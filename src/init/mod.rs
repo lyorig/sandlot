@@ -14,6 +14,18 @@
 //! Sandlot apps are strongly encouraged to call [`Context::builder`] at startup to fill in details
 //! about the program. This is completely optional, but it helps in small ways (we can provide
 //! an About dialog box for the macOS menu, we can name the app in the system's audio mixer, etc).
+//!
+//! Implementation checklist ([source](https://wiki.libsdl.org/SDL3/CategoryInit)):
+//! - [x] SDL_GetAppMetadataProperty
+//! - [x] SDL_Init
+//! - [x] SDL_InitSubSystem
+//! - [x] SDL_IsMainThread
+//! - [x] SDL_Quit
+//! - [x] SDL_QuitSubSystem
+//! - [ ] SDL_RunOnMainThread
+//! - [ ] SDL_SetAppMetadata (unnecessary)
+//! - [x] SDL_SetAppMetadataProperty
+//! - [x] SDL_WasInit
 
 use std::{marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
 
@@ -39,56 +51,17 @@ use crate::{
 mod_reexport!(builder);
 mod_reexport!(metadata);
 
-/// A zero-sized type that mainly exists to call [`SDL_Quit`].
-/// As such, think of it as a guard that creates a scope for
-/// the initialization of subsystems, ensuring they're properly
-/// quit once it goes out of scope.
-pub struct Context;
+#[derive(Clone, Copy)]
+pub struct ContextHandle;
 
-impl Context {
-    /// Create a new context, enabling you to initialize individual subsystems.
-    ///
-    /// Returns [`Err`] if SDL fails basic initialization.
-    ///
-    /// Only call this on the main thread!
-    pub fn new() -> Result<Self> {
-        // This initializes the main thread and other basic stuff,
-        // like setting app metadata.
-        if unsafe { SDL_Init(SDL_InitFlags::new(0)) } {
-            Ok(Self {})
-        } else {
-            Err(Error::current())
-        }
-    }
-
-    /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
-    ///
-    /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
-    ///
-    /// # Remarks
-    ///
-    /// You can optionally provide metadata about your app to SDL. This is not required, but strongly encouraged.
-    ///
-    /// There are several locations where SDL can make use of metadata (an "About" box in the macOS menu bar,
-    /// the name of the app can be shown on some audio mixers, etc). Any piece of metadata can be left out,
-    /// if a specific detail doesn't make sense for the app.
-    ///
-    /// This function should be called as early as possible, before `SDL_Init`.
-    /// Multiple calls to this function are allowed, but various state might not change once it has been set up
-    /// with a previous call to this function.
-    ///
-    /// Once set, this metadata can be read using [`Context::metadata`].
-    #[doc(alias = "SDL_SetAppMetadataProperty")]
-    pub fn builder() -> ContextBuilder {
-        ContextBuilder::new()
-    }
-
-    /// Read the app metadata set via [`Self::builder`].
+impl ContextHandle {
+    /// Read the app metadata set via [`Context::builder`].
     ///
     /// The metadata lives in the global property group, so the returned
     /// [`ContextMetadata`] is zero-sized and borrows this [`Context`].
     ///
     /// All metadata string values are UTF-8.
+    #[doc(alias = "SDL_GetAppMetadataProperty")]
     pub fn metadata(&self) -> ContextMetadata<'_> {
         ContextMetadata::new()
     }
@@ -148,6 +121,80 @@ impl Context {
                 c_ptr_to_str(ptr.as_ptr())
             })
         }
+    }
+}
+
+/// A zero-sized type that mainly exists to call [`SDL_Quit`].
+/// As such, think of it as a guard that creates a scope for
+/// the initialization of subsystems, ensuring they're properly
+/// quit once it goes out of scope.
+pub struct Context {
+    handle: ContextHandle,
+}
+
+impl Context {
+    /// Create a new context, enabling you to further initialize individual subsystems.
+    ///
+    /// Returns [`Err`] if SDL fails basic initialization.
+    ///
+    /// Only call this on the main thread!
+    #[doc(alias = "SDL_Init")]
+    pub fn init() -> Result<Self> {
+        // This initializes the main thread and other basic stuff,
+        // like setting app metadata.
+        if unsafe { SDL_Init(SDL_InitFlags::new(0)) } {
+            Ok(Self {
+                handle: ContextHandle,
+            })
+        } else {
+            Err(Error::current())
+        }
+    }
+
+    /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
+    ///
+    /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
+    ///
+    /// # Remarks
+    ///
+    /// You can optionally provide metadata about your app to SDL. This is not required, but strongly encouraged.
+    ///
+    /// There are several locations where SDL can make use of metadata (an "About" box in the macOS menu bar,
+    /// the name of the app can be shown on some audio mixers, etc). Any piece of metadata can be left out,
+    /// if a specific detail doesn't make sense for the app.
+    ///
+    /// Once set, this metadata can be read using [`ContextHandle::metadata`].
+    #[doc(alias = "SDL_SetAppMetadataProperty")]
+    pub fn builder() -> ContextBuilder {
+        ContextBuilder::new()
+    }
+
+    /// # Safety
+    ///
+    /// The caller must only use the returned handle within
+    /// the lifetime of the backing [`Context`].
+    pub unsafe fn as_handle(&self) -> ContextHandle {
+        unsafe { Subsystem::as_handle(self) }
+    }
+
+    pub fn as_ref(&self) -> Ref<'_, Self> {
+        Subsystem::as_ref(self)
+    }
+}
+
+impl Deref for Context {
+    type Target = ContextHandle;
+
+    fn deref(&self) -> &Self::Target {
+        &self.handle
+    }
+}
+
+impl Subsystem for Context {
+    type Handle = ContextHandle;
+
+    unsafe fn as_handle(&self) -> Self::Handle {
+        self.handle
     }
 }
 

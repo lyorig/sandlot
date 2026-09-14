@@ -54,7 +54,7 @@ fn event_timestamp() {
 #[test]
 fn event_push() -> Result {
     // Initialize events.
-    let ctx = Context::new()?;
+    let ctx = Context::init()?;
     let evts = Events::init(&ctx)?;
 
     // Should work now.

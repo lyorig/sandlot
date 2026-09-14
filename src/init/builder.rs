@@ -46,9 +46,9 @@ impl ContextBuilder {
 
     /// # Panics
     ///
-    /// This method simply calls [`Context::new`]. Consult its documentation for panic conditions.
+    /// This method simply calls [`Context::init`]. Consult its documentation for panic conditions.
     pub fn build(self) -> Result<Context> {
-        Context::new()
+        Context::init()
     }
 
     fn set(self, key: *const c_char, value: &CStr) -> Self {
