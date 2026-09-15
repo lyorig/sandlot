@@ -85,7 +85,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     }
 
     pub(crate) fn from_sdl(id: SDL_DisplayID) -> Result<Self> {
-        opt2res_map(NonZero::new(id.0), |id| Self::new(id))
+        opt2res_map(NonZero::new(id.0), Self::new)
     }
 
     /// Returns the "raw" SDL handle type. Intended for interfacing with

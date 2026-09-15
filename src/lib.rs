@@ -10,7 +10,6 @@ use crate::util::c_ptr_to_str;
 
 pub mod boxed;
 
-pub mod clipboard;
 pub mod color;
 pub mod cpu;
 pub mod display;
