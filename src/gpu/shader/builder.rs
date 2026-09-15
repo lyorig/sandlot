@@ -21,7 +21,7 @@ impl<'p> ShaderBuilder<'p> {
 
     /// A name for the shader, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_SHADER_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props
                 .set_string(SDL_PROP_GPU_SHADER_CREATE_NAME_STRING, value.as_ptr())
@@ -37,7 +37,7 @@ impl<'p> ShaderBuilder<'p> {
     }
 
     pub fn build<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: ShaderCreateInfo,
     ) -> Result<Shader<'ctx, 'vid, 'dev>> {
@@ -48,7 +48,7 @@ impl<'p> ShaderBuilder<'p> {
     /// Creates a [`Shader`] using [`ShaderCreateInfo`],
     /// then removes all shader creation properties from the attached property group.
     pub fn build_cleanup<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: ShaderCreateInfo,
     ) -> Result<Shader<'ctx, 'vid, 'dev>> {

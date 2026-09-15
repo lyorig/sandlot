@@ -21,6 +21,7 @@ const CREATE_PROPERTIES: [*const c_char; 5] = [
     SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER,
 ];
 
+#[derive(Clone, Copy)]
 pub struct RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     inner: Ref<'p, Properties>,
     marker_wnd: PhantomData<Ref<'wnd, Window<'ctx, 'vid>>>,
@@ -38,7 +39,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
 
     /// The name of the rendering driver to use, if a specific one is desired.
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.inner
                 .set_string(SDL_PROP_RENDERER_CREATE_NAME_STRING, value.as_ptr())
@@ -51,7 +52,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// software renderer using a surface. Mutually exclusive with
     /// [`RendererBuilder::surface`].
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_WINDOW_POINTER")]
-    pub fn window(&mut self, value: Ref<'wnd, Window>) -> &mut Self {
+    pub fn window(self, value: Ref<'wnd, Window>) -> Self {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_RENDERER_CREATE_WINDOW_POINTER,
@@ -65,7 +66,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// The surface where rendering is displayed, if you want a software
     /// renderer without a window.
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_SURFACE_POINTER")]
-    pub fn surface(&mut self, value: Ref<'surf, Surface>) -> &mut Self {
+    pub fn surface(self, value: Ref<'surf, Surface>) -> Self {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_RENDERER_CREATE_SURFACE_POINTER,
@@ -79,7 +80,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// A [`Colorspace`] value describing the colorspace for output to the
     /// display. Defaults to [`Colorspace::Srgb`].
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_OUTPUT_COLORSPACE_NUMBER")]
-    pub fn colorspace(&mut self, value: Colorspace) -> &mut Self {
+    pub fn colorspace(self, value: Colorspace) -> Self {
         _ = unsafe {
             self.inner.set_number(
                 SDL_PROP_RENDERER_CREATE_OUTPUT_COLORSPACE_NUMBER,
@@ -94,7 +95,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// property can take any value that is supported by [`RendererHandle::set_vsync`]
     /// for the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER")]
-    pub fn vsync(&mut self, value: i64) -> &mut Self {
+    pub fn vsync(self, value: i64) -> Self {
         _ = unsafe {
             self.inner
                 .set_number(SDL_PROP_RENDERER_CREATE_PRESENT_VSYNC_NUMBER, value)
@@ -116,7 +117,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// you're creating this with needs one, proving the subsystem has been
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
-    pub fn build(&self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
+    pub fn build(self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
         Renderer::from_ptr(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) })
     }
 
@@ -127,7 +128,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// you're creating this with needs one, proving the subsystem has been
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
-    pub fn build_cleanup(&self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
+    pub fn build_cleanup(self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
         let res = Renderer::from_ptr(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res

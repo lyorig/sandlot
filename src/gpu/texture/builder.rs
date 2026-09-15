@@ -27,25 +27,25 @@ impl<'p> TextureBuilder<'p> {
 
     /// The clear color's red component for D3D12 render targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT")]
-    pub fn d3d12_clear_r(&mut self, value: f32) -> &mut Self {
+    pub fn d3d12_clear_r(self, value: f32) -> Self {
         self.set_float(SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT, value)
     }
 
     /// The clear color's green component for D3D12 render targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT")]
-    pub fn d3d12_clear_g(&mut self, value: f32) -> &mut Self {
+    pub fn d3d12_clear_g(self, value: f32) -> Self {
         self.set_float(SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_G_FLOAT, value)
     }
 
     /// The clear color's blue component for D3D12 render targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT")]
-    pub fn d3d12_clear_b(&mut self, value: f32) -> &mut Self {
+    pub fn d3d12_clear_b(self, value: f32) -> Self {
         self.set_float(SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_B_FLOAT, value)
     }
 
     /// The clear color's alpha component for D3D12 render targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT")]
-    pub fn d3d12_clear_a(&mut self, value: f32) -> &mut Self {
+    pub fn d3d12_clear_a(self, value: f32) -> Self {
         self.set_float(SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_A_FLOAT, value)
     }
 
@@ -56,7 +56,7 @@ impl<'p> TextureBuilder<'p> {
     /// - [`TextureBuilder::d3d12_clear_g`]
     /// - [`TextureBuilder::d3d12_clear_b`]
     /// - [`TextureBuilder::d3d12_clear_a`]
-    pub fn d3d12_clear(&mut self, value: RgbaF32) -> &mut Self {
+    pub fn d3d12_clear(self, value: RgbaF32) -> Self {
         self.d3d12_clear_r(value.rgb.r);
         self.d3d12_clear_g(value.rgb.g);
         self.d3d12_clear_b(value.rgb.b);
@@ -65,13 +65,13 @@ impl<'p> TextureBuilder<'p> {
 
     /// The clear value for D3D12 depth targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_DEPTH_FLOAT")]
-    pub fn d3d12_clear_depth(&mut self, value: f32) -> &mut Self {
+    pub fn d3d12_clear_depth(self, value: f32) -> Self {
         self.set_float(SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_DEPTH_FLOAT, value)
     }
 
     /// The clear value for D3D12 stencil targets.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_STENCIL_NUMBER")]
-    pub fn d3d12_clear_stencil(&mut self, value: i64) -> &mut Self {
+    pub fn d3d12_clear_stencil(self, value: i64) -> Self {
         self.set_number(
             SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_STENCIL_NUMBER,
             value,
@@ -80,7 +80,7 @@ impl<'p> TextureBuilder<'p> {
 
     /// A name for the texture, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props
                 .set_string(SDL_PROP_GPU_TEXTURE_CREATE_NAME_STRING, value.as_ptr())
@@ -96,7 +96,7 @@ impl<'p> TextureBuilder<'p> {
     }
 
     pub fn build<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: TextureCreateInfo,
     ) -> Result<Texture<'ctx, 'vid, 'dev>> {
@@ -107,7 +107,7 @@ impl<'p> TextureBuilder<'p> {
     /// Creates a [`Texture`] using [`TextureCreateInfo`],
     /// then removes all texture creation properties from the attached property group.
     pub fn build_cleanup<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: TextureCreateInfo,
     ) -> Result<Texture<'ctx, 'vid, 'dev>> {
@@ -116,12 +116,12 @@ impl<'p> TextureBuilder<'p> {
         res
     }
 
-    fn set_number(&mut self, key: *const c_char, value: i64) -> &mut Self {
+    fn set_number(self, key: *const c_char, value: i64) -> Self {
         _ = unsafe { self.props.set_number(key, value) };
         self
     }
 
-    fn set_float(&mut self, key: *const c_char, value: f32) -> &mut Self {
+    fn set_float(self, key: *const c_char, value: f32) -> Self {
         _ = unsafe { self.props.set_float(key, value) };
         self
     }

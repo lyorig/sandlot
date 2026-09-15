@@ -21,7 +21,7 @@ impl<'p> TransferBufferBuilder<'p> {
 
     /// A name for the transfer buffer, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_TRANSFERBUFFER_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props.set_string(
                 SDL_PROP_GPU_TRANSFERBUFFER_CREATE_NAME_STRING,
@@ -39,7 +39,7 @@ impl<'p> TransferBufferBuilder<'p> {
     }
 
     pub fn build(
-        &self,
+        self,
         device: Ref<Device>,
         mut create_info: TransferBufferCreateInfo,
     ) -> Result<TransferBuffer> {
@@ -50,7 +50,7 @@ impl<'p> TransferBufferBuilder<'p> {
     /// Creates a [`TransferBuffer`] using [`TransferBufferCreateInfo`],
     /// then removes all transfer buffer creation properties from the attached group.
     pub fn build_cleanup(
-        &self,
+        self,
         device: Ref<Device>,
         create_info: TransferBufferCreateInfo,
     ) -> Result<TransferBuffer> {

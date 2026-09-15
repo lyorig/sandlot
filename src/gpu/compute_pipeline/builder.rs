@@ -21,7 +21,7 @@ impl<'p> ComputePipelineBuilder<'p> {
 
     /// A name for the compute pipeline, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_COMPUTEPIPELINE_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props.set_string(
                 SDL_PROP_GPU_COMPUTEPIPELINE_CREATE_NAME_STRING,
@@ -39,7 +39,7 @@ impl<'p> ComputePipelineBuilder<'p> {
     }
 
     pub fn build<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: ComputePipelineCreateInfo<'_, '_>,
     ) -> Result<ComputePipeline<'ctx, 'vid, 'dev>> {
@@ -50,7 +50,7 @@ impl<'p> ComputePipelineBuilder<'p> {
     /// Creates a [`ComputePipeline`] using [`ComputePipelineCreateInfo`],
     /// then removes all compute pipeline creation properties from the attached property group.
     pub fn build_cleanup<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: ComputePipelineCreateInfo,
     ) -> Result<ComputePipeline<'ctx, 'vid, 'dev>> {

@@ -37,6 +37,7 @@ impl AppKind {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct ContextBuilder;
 
 impl ContextBuilder {

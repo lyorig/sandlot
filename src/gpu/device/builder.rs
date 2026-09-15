@@ -33,6 +33,7 @@ const CREATE_PROPERTIES: [*const c_char; 21] = [
 ];
 
 /// Builder for [`Device`], using [`SDL_CreateGPUDeviceWithProperties`].
+#[derive(Clone, Copy)]
 pub struct DeviceBuilder<'p, 'vo> {
     inner: Ref<'p, Properties>,
     marker: PhantomData<&'vo SDL_GPUVulkanOptions>,
@@ -48,25 +49,25 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
 
     /// Enable debug mode properties and validations. Defaults to `true`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN")]
-    pub fn debug_mode(&mut self, value: bool) -> &mut Self {
+    pub fn debug_mode(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN, value)
     }
 
     /// Prefer energy efficiency over maximum GPU performance. Defaults to `false`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN")]
-    pub fn prefer_low_power(&mut self, value: bool) -> &mut Self {
+    pub fn prefer_low_power(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_PREFERLOWPOWER_BOOLEAN, value)
     }
 
     /// Automatically log useful debug information on device creation. Defaults to `true`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_VERBOSE_BOOLEAN")]
-    pub fn verbose(&mut self, value: bool) -> &mut Self {
+    pub fn verbose(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_VERBOSE_BOOLEAN, value)
     }
 
     /// The name of the GPU driver to use, if a specific one is desired.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         self.set_string(SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, value)
     }
 
@@ -74,7 +75,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Disabling optional features allows the application to run on some
     /// older Android devices.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN")]
-    pub fn clip_distance(&mut self, value: bool) -> &mut Self {
+    pub fn clip_distance(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_FEATURE_CLIP_DISTANCE_BOOLEAN,
             value,
@@ -85,7 +86,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Disabling optional features allows the application to run on some
     /// older Android devices.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN")]
-    pub fn depth_clamping(&mut self, value: bool) -> &mut Self {
+    pub fn depth_clamping(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_FEATURE_DEPTH_CLAMPING_BOOLEAN,
             value,
@@ -96,7 +97,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Disabling optional features allows the application to run on some
     /// older Android devices.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN")]
-    pub fn indirect_draw_first_instance(&mut self, value: bool) -> &mut Self {
+    pub fn indirect_draw_first_instance(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_FEATURE_INDIRECT_DRAW_FIRST_INSTANCE_BOOLEAN,
             value,
@@ -107,50 +108,50 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Disabling optional features allows the application to run on some
     /// older Android devices.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN")]
-    pub fn anisotropy(&mut self, value: bool) -> &mut Self {
+    pub fn anisotropy(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_FEATURE_ANISOTROPY_BOOLEAN, value)
     }
 
     /// The app is able to provide shaders for an NDA platform.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_PRIVATE_BOOLEAN")]
-    pub fn shaders_private(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_private(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_PRIVATE_BOOLEAN, value)
     }
 
     /// The app is able to provide SPIR-V shaders, if applicable.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN")]
-    pub fn shaders_spirv(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_spirv(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_SPIRV_BOOLEAN, value)
     }
 
     /// The app is able to provide DXBC shaders, if applicable.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXBC_BOOLEAN")]
-    pub fn shaders_dxbc(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_dxbc(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXBC_BOOLEAN, value)
     }
 
     /// The app is able to provide DXIL shaders, if applicable.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN")]
-    pub fn shaders_dxil(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_dxil(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_DXIL_BOOLEAN, value)
     }
 
     /// The app is able to provide MSL shaders, if applicable.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN")]
-    pub fn shaders_msl(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_msl(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_MSL_BOOLEAN, value)
     }
 
     /// The app is able to provide Metal shader libraries, if applicable.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN")]
-    pub fn shaders_metallib(&mut self, value: bool) -> &mut Self {
+    pub fn shaders_metallib(self, value: bool) -> Self {
         self.set_bool(SDL_PROP_GPU_DEVICE_CREATE_SHADERS_METALLIB_BOOLEAN, value)
     }
 
     /// Allow D3D12 Tier 1 resource binding support, if the application uses
     /// 8 or fewer storage resources across all shader stages. Defaults to `false`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_ALLOW_FEWER_RESOURCE_SLOTS_BOOLEAN")]
-    pub fn d3d12_allow_fewer_resource_slots(&mut self, value: bool) -> &mut Self {
+    pub fn d3d12_allow_fewer_resource_slots(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_D3D12_ALLOW_FEWER_RESOURCE_SLOTS_BOOLEAN,
             value,
@@ -159,7 +160,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
 
     /// The prefix to use for all D3D12 vertex semantics. Defaults to `"TEXCOORD"`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_SEMANTIC_NAME_STRING")]
-    pub fn d3d12_semantic_name(&mut self, value: &CStr) -> &mut Self {
+    pub fn d3d12_semantic_name(self, value: &CStr) -> Self {
         self.set_string(SDL_PROP_GPU_DEVICE_CREATE_D3D12_SEMANTIC_NAME_STRING, value)
     }
 
@@ -168,7 +169,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// and vendoring D3D12Core.dll, they become possible on older platforms.
     /// The version must match the one given in the DLL.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_VERSION_NUMBER")]
-    pub fn d3d12_agility_sdk_version(&mut self, value: i64) -> &mut Self {
+    pub fn d3d12_agility_sdk_version(self, value: i64) -> Self {
         self.set_number(
             SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_VERSION_NUMBER,
             value,
@@ -178,7 +179,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// The path to the D3D12 Agility SDK DLL, relative to the executable path
     /// of the app. Do not put the DLL in the same directory as the exe.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_PATH_STRING")]
-    pub fn d3d12_agility_sdk_path(&mut self, value: &CStr) -> &mut Self {
+    pub fn d3d12_agility_sdk_path(self, value: &CStr) -> Self {
         self.set_string(
             SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_PATH_STRING,
             value,
@@ -188,7 +189,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Require hardware acceleration for the Vulkan device, excluding
     /// software renderers such as Lavapipe. Defaults to `false`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_VULKAN_REQUIRE_HARDWARE_ACCELERATION_BOOLEAN")]
-    pub fn vulkan_require_hardware_acceleration(&mut self, value: bool) -> &mut Self {
+    pub fn vulkan_require_hardware_acceleration(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_VULKAN_REQUIRE_HARDWARE_ACCELERATION_BOOLEAN,
             value,
@@ -201,7 +202,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// requires. The referenced struct is read at build time and must outlive
     /// `build()`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_VULKAN_OPTIONS_POINTER")]
-    pub fn vulkan_options(&mut self, value: &'vo SDL_GPUVulkanOptions) -> &mut Self {
+    pub fn vulkan_options(self, value: &'vo SDL_GPUVulkanOptions) -> Self {
         _ = unsafe {
             self.inner.set_pointer(
                 SDL_PROP_GPU_DEVICE_CREATE_VULKAN_OPTIONS_POINTER,
@@ -214,7 +215,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Allow macOS support for `MTLGPUFamilyMac1` hardware, if the
     /// application does not write to sRGB textures.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_METAL_ALLOW_MACFAMILY1_BOOLEAN")]
-    pub fn metal_allow_macfamily1(&mut self, value: bool) -> &mut Self {
+    pub fn metal_allow_macfamily1(self, value: bool) -> Self {
         self.set_bool(
             SDL_PROP_GPU_DEVICE_CREATE_METAL_ALLOW_MACFAMILY1_BOOLEAN,
             value,
@@ -231,7 +232,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// Build the device.
     #[doc(alias = "SDL_CreateGPUDeviceWithProperties")]
     pub fn build<'ctx, 'vid>(
-        &self,
+        self,
         _vid: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Device<'ctx, 'vid>> {
         Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) })
@@ -241,7 +242,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateGPUDeviceWithProperties")]
     pub fn build_cleanup<'ctx, 'vid>(
-        &self,
+        self,
         _vid: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Device<'ctx, 'vid>> {
         let res = Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) });
@@ -249,17 +250,17 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
         res
     }
 
-    fn set_bool(&mut self, key: *const c_char, value: bool) -> &mut Self {
+    fn set_bool(self, key: *const c_char, value: bool) -> Self {
         _ = unsafe { self.inner.set_bool(key, value) };
         self
     }
 
-    fn set_number(&mut self, key: *const c_char, value: i64) -> &mut Self {
+    fn set_number(self, key: *const c_char, value: i64) -> Self {
         _ = unsafe { self.inner.set_number(key, value) };
         self
     }
 
-    fn set_string(&mut self, key: *const c_char, value: &CStr) -> &mut Self {
+    fn set_string(self, key: *const c_char, value: &CStr) -> Self {
         _ = unsafe { self.inner.set_string(key, value.as_ptr()) };
         self
     }

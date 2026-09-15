@@ -21,7 +21,7 @@ impl<'p> SamplerBuilder<'p> {
 
     /// A name for the sampler, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_SAMPLER_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props
                 .set_string(SDL_PROP_GPU_SAMPLER_CREATE_NAME_STRING, value.as_ptr())
@@ -37,7 +37,7 @@ impl<'p> SamplerBuilder<'p> {
     }
 
     pub fn build<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: SamplerCreateInfo,
     ) -> Result<Sampler<'ctx, 'vid, 'dev>> {
@@ -48,7 +48,7 @@ impl<'p> SamplerBuilder<'p> {
     /// Creates a [`Sampler`] using [`SamplerCreateInfo`],
     /// then removes all sampler creation properties from the attached property group.
     pub fn build_cleanup<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: SamplerCreateInfo,
     ) -> Result<Sampler<'ctx, 'vid, 'dev>> {

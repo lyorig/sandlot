@@ -20,7 +20,7 @@ impl<'p> GraphicsPipelineBuilder<'p> {
 
     /// A name for the graphics pipeline, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING")]
-    pub fn name(&mut self, value: &CStr) -> &mut Self {
+    pub fn name(self, value: &CStr) -> Self {
         _ = unsafe {
             self.props.set_string(
                 SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING,
@@ -38,7 +38,7 @@ impl<'p> GraphicsPipelineBuilder<'p> {
     }
 
     pub fn build<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: GraphicsPipelineCreateInfo,
     ) -> Result<GraphicsPipeline<'ctx, 'vid, 'dev>> {
@@ -49,7 +49,7 @@ impl<'p> GraphicsPipelineBuilder<'p> {
     /// Creates a [`GraphicsPipeline`] using [`GraphicsPipelineCreateInfo`],
     /// then removes all graphics pipeline creation properties from the attached property group.
     pub fn build_cleanup<'ctx, 'vid, 'dev>(
-        &self,
+        self,
         device: Ref<'dev, Device<'ctx, 'vid>>,
         create_info: GraphicsPipelineCreateInfo,
     ) -> Result<GraphicsPipeline<'ctx, 'vid, 'dev>> {

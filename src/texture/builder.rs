@@ -29,6 +29,7 @@ const CREATE_PROPERTIES: [*const c_char; 7] = [
 /// The backend-specific properties that wrap existing native textures
 /// (D3D11, D3D12, Metal, OpenGL, OpenGLES2, Vulkan and GPU), as well as
 /// [`SDL_PROP_TEXTURE_CREATE_PALETTE_POINTER`], are not covered.
+#[derive(Clone, Copy)]
 pub struct TextureBuilder<'a> {
     inner: Ref<'a, Properties>,
 }
@@ -43,7 +44,7 @@ impl<'a> TextureBuilder<'a> {
     /// [`Colorspace::Hdr10`] for 10-bit textures, [`Colorspace::Srgb`] for
     /// other RGB textures and [`Colorspace::Jpeg`] for YUV textures.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER")]
-    pub fn colorspace(&mut self, value: Colorspace) -> &mut Self {
+    pub fn colorspace(self, value: Colorspace) -> Self {
         self.set_number(
             SDL_PROP_TEXTURE_CREATE_COLORSPACE_NUMBER,
             i64::from(value as u32),
@@ -53,7 +54,7 @@ impl<'a> TextureBuilder<'a> {
     /// One of the enumerated values in [`PixelFormat`]. Defaults to the
     /// best RGBA format for the renderer.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER")]
-    pub fn format(&mut self, value: PixelFormat) -> &mut Self {
+    pub fn format(self, value: PixelFormat) -> Self {
         self.set_number(
             SDL_PROP_TEXTURE_CREATE_FORMAT_NUMBER,
             i64::from(value as i32),
@@ -63,7 +64,7 @@ impl<'a> TextureBuilder<'a> {
     /// One of the enumerated values in [`TextureAccess`]. Defaults to
     /// [`TextureAccess::Static`].
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER")]
-    pub fn access(&mut self, value: TextureAccess) -> &mut Self {
+    pub fn access(self, value: TextureAccess) -> Self {
         self.set_number(
             SDL_PROP_TEXTURE_CREATE_ACCESS_NUMBER,
             i64::from(value as i32),
@@ -72,18 +73,18 @@ impl<'a> TextureBuilder<'a> {
 
     /// The width of the texture in pixels. Required.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER")]
-    pub fn width(&mut self, value: i64) -> &mut Self {
+    pub fn width(self, value: i64) -> Self {
         self.set_number(SDL_PROP_TEXTURE_CREATE_WIDTH_NUMBER, value)
     }
 
     /// The height of the texture in pixels. Required.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER")]
-    pub fn height(&mut self, value: i64) -> &mut Self {
+    pub fn height(self, value: i64) -> Self {
         self.set_number(SDL_PROP_TEXTURE_CREATE_HEIGHT_NUMBER, value)
     }
 
     /// Utility method that calls `self.width()` and `self.height()`.
-    pub fn size(&mut self, size: PointI32) -> &mut Self {
+    pub fn size(self, size: PointI32) -> Self {
         self.width(size.x.into());
         self.height(size.y.into())
     }
@@ -93,7 +94,7 @@ impl<'a> TextureBuilder<'a> {
     /// headroom. Defaults to 100 for HDR10 textures and 1.0 for floating
     /// point textures.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT")]
-    pub fn sdr_white_point(&mut self, value: f32) -> &mut Self {
+    pub fn sdr_white_point(self, value: f32) -> Self {
         self.set_float(SDL_PROP_TEXTURE_CREATE_SDR_WHITE_POINT_FLOAT, value)
     }
 
@@ -102,7 +103,7 @@ impl<'a> TextureBuilder<'a> {
     /// values outside the range supported by the display will be scaled into
     /// the available HDR headroom, otherwise they are clipped.
     #[doc(alias = "SDL_PROP_TEXTURE_CREATE_HDR_HEADROOM_FLOAT")]
-    pub fn hdr_headroom(&mut self, value: f32) -> &mut Self {
+    pub fn hdr_headroom(self, value: f32) -> Self {
         self.set_float(SDL_PROP_TEXTURE_CREATE_HDR_HEADROOM_FLOAT, value)
     }
 
@@ -116,7 +117,7 @@ impl<'a> TextureBuilder<'a> {
     /// Build the texture.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
     pub fn build<'ctx, 'vid, 'wnd, 'rnd>(
-        &self,
+        self,
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
     ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
         Texture::from_ptr(unsafe { SDL_CreateTextureWithProperties(rnd.as_raw(), self.inner.id()) })
@@ -126,7 +127,7 @@ impl<'a> TextureBuilder<'a> {
     /// See the [crate::properties] module docs for more info.
     #[doc(alias = "SDL_CreateTextureWithProperties")]
     pub fn build_cleanup<'ctx, 'vid, 'wnd, 'rnd>(
-        &self,
+        self,
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
     ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
         let res = Texture::from_ptr(unsafe {
@@ -136,12 +137,12 @@ impl<'a> TextureBuilder<'a> {
         res
     }
 
-    fn set_number(&mut self, key: *const c_char, value: i64) -> &mut Self {
+    fn set_number(self, key: *const c_char, value: i64) -> Self {
         _ = unsafe { self.inner.set_number(key, value) };
         self
     }
 
-    fn set_float(&mut self, key: *const c_char, value: f32) -> &mut Self {
+    fn set_float(self, key: *const c_char, value: f32) -> Self {
         _ = unsafe { self.inner.set_float(key, value) };
         self
     }
