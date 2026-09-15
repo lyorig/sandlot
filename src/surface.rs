@@ -102,13 +102,13 @@ resource_new! {
 
 impl SurfaceHandle {
     /// Get the size of the surface.
-    pub fn size(&self) -> PointI32 {
+    pub fn size(self) -> PointI32 {
         let surf = unsafe { self.handle.as_ref() };
         PointI32::new(surf.w, surf.h)
     }
 
     /// Get the pixel format of the surface.
-    pub fn format(&self) -> PixelFormat {
+    pub fn format(self) -> PixelFormat {
         let surf = unsafe { self.handle.as_ref() };
         unsafe { PixelFormat::from_sdl_unchecked(surf.format) }
     }
@@ -127,7 +127,7 @@ impl SurfaceHandle {
     /// `SDL_SetSurfaceClipRect`), then this function will fill based on the
     /// intersection of the clip rectangle and the whole surface.
     #[doc(alias = "SDL_FillSurfaceRect")]
-    pub fn fill(&self, c: RgbaU8) -> Result<()> {
+    pub fn fill(self, c: RgbaU8) -> Result<()> {
         to_result(unsafe { SDL_FillSurfaceRect(self.as_raw(), std::ptr::null(), self.map_rgba(c)) })
     }
 
@@ -143,7 +143,7 @@ impl SurfaceHandle {
     /// `SDL_SetSurfaceClipRect`), then this function will fill based on the
     /// intersection of the clip rectangle and `pos`.
     #[doc(alias = "SDL_FillSurfaceRect")]
-    pub fn fill_rect(&self, pos: RectI32, c: RgbaU8) -> Result<()> {
+    pub fn fill_rect(self, pos: RectI32, c: RgbaU8) -> Result<()> {
         to_result(unsafe {
             SDL_FillSurfaceRect(self.as_raw(), (&raw const pos).cast(), self.map_rgba(c))
         })
@@ -161,7 +161,7 @@ impl SurfaceHandle {
     /// `SDL_SetSurfaceClipRect`), then this function will fill based on the
     /// intersection of the clip rectangle and each rectangle in `pos`.
     #[doc(alias = "SDL_FillSurfaceRects")]
-    pub fn fill_rects(&self, pos: &[RectI32], c: RgbaU8) -> Result<()> {
+    pub fn fill_rects(self, pos: &[RectI32], c: RgbaU8) -> Result<()> {
         to_result(unsafe {
             SDL_FillSurfaceRects(
                 self.as_raw(),
@@ -185,20 +185,20 @@ impl SurfaceHandle {
     /// colorspace, otherwise the color is assumed to be in the colorspace of
     /// the surface.
     #[doc(alias = "SDL_ClearSurface")]
-    pub fn clear(&self, c: RgbaF32) -> Result<()> {
+    pub fn clear(self, c: RgbaF32) -> Result<()> {
         to_result(unsafe { SDL_ClearSurface(self.as_raw(), c.rgb.r, c.rgb.g, c.rgb.b, c.a) })
     }
 
     /// Flip a surface vertically or horizontally.
     #[doc(alias = "SDL_FlipSurface")]
-    pub fn flip(&self, fm: FlipMode) -> Result<()> {
+    pub fn flip(self, fm: FlipMode) -> Result<()> {
         to_result(unsafe { SDL_FlipSurface(self.as_raw(), fm.into()) })
     }
 
     /// Create a new surface identical to the existing surface, scaled to
     /// the desired size.
     #[doc(alias = "SDL_ScaleSurface")]
-    pub fn scale(&self, size: PointI32, sm: ScaleMode) -> Result<Surface> {
+    pub fn scale(self, size: PointI32, sm: ScaleMode) -> Result<Surface> {
         Surface::from_ptr(unsafe { SDL_ScaleSurface(self.as_raw(), size.x, size.y, sm.to_sdl()) })
     }
 
@@ -221,7 +221,7 @@ impl SurfaceHandle {
     /// If the pixel format bpp (color depth) is less than 32-bpp then the
     /// unused upper bits of the return value can safely be ignored.
     #[doc(alias = "SDL_MapSurfaceRGB")]
-    pub fn map_rgb(&self, rgb: RgbU8) -> u32 {
+    pub fn map_rgb(self, rgb: RgbU8) -> u32 {
         unsafe { SDL_MapSurfaceRGB(self.as_raw(), rgb.r, rgb.g, rgb.b) }
     }
 
@@ -244,7 +244,7 @@ impl SurfaceHandle {
     /// If the pixel format bpp (color depth) is less than 32-bpp then the
     /// unused upper bits of the return value can safely be ignored.
     #[doc(alias = "SDL_MapSurfaceRGBA")]
-    pub fn map_rgba(&self, rgba: RgbaU8) -> u32 {
+    pub fn map_rgba(self, rgba: RgbaU8) -> u32 {
         unsafe { SDL_MapSurfaceRGBA(self.as_raw(), rgba.rgb.r, rgba.rgb.g, rgba.rgb.b, rgba.a) }
     }
 
@@ -255,7 +255,7 @@ impl SurfaceHandle {
     /// If the original surface has alternate images, the new surface will
     /// have a reference to them as well.
     #[doc(alias = "SDL_DuplicateSurface")]
-    pub fn try_clone(&self) -> Result<Surface> {
+    pub fn try_clone(self) -> Result<Surface> {
         Surface::from_ptr(unsafe { SDL_DuplicateSurface(self.as_raw()) })
     }
 
@@ -266,7 +266,7 @@ impl SurfaceHandle {
     /// surface, or the entire destination surface if [`None`].
     #[doc(alias = "SDL_StretchSurface")]
     pub fn stretch(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -316,7 +316,7 @@ impl SurfaceHandle {
     ///   color key is set, only copy the pixels that do not match it).
     #[doc(alias = "SDL_BlitSurface")]
     pub fn blit(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -355,7 +355,7 @@ impl SurfaceHandle {
     /// destination rectangle.
     #[doc(alias = "SDL_BlitSurface9Grid")]
     pub fn blit_9grid(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -387,7 +387,7 @@ impl SurfaceHandle {
     /// surface, or the entire destination surface if [`None`].
     #[doc(alias = "SDL_BlitSurfaceScaled")]
     pub fn blit_scaled(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -417,7 +417,7 @@ impl SurfaceHandle {
     /// completely fill `dst`.
     #[doc(alias = "SDL_BlitSurfaceTiled")]
     pub fn blit_tiled(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -449,7 +449,7 @@ impl SurfaceHandle {
     /// needed to completely fill `dst`.
     #[doc(alias = "SDL_BlitSurfaceTiledWithScale")]
     pub fn blit_tiled_scaled(
-        &self,
+        self,
         target: Ref<Surface>,
         src: Option<&PointI32>,
         dst: Option<&PointI32>,
@@ -472,7 +472,7 @@ impl SurfaceHandle {
 impl traits::BlendMode for SurfaceHandle {
     /// Get the blend mode used for blit operations.
     #[doc(alias = "SDL_GetSurfaceBlendMode")]
-    fn blend_mode(&self) -> BlendMode {
+    fn blend_mode(self) -> BlendMode {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetSurfaceBlendMode(self.as_raw(), ret.as_mut_ptr());
@@ -488,7 +488,7 @@ impl traits::BlendMode for SurfaceHandle {
     /// with the existing data, the blend mode of the SOURCE surface should
     /// be set to [`BlendMode::NONE`].
     #[doc(alias = "SDL_SetSurfaceBlendMode")]
-    fn set_blend_mode(&self, bm: BlendMode) {
+    fn set_blend_mode(self, bm: BlendMode) {
         unsafe {
             SDL_SetSurfaceBlendMode(self.as_raw(), bm.to_sdl());
         }
@@ -498,7 +498,7 @@ impl traits::BlendMode for SurfaceHandle {
 impl traits::ColorModU8 for SurfaceHandle {
     /// Get the additional color value multiplied into blit operations.
     #[doc(alias = "SDL_GetSurfaceColorMod")]
-    fn rgb_mod_u8(&self) -> RgbU8 {
+    fn rgb_mod_u8(self) -> RgbU8 {
         let mut ret = MaybeUninit::<RgbU8>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -515,7 +515,7 @@ impl traits::ColorModU8 for SurfaceHandle {
 
     /// Get the additional alpha value used in blit operations.
     #[doc(alias = "SDL_GetSurfaceAlphaMod")]
-    fn alpha_mod_u8(&self) -> u8 {
+    fn alpha_mod_u8(self) -> u8 {
         let mut ret = MaybeUninit::uninit();
 
         unsafe {
@@ -534,7 +534,7 @@ impl traits::ColorModU8 for SurfaceHandle {
     ///
     /// `srcC = srcC * (color / 255)`
     #[doc(alias = "SDL_SetSurfaceColorMod")]
-    fn set_rgb_mod_u8(&self, rm: RgbU8) {
+    fn set_rgb_mod_u8(self, rm: RgbU8) {
         unsafe { SDL_SetSurfaceColorMod(self.as_raw(), rm.r, rm.g, rm.b) };
     }
 
@@ -548,7 +548,7 @@ impl traits::ColorModU8 for SurfaceHandle {
     ///
     /// `srcA = srcA * (alpha / 255)`
     #[doc(alias = "SDL_SetSurfaceAlphaMod")]
-    fn set_alpha_mod_u8(&self, am: u8) {
+    fn set_alpha_mod_u8(self, am: u8) {
         unsafe { SDL_SetSurfaceAlphaMod(self.as_raw(), am) };
     }
 }

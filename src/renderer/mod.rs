@@ -907,7 +907,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 impl traits::BlendMode for RendererHandle<'_, '_, '_> {
     /// Get the blend mode used for drawing operations.
     #[doc(alias = "SDL_GetRenderDrawBlendMode")]
-    fn blend_mode(&self) -> BlendMode {
+    fn blend_mode(self) -> BlendMode {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetRenderDrawBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
@@ -925,7 +925,7 @@ impl traits::BlendMode for RendererHandle<'_, '_, '_> {
     /// If the blend mode is not supported, the closest supported mode is
     /// chosen.
     #[doc(alias = "SDL_SetRenderDrawBlendMode")]
-    fn set_blend_mode(&self, bm: BlendMode) {
+    fn set_blend_mode(self, bm: BlendMode) {
         unsafe {
             SDL_SetRenderDrawBlendMode(self.handle.as_ptr(), bm.to_sdl());
         }

@@ -130,7 +130,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
 impl traits::BlendMode for TextureHandle<'_, '_, '_, '_> {
     /// Get the blend mode used for texture copy operations.
     #[doc(alias = "SDL_GetTextureBlendMode")]
-    fn blend_mode(&self) -> BlendMode {
+    fn blend_mode(self) -> BlendMode {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetTextureBlendMode(self.handle.as_ptr(), ret.as_mut_ptr());
@@ -146,7 +146,7 @@ impl traits::BlendMode for TextureHandle<'_, '_, '_, '_> {
     /// If the blend mode is not supported, the closest supported mode is
     /// chosen.
     #[doc(alias = "SDL_SetTextureBlendMode")]
-    fn set_blend_mode(&self, bm: BlendMode) {
+    fn set_blend_mode(self, bm: BlendMode) {
         unsafe {
             SDL_SetTextureBlendMode(self.handle.as_ptr(), bm.to_sdl());
         }
@@ -157,7 +157,7 @@ impl traits::ColorModU8 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional color value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureColorMod")]
-    fn rgb_mod_u8(&self) -> RgbU8 {
+    fn rgb_mod_u8(self) -> RgbU8 {
         let mut ret = MaybeUninit::<RgbU8>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -177,7 +177,7 @@ impl traits::ColorModU8 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional alpha value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureAlphaMod")]
-    fn alpha_mod_u8(&self) -> u8 {
+    fn alpha_mod_u8(self) -> u8 {
         let mut ret = MaybeUninit::<u8>::uninit();
 
         // SAFETY: This function only reads struct fields.
@@ -200,7 +200,7 @@ impl traits::ColorModU8 for TextureHandle<'_, '_, '_, '_> {
     ///
     /// Color modulation is not always supported by the renderer.
     #[doc(alias = "SDL_SetTextureColorMod")]
-    fn set_rgb_mod_u8(&self, rm: RgbU8) {
+    fn set_rgb_mod_u8(self, rm: RgbU8) {
         unsafe {
             SDL_SetTextureColorMod(self.handle.as_ptr(), rm.r, rm.g, rm.b);
         }
@@ -219,7 +219,7 @@ impl traits::ColorModU8 for TextureHandle<'_, '_, '_, '_> {
     ///
     /// Alpha modulation is not always supported by the renderer.
     #[doc(alias = "SDL_SetTextureAlphaMod")]
-    fn set_alpha_mod_u8(&self, am: u8) {
+    fn set_alpha_mod_u8(self, am: u8) {
         unsafe {
             SDL_SetTextureAlphaMod(self.handle.as_ptr(), am);
         }
@@ -230,7 +230,7 @@ impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional color value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureColorModFloat")]
-    fn rgb_mod_f32(&self) -> RgbF32 {
+    fn rgb_mod_f32(self) -> RgbF32 {
         let mut ret = MaybeUninit::<RgbF32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -250,7 +250,7 @@ impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     /// Get the additional alpha value multiplied into render copy
     /// operations.
     #[doc(alias = "SDL_GetTextureAlphaModFloat")]
-    fn alpha_mod_f32(&self) -> f32 {
+    fn alpha_mod_f32(self) -> f32 {
         let mut ret = MaybeUninit::<f32>::uninit();
 
         // SAFETY: This function only reads struct fields.
@@ -273,7 +273,7 @@ impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     ///
     /// Color modulation is not always supported by the renderer.
     #[doc(alias = "SDL_SetTextureColorModFloat")]
-    fn set_rgb_mod_f32(&self, rm: RgbF32) {
+    fn set_rgb_mod_f32(self, rm: RgbF32) {
         unsafe {
             SDL_SetTextureColorModFloat(self.handle.as_ptr(), rm.r, rm.g, rm.b);
         }
@@ -292,7 +292,7 @@ impl traits::ColorModF32 for TextureHandle<'_, '_, '_, '_> {
     ///
     /// Alpha modulation is not always supported by the renderer.
     #[doc(alias = "SDL_SetTextureAlphaModFloat")]
-    fn set_alpha_mod_f32(&self, am: f32) {
+    fn set_alpha_mod_f32(self, am: f32) {
         unsafe {
             SDL_SetTextureAlphaModFloat(self.handle.as_ptr(), am);
         }
