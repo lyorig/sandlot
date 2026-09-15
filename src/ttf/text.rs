@@ -54,7 +54,26 @@ use crate::{
 };
 
 resource_new! {
-   /// A text object to be drawn using a text engine.
+    /// Representations of text with various properties.
+    ///
+    /// # Drawing text
+    ///
+    /// A [`Text`] cannot be drawn by itself.
+    ///
+    /// SDL_ttf has this weird API where you first assign an engine to a text object,
+    /// after which you have to call the correct drawing function. For instance:
+    /// 1. set a surface engine via [`TTF_SetTextEngine`]
+    /// 1. draw to a surface via [`TTF_DrawSurfaceText`]
+    ///
+    /// What if you, hmm, set a surface engine, but then call [`TTF_DrawRendererText`]?
+    /// I'm glad you asked, 'cause it's a one-way ticket to segfault land! So we can't
+    /// really simply expose a combination of `set_engine` and `draw_to_surface`.
+    ///
+    /// Sandlot (hopefully) removes all this hassle via special text objects.
+    /// These are named `<Name>Text` for every `<Name>Engine`, e.g. [`SurfaceText`] for [`SurfaceEngine`].
+    /// Their purpose is to own a [`Text`] object and create a scope where it can provably be used
+    /// with a given engine. With this design, a single [`Text`] can be moved between different special
+    /// text objects and prevent bugs at next to no overhead.
    pub struct Text<'ttf, 'font> : TTF_Text {
        marker: PhantomData<(Ref<'font, Font<'ttf>>)>,
    }
@@ -143,7 +162,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// The size of the text may change when the font or font style and size
     /// change.
     #[doc(alias = "TTF_GetTextSize")]
-    pub fn size(&self) -> PointI32 {
+    pub fn size(self) -> PointI32 {
         let mut ret = MaybeUninit::<PointI32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -155,7 +174,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
 
     /// Get the color of a text object, in 8-bit components.
     #[doc(alias = "TTF_GetTextColor")]
-    pub fn color_u8(&self) -> RgbaU8 {
+    pub fn color_u8(self) -> RgbaU8 {
         let mut col = MaybeUninit::<RgbaU8>::uninit();
         let ptr = col.as_mut_ptr();
 
@@ -178,7 +197,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// The default text color is white (255, 255, 255, 255).
     #[doc(alias = "TTF_SetTextColor")]
-    pub fn set_color_u8(&self, color: RgbaU8) -> Result<()> {
+    pub fn set_color_u8(self, color: RgbaU8) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColor(
                 self.as_raw(),
@@ -193,7 +212,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// Get the color of a text object, in floating-point components
     /// (normally in the range of 0-1).
     #[doc(alias = "TTF_GetTextColorFloat")]
-    pub fn color_f32(&self) -> RgbaF32 {
+    pub fn color_f32(self) -> RgbaF32 {
         let mut color = MaybeUninit::<RgbaF32>::uninit();
         let ptr = color.as_mut_ptr();
         unsafe {
@@ -215,7 +234,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// The default text color is white (1.0, 1.0, 1.0, 1.0).
     #[doc(alias = "TTF_SetTextColorFloat")]
-    pub fn set_color_f32(&self, color: RgbaF32) -> Result<()> {
+    pub fn set_color_f32(self, color: RgbaF32) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColorFloat(
                 self.as_raw(),
@@ -233,7 +252,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This defaults to the direction of the font used by the text object.
     #[doc(alias = "TTF_GetTextDirection")]
-    pub fn direction(&self) -> Direction {
+    pub fn direction(self) -> Direction {
         let dir = unsafe { TTF_GetTextDirection(self.as_raw()) };
         unsafe { Direction::from_sdl_unchecked(dir) }
     }
@@ -245,7 +264,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function only supports left-to-right text shaping if SDL_ttf was
     /// not built with HarfBuzz support.
     #[doc(alias = "TTF_SetTextDirection")]
-    pub fn set_direction(&self, direction: Direction) -> Result<()> {
+    pub fn set_direction(self, direction: Direction) -> Result<()> {
         to_result(unsafe { TTF_SetTextDirection(self.as_raw(), direction.to_sdl()) })
     }
 
@@ -260,7 +279,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This defaults to the script of the font used by the text object.
     #[doc(alias = "TTF_GetTextScript")]
-    pub fn script(&self) -> u32 {
+    pub fn script(self) -> u32 {
         unsafe { TTF_GetTextScript(self.as_raw()) }
     }
 
@@ -273,7 +292,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This function fails if SDL_ttf isn't built with HarfBuzz support.
     #[doc(alias = "TTF_SetTextScript")]
-    pub fn set_script(&self, script: u32) -> Result<()> {
+    pub fn set_script(self, script: u32) -> Result<()> {
         to_result(unsafe { TTF_SetTextScript(self.as_raw(), script) })
     }
 
@@ -281,7 +300,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// Returns the offset of the upper left corner of this text, in pixels.
     #[doc(alias = "TTF_GetTextPosition")]
-    pub fn position(&self) -> Result<PointI32> {
+    pub fn position(self) -> Result<PointI32> {
         let mut position = MaybeUninit::<PointI32>::uninit();
         let ptr = position.as_mut_ptr();
         to_result(unsafe {
@@ -303,7 +322,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextPosition")]
-    pub fn set_position(&self, position: PointI32) -> Result<()> {
+    pub fn set_position(self, position: PointI32) -> Result<()> {
         to_result(unsafe { TTF_SetTextPosition(self.as_raw(), position.x, position.y) })
     }
 
@@ -312,7 +331,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// Returns the maximum width in pixels, or 0 if the text is being wrapped
     /// on newline characters.
     #[doc(alias = "TTF_GetTextWrapWidth")]
-    pub fn wrap_width(&self) -> Result<i32> {
+    pub fn wrap_width(self) -> Result<i32> {
         let mut width = 0;
         to_result(unsafe { TTF_GetTextWrapWidth(self.as_raw(), &raw mut width) })?;
         Ok(width)
@@ -328,13 +347,13 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextWrapWidth")]
-    pub fn set_wrap_width(&self, width: i32) -> Result<()> {
+    pub fn set_wrap_width(self, width: i32) -> Result<()> {
         to_result(unsafe { TTF_SetTextWrapWidth(self.as_raw(), width) })
     }
 
     /// Return whether whitespace is shown when wrapping a text object.
     #[doc(alias = "TTF_TextWrapWhitespaceVisible")]
-    pub fn wrap_whitespace_visible(&self) -> bool {
+    pub fn wrap_whitespace_visible(self) -> bool {
         unsafe { TTF_TextWrapWhitespaceVisible(self.as_raw()) }
     }
 
@@ -350,13 +369,13 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextWrapWhitespaceVisible")]
-    pub fn set_wrap_whitespace_visible(&self, visible: bool) -> Result<()> {
+    pub fn set_wrap_whitespace_visible(self, visible: bool) -> Result<()> {
         to_result(unsafe { TTF_SetTextWrapWhitespaceVisible(self.as_raw(), visible) })
     }
 
     /// Get the font used by a text object.
     #[doc(alias = "TTF_GetTextFont")]
-    pub fn font(&self) -> Result<Ref<'font, Font<'ttf>>> {
+    pub fn font(self) -> Result<Ref<'font, Font<'ttf>>> {
         let font = unsafe { TTF_GetTextFont(self.as_raw()) };
         let handle = FontHandle::from_ptr(font).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
@@ -374,7 +393,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextFont")]
-    pub fn set_font(&self, font: Option<Ref<'font, Font<'ttf>>>) -> Result<()> {
+    pub fn set_font(self, font: Option<Ref<'font, Font<'ttf>>>) -> Result<()> {
         let font = font.map_or(std::ptr::null_mut(), |font| font.as_raw());
         to_result(unsafe { TTF_SetTextFont(self.as_raw(), font) })
     }
@@ -399,7 +418,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// string, this will return a zero length substring at the end of the
     /// text with the `TTF_SUBSTRING_TEXT_END` flag set.
     #[doc(alias = "TTF_GetTextSubString")]
-    pub fn substring(&self, offset: i32) -> Result<SubString> {
+    pub fn substring(self, offset: i32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
         to_result(unsafe { TTF_GetTextSubString(self.as_raw(), offset, value.as_mut_ptr()) })?;
         Ok(SubString::from(unsafe { value.assume_init() }))
@@ -418,7 +437,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// will return a zero length substring at the end of the text with the
     /// `TTF_SUBSTRING_TEXT_END` flag set.
     #[doc(alias = "TTF_GetTextSubStringForLine")]
-    pub fn substring_for_line(&self, line: i32) -> Result<SubString> {
+    pub fn substring_for_line(self, line: i32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
         to_result(unsafe { TTF_GetTextSubStringForLine(self.as_raw(), line, value.as_mut_ptr()) })?;
         Ok(SubString::from(unsafe { value.assume_init() }))
@@ -429,7 +448,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// The point is relative to the top left of the text and may be outside
     /// the bounds of the text area.
     #[doc(alias = "TTF_GetTextSubStringForPoint")]
-    pub fn substring_for_point(&self, point: PointI32) -> Result<SubString> {
+    pub fn substring_for_point(self, point: PointI32) -> Result<SubString> {
         let mut value = MaybeUninit::uninit();
         to_result(unsafe {
             TTF_GetTextSubStringForPoint(self.as_raw(), point.x, point.y, value.as_mut_ptr())
@@ -444,7 +463,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// If called at the start of the text, this will return a zero length
     /// substring with the `TTF_SUBSTRING_TEXT_START` flag set.
     #[doc(alias = "TTF_GetPreviousTextSubString")]
-    pub fn previous_substring(&self, value: SubString) -> Result<SubString> {
+    pub fn previous_substring(self, value: SubString) -> Result<SubString> {
         let mut previous = MaybeUninit::uninit();
         let value: TTF_SubString = unsafe { std::mem::transmute(value) };
         to_result(unsafe {
@@ -460,7 +479,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// If called at the end of the text, this will return a zero length
     /// substring with the `TTF_SUBSTRING_TEXT_END` flag set.
     #[doc(alias = "TTF_GetNextTextSubString")]
-    pub fn next_substring(&self, value: SubString) -> Result<SubString> {
+    pub fn next_substring(self, value: SubString) -> Result<SubString> {
         let mut next = MaybeUninit::uninit();
         let value: TTF_SubString = unsafe { std::mem::transmute(value) };
         to_result(unsafe {
@@ -475,7 +494,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// length of the range being queried, in bytes, or -1 for the remainder
     /// of the string.
     #[doc(alias = "TTF_GetTextSubStringsForRange")]
-    pub fn substrings_for_range(&self, offset: i32, length: i32) -> Result<Vec<SubString>> {
+    pub fn substrings_for_range(self, offset: i32, length: i32) -> Result<Vec<SubString>> {
         let mut count = 0;
         let values =
             unsafe { TTF_GetTextSubStringsForRange(self.as_raw(), offset, length, &raw mut count) };
@@ -502,7 +521,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// is rendered, but you can call this if you need more control over the
     /// timing of when the layout and text engine representation are updated.
     #[doc(alias = "TTF_UpdateText")]
-    pub fn update(&self) -> Result<()> {
+    pub fn update(self) -> Result<()> {
         to_result(unsafe { TTF_UpdateText(self.as_raw()) })
     }
 
@@ -512,7 +531,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This function may cause the internal text representation to be rebuilt.
     #[doc(alias = "TTF_SetTextEngine")]
-    fn set_engine<H, R>(&self, engine: Ref<R>) -> Result<()>
+    fn set_engine<H, R>(self, engine: Ref<R>) -> Result<()>
     where
         H: Handle<Raw = *mut TTF_TextEngine>,
         R: Resource<Handle = H>,
@@ -526,26 +545,9 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// Get the text engine used by a text object.
     #[doc(alias = "TTF_GetTextEngine")]
-    pub unsafe fn engine(&self) -> Result<NonNull<TTF_TextEngine>> {
+    pub unsafe fn engine(self) -> Result<NonNull<TTF_TextEngine>> {
         let eng = unsafe { TTF_GetTextEngine(self.as_raw()) };
         opt2res(NonNull::new(eng))
-    }
-}
-
-impl<'ttf, 'font> Text<'ttf, 'font> {
-    /// Create a text object from UTF-8 text and a text engine.
-    ///
-    /// The engine may be set afterwards via [`TextHandle::set_engine`].
-    #[doc(alias = "TTF_CreateText")]
-    fn new(font: Ref<'font, Font<'ttf>>, text: RtStr) -> Result<Self> {
-        Self::from_ptr(unsafe {
-            TTF_CreateText(
-                std::ptr::null_mut(),
-                font.as_raw(),
-                text.as_ptr(),
-                text.len(),
-            )
-        })
     }
 
     /// Set the UTF-8 text used by a text object.
@@ -555,7 +557,7 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextString")]
-    pub fn set_string(&self, text: RtStr) -> Result<()> {
+    pub fn set_string(self, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_SetTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -571,7 +573,7 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_InsertTextString")]
-    pub fn insert_string(&self, offset: i32, text: RtStr) -> Result<()> {
+    pub fn insert_string(self, offset: i32, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_InsertTextString(self.as_raw(), offset, text.as_ptr(), text.len()) })
     }
 
@@ -582,7 +584,7 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_AppendTextString")]
-    pub fn append_string(&self, text: RtStr) -> Result<()> {
+    pub fn append_string(self, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_AppendTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -599,8 +601,23 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_DeleteTextString")]
-    pub fn delete_string(&self, offset: i32, length: i32) -> Result<()> {
+    pub fn delete_string(self, offset: i32, length: i32) -> Result<()> {
         to_result(unsafe { TTF_DeleteTextString(self.as_raw(), offset, length) })
+    }
+}
+
+impl<'ttf, 'font> Text<'ttf, 'font> {
+    /// Create a text object from UTF-8 text.
+    #[doc(alias = "TTF_CreateText")]
+    pub fn new(font: Ref<'font, Font<'ttf>>, text: RtStr) -> Result<Self> {
+        Self::from_ptr(unsafe {
+            TTF_CreateText(
+                std::ptr::null_mut(),
+                font.as_raw(),
+                text.as_ptr(),
+                text.len(),
+            )
+        })
     }
 }
 
@@ -613,17 +630,22 @@ impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
     RendererText<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
 {
     pub fn new(
-        font: Ref<'font, Font<'ttf>>,
-        text: RtStr,
+        text: Text<'ttf, 'font>,
         eng: Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>,
     ) -> Result<Self> {
-        let text = Text::new(font, text)?;
         text.set_engine(eng)?;
 
         Ok(Self {
             text,
             marker: PhantomData,
         })
+    }
+
+    /// Consumes `self`, returning the underlying [`Text`].
+    ///
+    /// This makes it possible to use it with another text-with-renderer instance.
+    pub fn into_text(self) -> Text<'ttf, 'font> {
+        self.text
     }
 
     /// Draw text to an SDL renderer.
@@ -657,12 +679,7 @@ pub struct SurfaceText<'ttf, 'font, 'eng> {
 }
 
 impl<'ttf, 'font, 'eng> SurfaceText<'ttf, 'font, 'eng> {
-    pub fn new(
-        font: Ref<'font, Font<'ttf>>,
-        text: RtStr,
-        eng: Ref<'eng, SurfaceEngine>,
-    ) -> Result<Self> {
-        let text = Text::new(font, text)?;
+    pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, SurfaceEngine>) -> Result<Self> {
         text.set_engine(eng)?;
 
         Ok(Self {
@@ -671,17 +688,19 @@ impl<'ttf, 'font, 'eng> SurfaceText<'ttf, 'font, 'eng> {
         })
     }
 
+    /// Consumes `self`, returning the underlying [`Text`].
+    ///
+    /// This makes it possible to use it with another text-with-renderer instance.
+    pub fn into_text(self) -> Text<'ttf, 'font> {
+        self.text
+    }
+
     /// Draw text to an SDL surface.
     ///
     /// `pos` is the coordinate in pixels, positive from the top left edge
     /// towards the bottom right.
-    ///
-    /// # Remarks
-    ///
-    /// The text must have been created using a surface text engine, i.e.
-    /// [`Text::new`] combined with [`TextHandle::set_engine`] and [`SurfaceEngine::new`](super::SurfaceEngine::new).
     #[doc(alias = "TTF_DrawSurfaceText")]
-    fn draw(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
+    pub fn draw(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
         to_result(unsafe { TTF_DrawSurfaceText(self.as_raw(), pos.x, pos.y, surf.as_raw()) })
     }
 }
@@ -701,17 +720,22 @@ pub struct GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
 
 impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
     pub fn new(
-        font: Ref<'font, Font<'ttf>>,
-        text: RtStr,
+        text: Text<'ttf, 'font>,
         eng: Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>,
     ) -> Result<Self> {
-        let text = Text::new(font, text)?;
         text.set_engine(eng)?;
 
         Ok(Self {
             text,
             marker: PhantomData,
         })
+    }
+
+    /// Consumes `self`, returning the underlying [`Text`].
+    ///
+    /// This makes it possible to use it with another text-with-renderer instance.
+    pub fn into_text(self) -> Text<'ttf, 'font> {
+        self.text
     }
 
     /// # Safety
