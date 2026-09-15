@@ -1,23 +1,23 @@
 use std::{ffi::c_char, marker::PhantomData};
 
-/// A string that the `TTF_RenderText*` functions can safely read.
+/// A string that certain TTF functions can safely read.
 ///
-/// The `TTF_RenderText*` functions take a pointer and a byte length.
+/// Many TTF functions take a pointer and a byte length.
 /// A length of zero means that the pointer refers to a nul-terminated string.
-/// As Rust strings do not have a nul terminator, an empty `&str` would make the
+/// As Rust strings do not have a nul terminator, an empty [`&str`](str) would make the
 /// function read past the end of the string. This struct prevents that error.
 ///
 /// Construct a "TTF-ready" string from a `&str`:
-/// - [`RtStr::new`] checks for an empty string. In that case, the pointer it set to `c""`.
-/// - [`RtStr::new_unchecked`] skips the check. Use when you know that the string is not empty.
+/// - [`TtfStr::new`] checks for an empty string. In that case, the pointer it set to `c""`.
+/// - [`TtfStr::new_unchecked`] skips the check. Use when you know that the string is not empty.
 #[derive(Clone, Copy)]
-pub struct RtStr<'a> {
+pub struct TtfStr<'a> {
     ptr: *const c_char,
     len: usize,
     marker: PhantomData<&'a str>,
 }
 
-impl<'a> RtStr<'a> {
+impl<'a> TtfStr<'a> {
     pub const fn new(s: &'a str) -> Self {
         let len = s.len();
         let ptr = if len == 0 {

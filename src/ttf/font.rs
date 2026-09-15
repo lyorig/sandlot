@@ -8,7 +8,7 @@ use crate::{
     init,
     resource::resource_new,
     surface::Surface,
-    ttf::{Context, RtStr},
+    ttf::{Context, TtfStr},
     util::c_ptr_to_str,
 };
 
@@ -142,7 +142,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_shaded`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Blended")]
-    pub fn render_text_blended(self, text: RtStr, color: RgbaU8) -> Result<Surface> {
+    pub fn render_text_blended(self, text: TtfStr, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Blended(
                 self.handle.as_ptr(),
@@ -172,7 +172,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_shaded`], and
     /// [`FontHandle::render_text_blended`].
     #[doc(alias = "TTF_RenderText_LCD")]
-    pub fn render_text_lcd(self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_text_lcd(self, text: TtfStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_LCD(
                 self.handle.as_ptr(),
@@ -204,7 +204,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_blended`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Shaded")]
-    pub fn render_text_shaded(self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_text_shaded(self, text: TtfStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Shaded(
                 self.handle.as_ptr(),
@@ -236,7 +236,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_blended`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Solid")]
-    pub fn render_text_solid(self, text: RtStr, color: RgbaU8) -> Result<Surface> {
+    pub fn render_text_solid(self, text: TtfStr, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Solid(
                 self.handle.as_ptr(),
@@ -266,7 +266,7 @@ impl<'ttf> FontHandle<'ttf> {
     #[doc(alias = "TTF_RenderText_Blended_Wrapped")]
     pub fn render_text_blended_wrapped(
         self,
-        text: RtStr,
+        text: TtfStr,
         color: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {
@@ -301,7 +301,7 @@ impl<'ttf> FontHandle<'ttf> {
     #[doc(alias = "TTF_RenderText_LCD_Wrapped")]
     pub fn render_text_lcd_wrapped(
         self,
-        text: RtStr,
+        text: TtfStr,
         fg: RgbaU8,
         bg: RgbaU8,
         wrap_length: i32,
@@ -339,7 +339,7 @@ impl<'ttf> FontHandle<'ttf> {
     #[doc(alias = "TTF_RenderText_Shaded_Wrapped")]
     pub fn render_text_shaded_wrapped(
         self,
-        text: RtStr,
+        text: TtfStr,
         fg: RgbaU8,
         bg: RgbaU8,
         wrap_length: i32,
@@ -377,7 +377,7 @@ impl<'ttf> FontHandle<'ttf> {
     #[doc(alias = "TTF_RenderText_Solid_Wrapped")]
     pub fn render_text_solid_wrapped(
         self,
-        text: RtStr,
+        text: TtfStr,
         color: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {

@@ -49,7 +49,7 @@ use crate::{
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource, resource_new},
     surface::Surface,
-    ttf::{Font, FontHandle, GpuEngine, RendererEngine, RtStr, SurfaceEngine},
+    ttf::{Font, FontHandle, GpuEngine, RendererEngine, TtfStr, SurfaceEngine},
     util::{impl_enum_transmute, opt2res, to_result},
 };
 
@@ -66,10 +66,10 @@ resource_new! {
     /// 1. draw to a surface via [`TTF_DrawSurfaceText`]
     ///
     /// What if you, hmm, set a surface engine, but then call [`TTF_DrawRendererText`]?
-    /// I'm glad you asked, 'cause it's a one-way ticket to segfault land! So we can't
+    /// I'm glad you asked, 'cause that's a one-way ticket to segfault land! So we can't
     /// really simply expose a combination of `set_engine` and `draw_to_surface`.
     ///
-    /// Sandlot (hopefully) removes all this hassle via special text objects.
+    /// Sandlot (hopefully) removes all this hassle via "engine'd text objects" (I'm not good with naming things).
     /// These are named `<Name>Text` for every `<Name>Engine`, e.g. [`SurfaceText`] for [`SurfaceEngine`].
     /// Their purpose is to own a [`Text`] object and create a scope where it can provably be used
     /// with a given engine. With this design, a single [`Text`] can be moved between different special
@@ -557,7 +557,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextString")]
-    pub fn set_string(self, text: RtStr) -> Result<()> {
+    pub fn set_string(self, text: TtfStr) -> Result<()> {
         to_result(unsafe { TTF_SetTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -573,7 +573,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_InsertTextString")]
-    pub fn insert_string(self, offset: i32, text: RtStr) -> Result<()> {
+    pub fn insert_string(self, offset: i32, text: TtfStr) -> Result<()> {
         to_result(unsafe { TTF_InsertTextString(self.as_raw(), offset, text.as_ptr(), text.len()) })
     }
 
@@ -584,7 +584,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_AppendTextString")]
-    pub fn append_string(self, text: RtStr) -> Result<()> {
+    pub fn append_string(self, text: TtfStr) -> Result<()> {
         to_result(unsafe { TTF_AppendTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -609,7 +609,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
 impl<'ttf, 'font> Text<'ttf, 'font> {
     /// Create a text object from UTF-8 text.
     #[doc(alias = "TTF_CreateText")]
-    pub fn new(font: Ref<'font, Font<'ttf>>, text: RtStr) -> Result<Self> {
+    pub fn new(font: Ref<'font, Font<'ttf>>, text: TtfStr) -> Result<Self> {
         Self::from_ptr(unsafe {
             TTF_CreateText(
                 std::ptr::null_mut(),

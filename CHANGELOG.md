@@ -14,8 +14,12 @@
   - almost all handle methods take `self` by value
   - TTF objects and builders have added lifetimes
   - TTF `Text` cannot be drawn by itself (needs engine'd text object)
-  - `EventIter` is now tied to the `Events` subsystem
-  - Several functions have been moved to subsystems due to lifetime safety (display, clipboard)
+  - TTF `RtStr` has been renamed to `TtfStr`
+  - `EventIter` is tied to the `Events` subsystem
+  - several functions have been moved to subsystems due to lifetime safety:
+    - display getters
+    - everything from `sandlot::clipboard` (which has been removed)
+    - screen saver functions from `sandlot::window`
 - Docs
   - Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
   - `Self` no longer used in links

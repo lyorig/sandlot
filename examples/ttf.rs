@@ -12,8 +12,8 @@ use sandlot::{
     window::{Window, WindowFlags},
 };
 
-fn rt(s: &str) -> RtStr<'_> {
-    unsafe { RtStr::new_unchecked(s) }
+fn rt(s: &str) -> TtfStr<'_> {
+    unsafe { TtfStr::new_unchecked(s) }
 }
 
 fn run() -> Result<()> {
