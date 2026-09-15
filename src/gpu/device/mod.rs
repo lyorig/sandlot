@@ -227,7 +227,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// versions. The returned view is borrowed from this device and provides
     /// access to the device and driver information exposed by SDL.
     #[doc(alias = "SDL_GetGPUDeviceProperties")]
-    pub fn properties(&self) -> DeviceProperties<'_> {
+    pub fn properties(&self) -> DeviceProperties<'ctx, 'vid, '_> {
         unsafe {
             let id = SDL_GetGPUDeviceProperties(self.handle.as_ptr());
             let handle = PropertiesHandle::from_id(id).unwrap_unchecked();

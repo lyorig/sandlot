@@ -232,7 +232,7 @@ impl Context {
 
     /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
     ///
-    /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
+    /// This metadata is stored in the global properties (see [`ContextHandle::global_properties`]).
     /// Although it **doesn't seem to be used** by SDL as of version 3.4.16, specifying it is
     /// still recommended, as future versions may make use of it.
     ///

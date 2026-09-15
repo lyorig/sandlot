@@ -1328,7 +1328,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// `SDL_PROP_WINDOW_WAYLAND_WINDOW_ID_STRING`, which sdl3-sys does not
     /// expose.
     #[doc(alias = "SDL_GetWindowProperties")]
-    pub fn properties(&self) -> WindowProperties<'_> {
+    pub fn properties(&self) -> WindowProperties<'ctx, 'vid, '_> {
         unsafe {
             let id = SDL_GetWindowProperties(self.handle.as_ptr());
             let handle = PropertiesHandle::from_id(id).unwrap_unchecked();

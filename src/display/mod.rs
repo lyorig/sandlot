@@ -10,7 +10,7 @@
 //! - [x] SDL_GetDisplayForPoint
 //! - [x] SDL_GetDisplayForRect
 //! - [x] SDL_GetDisplayName
-//! - [ ] SDL_GetDisplayProperties
+//! - [x] SDL_GetDisplayProperties
 //! - [x] SDL_GetDisplays
 //! - [x] SDL_GetDisplayUsableBounds
 //! - [x] SDL_GetFullscreenDisplayModes
@@ -22,19 +22,23 @@ use crate::{
     boxed::Box,
     error::Error,
     init,
+    properties::PropertiesHandle,
     rect::{PointI32, RectI32},
-    util::{boolenum, impl_enum_transmute, opt2res_map},
+    resource::Ref,
+    util::{boolenum, impl_enum_transmute, mod_reexport, opt2res_map},
 };
 
 use sdl3_sys::video::*;
 use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, num::NonZero, ptr::NonNull};
+
+mod_reexport!(properties);
 
 boolenum!(
     /// Whether to include high-density display modes in enumeration.
     IncludeHighDensityModes
 );
 
-/// Display orientation values; the way a display is rotated.
+/// The way a display is rotated.
 #[repr(i32)]
 #[derive(Clone, Copy, Debug)]
 pub enum DisplayOrientation {
@@ -295,5 +299,17 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
                 Err(Error::current())
             }
         }
+    }
+
+    /// Get the properties associated with this display.
+    #[doc(alias = "SDL_GetDisplayProperties")]
+    pub fn properties(&self) -> DisplayProperties<'ctx, 'vid, '_> {
+        let r = unsafe {
+            let id = SDL_GetDisplayProperties(self.id());
+            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+            Ref::from_handle(handle)
+        };
+
+        DisplayProperties::new(r)
     }
 }

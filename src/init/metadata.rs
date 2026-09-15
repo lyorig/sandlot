@@ -7,9 +7,13 @@ use sdl3_sys::init::*;
 
 use crate::init::{AppKind, Context};
 
+// doc-only
+#[expect(unused_imports)]
+use crate::init::ContextHandle;
+
 /// Read-only app metadata, as documented by [`SDL_GetAppMetadataProperty`].
 ///
-/// The metadata lives in [`Properties::global`](crate::properties::Properties::global), so this type is zero-sized
+/// The metadata lives in the global properties (see [`ContextHandle::global_properties`]), so this type is zero-sized
 /// and only borrows the [`Context`] it was obtained from.
 #[doc(alias = "SDL_GetAppMetadataProperty")]
 #[derive(Clone, Copy)]

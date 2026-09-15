@@ -314,7 +314,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// - the OpenGL texture target
     /// - `SDL_PROP_TEXTURE_OPENGL_TEX_{W,H}_FLOAT`
     #[doc(alias = "SDL_GetTextureProperties")]
-    pub fn properties(&self) -> TextureProperties<'_> {
+    pub fn properties(&self) -> TextureProperties<'ctx, 'vid, 'wnd, 'rnd, '_> {
         unsafe {
             let id = SDL_GetTextureProperties(self.handle.as_ptr());
             let handle = PropertiesHandle::from_id(id).unwrap_unchecked();

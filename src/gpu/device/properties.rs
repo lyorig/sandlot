@@ -1,23 +1,27 @@
-use std::ffi::{CStr, c_char};
+use std::{
+    ffi::{CStr, c_char},
+    marker::PhantomData,
+};
 
 use sdl3_sys::gpu::*;
 
-use crate::{
-    properties::{Properties, PropertiesHandle},
-    resource::Ref,
-};
+use crate::{gpu::Device, properties::Properties, resource::Ref};
 
 #[derive(Clone, Copy)]
-pub struct DeviceProperties<'a> {
-    inner: Ref<'a, Properties>,
+pub struct DeviceProperties<'ctx, 'vid, 'dev> {
+    inner: Ref<'dev, Properties>,
+    marker: PhantomData<Ref<'dev, Device<'ctx, 'vid>>>,
 }
 
-impl<'a> DeviceProperties<'a> {
-    pub(super) fn new(inner: Ref<'a, Properties>) -> Self {
-        Self { inner }
+impl<'ctx, 'vid, 'dev> DeviceProperties<'ctx, 'vid, 'dev> {
+    pub(super) fn new(inner: Ref<'dev, Properties>) -> Self {
+        Self {
+            inner,
+            marker: PhantomData,
+        }
     }
 
-    fn get(&self, key: *const c_char) -> Option<&str> {
+    fn get(self, key: *const c_char) -> Option<&'dev str> {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
         if s.is_null() {
             None
@@ -30,30 +34,22 @@ impl<'a> DeviceProperties<'a> {
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_NAME_STRING")]
-    pub fn device_name(&self) -> Option<&str> {
+    pub fn device_name(self) -> Option<&'dev str> {
         self.get(SDL_PROP_GPU_DEVICE_NAME_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING")]
-    pub fn driver_name(&self) -> Option<&str> {
+    pub fn driver_name(self) -> Option<&'dev str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING")]
-    pub fn driver_version(&self) -> Option<&str> {
+    pub fn driver_version(self) -> Option<&'dev str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING")]
-    pub fn driver_info(&self) -> Option<&str> {
+    pub fn driver_info(self) -> Option<&'dev str> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING)
-    }
-}
-
-impl std::ops::Deref for DeviceProperties<'_> {
-    type Target = PropertiesHandle;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
     }
 }

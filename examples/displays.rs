@@ -1,5 +1,12 @@
 use sandlot::{Result, init::Context, init::Video};
 
+fn print_optional_property<T: std::fmt::Display>(name: &str, opt: Option<T>) {
+    match opt {
+        None => println!("- {} = <unavailable>", name),
+        Some(t) => println!("- {} = {}", name, t),
+    }
+}
+
 fn run() -> Result<()> {
     let ctx = Context::init()?;
     let vid = Video::init(ctx.as_ref())?;
@@ -12,7 +19,23 @@ fn run() -> Result<()> {
             disp.bounds()?,
             disp.usable_bounds()?,
             disp.content_scale()?
-        )
+        );
+
+        let props = disp.properties();
+        println!("Display properties:");
+        print_optional_property("HDR enabled", Some(props.hdr_enabled()));
+        print_optional_property(
+            "KMS/DRM panel orientation",
+            props.kmsdrm_panel_orientation(),
+        );
+        print_optional_property(
+            "Wayland `wl_output`",
+            props.wayland_wl_output().map(|p| format!("{p:p}")),
+        );
+        print_optional_property(
+            "Windows `HMONITOR`",
+            props.windows_hmonitor().map(|p| format!("{p:p}")),
+        );
     }
 
     let p = vid.display_primary()?;
