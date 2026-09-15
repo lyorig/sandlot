@@ -184,7 +184,7 @@ impl<'ctx, 'vid, 'dev> GraphicsPipelineHandle<'ctx, 'vid, 'dev> {
     /// `render_pass` is the render pass that will use the pipeline. A graphics
     /// pipeline must be bound before making draw calls.
     #[doc(alias = "SDL_BindGPUGraphicsPipeline")]
-    pub fn bind(&self, render_pass: Ref<RenderPass>) {
+    pub fn bind(self, render_pass: Ref<RenderPass>) {
         unsafe { SDL_BindGPUGraphicsPipeline(render_pass.as_raw(), self.handle.as_ptr()) };
     }
 }

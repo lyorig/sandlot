@@ -170,7 +170,7 @@ impl TransferBufferHandle {
     /// Returns [`Err`] if the buffer cannot be mapped. Call [`TransferBufferHandle::unmap`]
     /// before encoding upload commands that use the buffer.
     #[doc(alias = "SDL_MapGPUTransferBuffer")]
-    pub fn map(&self, device: Ref<Device>, cycle: Cycle) -> Result<NonNull<u8>> {
+    pub fn map(self, device: Ref<Device>, cycle: Cycle) -> Result<NonNull<u8>> {
         let ptr = unsafe { SDL_MapGPUTransferBuffer(device.as_raw(), self.as_raw(), cycle.into()) };
         NonNull::new(ptr.cast()).ok_or_else(Error::current)
     }
@@ -180,7 +180,7 @@ impl TransferBufferHandle {
     /// `device` is the GPU device that owns the buffer. The mapped memory must
     /// be unmapped before encoding upload commands that use it.
     #[doc(alias = "SDL_UnmapGPUTransferBuffer")]
-    pub fn unmap(&self, device: Ref<Device>) {
+    pub fn unmap(self, device: Ref<Device>) {
         unsafe { SDL_UnmapGPUTransferBuffer(device.as_raw(), self.as_raw()) };
     }
 }

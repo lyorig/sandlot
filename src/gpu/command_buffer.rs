@@ -247,7 +247,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     ///
     /// This operation must be recorded outside any render, compute, or copy pass.
     #[doc(alias = "SDL_GenerateMipmapsForGPUTexture")]
-    pub fn generate_mipmaps(&self, texture: Ref<Texture<'ctx, 'vid, 'dev>>) {
+    pub fn generate_mipmaps(self, texture: Ref<Texture<'ctx, 'vid, 'dev>>) {
         unsafe { SDL_GenerateMipmapsForGPUTexture(self.handle.as_ptr(), texture.as_raw()) }
     }
 
@@ -256,7 +256,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// `text` is the label to insert. On Direct3D 12, this requires
     /// `WinPixEventRuntime.dll` to be available in `PATH` or beside the executable.
     #[doc(alias = "SDL_InsertGPUDebugLabel")]
-    pub fn insert_debug_label(&self, text: &CStr) {
+    pub fn insert_debug_label(self, text: &CStr) {
         unsafe { SDL_InsertGPUDebugLabel(self.handle.as_ptr(), text.as_ptr()) }
     }
 
@@ -268,7 +268,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// On some backends, groups recorded inside a pass are scoped to that native
     /// pass, so they should be popped in the same pass.
     #[doc(alias = "SDL_PushGPUDebugGroup")]
-    pub fn push_debug_group(&self, name: &CStr) {
+    pub fn push_debug_group(self, name: &CStr) {
         unsafe { SDL_PushGPUDebugGroup(self.handle.as_ptr(), name.as_ptr()) }
     }
 
@@ -277,7 +277,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// On Direct3D 12, this requires `WinPixEventRuntime.dll` to be available in
     /// `PATH` or beside the executable.
     #[doc(alias = "SDL_PopGPUDebugGroup")]
-    pub fn pop_debug_group(&self) {
+    pub fn pop_debug_group(self) {
         unsafe { SDL_PopGPUDebugGroup(self.handle.as_ptr()) }
     }
 
@@ -288,7 +288,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// data must follow `std140` layout rules; `vec3` and `vec4` fields must be
     /// aligned to 16-byte boundaries.
     #[doc(alias = "SDL_PushGPUVertexUniformData")]
-    pub fn push_vertex_uniform_data(&self, slot_index: u32, data: &[u8]) {
+    pub fn push_vertex_uniform_data(self, slot_index: u32, data: &[u8]) {
         unsafe {
             SDL_PushGPUVertexUniformData(
                 self.handle.as_ptr(),
@@ -306,7 +306,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// data must follow `std140` layout rules; `vec3` and `vec4` fields must be
     /// aligned to 16-byte boundaries.
     #[doc(alias = "SDL_PushGPUFragmentUniformData")]
-    pub fn push_fragment_uniform_data(&self, slot_index: u32, data: &[u8]) {
+    pub fn push_fragment_uniform_data(self, slot_index: u32, data: &[u8]) {
         unsafe {
             SDL_PushGPUFragmentUniformData(
                 self.handle.as_ptr(),
@@ -323,7 +323,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// write. The data must follow `std140` layout rules; `vec3` and `vec4`
     /// fields must be aligned to 16-byte boundaries.
     #[doc(alias = "SDL_PushGPUComputeUniformData")]
-    pub fn push_compute_uniform_data(&self, slot_index: u32, data: &[u8]) {
+    pub fn push_compute_uniform_data(self, slot_index: u32, data: &[u8]) {
         unsafe {
             SDL_PushGPUComputeUniformData(
                 self.handle.as_ptr(),
@@ -339,7 +339,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// `info` contains the source, destination, load, clear, flip, filter, and
     /// cycling parameters. This operation must be recorded outside any pass.
     #[doc(alias = "SDL_BlitGPUTexture")]
-    pub fn blit(&self, info: &BlitInfo) {
+    pub fn blit(self, info: &BlitInfo) {
         unsafe { SDL_BlitGPUTexture(self.handle.as_ptr(), &raw const info.0) }
     }
 }

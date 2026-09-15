@@ -120,7 +120,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// `pipeline` is the compute pipeline to bind. A pipeline must be bound
     /// before dispatching compute work.
     #[doc(alias = "SDL_BindGPUComputePipeline")]
-    pub fn bind(&self, pipeline: Ref<ComputePipeline>) {
+    pub fn bind(self, pipeline: Ref<ComputePipeline>) {
         unsafe { SDL_BindGPUComputePipeline(self.handle.as_ptr(), pipeline.as_raw()) };
     }
 
@@ -130,7 +130,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// consecutive slots from there. The textures must have been created with
     /// [`crate::gpu::texture::TextureUsageFlags::SAMPLER`].
     #[doc(alias = "SDL_BindGPUComputeSamplers")]
-    pub fn bind_samplers(&self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
+    pub fn bind_samplers(self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
         unsafe {
             SDL_BindGPUComputeSamplers(
                 self.handle.as_ptr(),
@@ -148,7 +148,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// created with [`crate::gpu::texture::TextureUsageFlags::COMPUTE_STORAGE_READ`].
     #[doc(alias = "SDL_BindGPUComputeStorageTextures")]
     pub fn bind_storage_textures(
-        &self,
+        self,
         first_slot: u32,
         textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
     ) {
@@ -168,7 +168,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// supplies consecutive slots from there. Each buffer must have been
     /// created with [`crate::gpu::buffer::BufferUsageFlags::COMPUTE_STORAGE_READ`].
     #[doc(alias = "SDL_BindGPUComputeStorageBuffers")]
-    pub fn bind_storage_buffers(&self, first_slot: u32, buffers: &[Ref<Buffer>]) {
+    pub fn bind_storage_buffers(self, first_slot: u32, buffers: &[Ref<Buffer>]) {
         unsafe {
             SDL_BindGPUComputeStorageBuffers(
                 self.handle.as_ptr(),
@@ -186,7 +186,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// writing the same resource region have no guaranteed write order; end the
     /// pass and begin another one when ordering is required.
     #[doc(alias = "SDL_DispatchGPUCompute")]
-    pub fn dispatch(&self, (x, y, z): (u32, u32, u32)) {
+    pub fn dispatch(self, (x, y, z): (u32, u32, u32)) {
         unsafe { SDL_DispatchGPUCompute(self.handle.as_ptr(), x, y, z) }
     }
 
@@ -198,7 +198,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// no guaranteed write order; end the pass and begin another one when
     /// ordering is required.
     #[doc(alias = "SDL_DispatchGPUComputeIndirect")]
-    pub fn dispatch_indirect(&self, buffer: Ref<Buffer>, offset: u32) {
+    pub fn dispatch_indirect(self, buffer: Ref<Buffer>, offset: u32) {
         unsafe {
             SDL_DispatchGPUComputeIndirect(self.handle.as_ptr(), buffer.as_raw(), offset);
         }

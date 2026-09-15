@@ -94,7 +94,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
 
     /// Returns the "raw" SDL handle type. Intended for interfacing with
     /// SDL display functions.
-    pub fn id(&self) -> SDL_DisplayID {
+    pub fn id(self) -> SDL_DisplayID {
         unsafe { std::mem::transmute(self.id) }
     }
 
@@ -118,7 +118,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// The primary display is often located at (0,0), but may be placed at a
     /// different location depending on monitor layout.
     #[doc(alias = "SDL_GetDisplayBounds")]
-    pub fn bounds(&self) -> Result<RectI32> {
+    pub fn bounds(self) -> Result<RectI32> {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             if SDL_GetDisplayBounds(self.id(), ret.as_mut_ptr()) {
@@ -142,7 +142,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// areas, so these are good guidelines for the maximum space available
     /// to a non-fullscreen window.
     #[doc(alias = "SDL_GetDisplayUsableBounds")]
-    pub fn usable_bounds(&self) -> Result<RectI32> {
+    pub fn usable_bounds(self) -> Result<RectI32> {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             if SDL_GetDisplayUsableBounds(self.id(), ret.as_mut_ptr()) {
@@ -164,7 +164,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     ///
     /// The returned pointer is managed by SDL and is owned by the display.
     #[doc(alias = "SDL_GetCurrentDisplayMode")]
-    pub fn current_mode(&self) -> Result<NonNull<SDL_DisplayMode>> {
+    pub fn current_mode(self) -> Result<NonNull<SDL_DisplayMode>> {
         let ptr = unsafe { SDL_GetCurrentDisplayMode(self.id()) };
         if ptr.is_null() {
             Err(Error::current())
@@ -184,7 +184,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     ///
     /// The returned pointer is managed by SDL and is owned by the display.
     #[doc(alias = "SDL_GetDesktopDisplayMode")]
-    pub fn desktop_mode(&self) -> Result<NonNull<SDL_DisplayMode>> {
+    pub fn desktop_mode(self) -> Result<NonNull<SDL_DisplayMode>> {
         let ptr = unsafe { SDL_GetDesktopDisplayMode(self.id()) };
         if ptr.is_null() {
             Err(Error::current())
@@ -206,7 +206,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// - refresh rate -> highest to lowest
     /// - pixel density -> lowest to highest
     #[doc(alias = "SDL_GetFullscreenDisplayModes")]
-    pub fn fullscreen_modes(&self) -> Result<Box<[NonNull<SDL_DisplayMode>]>> {
+    pub fn fullscreen_modes(self) -> Result<Box<[NonNull<SDL_DisplayMode>]>> {
         let mut count = MaybeUninit::uninit();
         let ptr = unsafe { SDL_GetFullscreenDisplayModes(self.id(), count.as_mut_ptr()) };
 
@@ -231,7 +231,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// particularly on high-DPI and/or multi-monitor desktop
     /// configurations.
     #[doc(alias = "SDL_GetDisplayContentScale")]
-    pub fn content_scale(&self) -> Result<f32> {
+    pub fn content_scale(self) -> Result<f32> {
         let ret = unsafe { SDL_GetDisplayContentScale(self.id()) };
         if ret == 0. {
             Err(Error::current())
@@ -244,7 +244,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     ///
     /// Returns [`None`] if the orientation isn't available.
     #[doc(alias = "SDL_GetCurrentDisplayOrientation")]
-    pub fn current_orientation(&self) -> Option<DisplayOrientation> {
+    pub fn current_orientation(self) -> Option<DisplayOrientation> {
         let or = unsafe { SDL_GetCurrentDisplayOrientation(self.id()) };
         DisplayOrientation::from_sdl(or)
     }
@@ -253,7 +253,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     ///
     /// Returns [`None`] if the orientation isn't available.
     #[doc(alias = "SDL_GetNaturalDisplayOrientation")]
-    pub fn natural_orientation(&self) -> Option<DisplayOrientation> {
+    pub fn natural_orientation(self) -> Option<DisplayOrientation> {
         let or = unsafe { SDL_GetNaturalDisplayOrientation(self.id()) };
         DisplayOrientation::from_sdl(or)
     }
@@ -278,7 +278,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     /// too small, an error is returned.
     #[doc(alias = "SDL_GetClosestFullscreenDisplayMode")]
     pub fn closest_fullscreen_mode(
-        &self,
+        self,
         size: PointI32,
         refresh_rate: f32,
         ihdm: IncludeHighDensityModes,

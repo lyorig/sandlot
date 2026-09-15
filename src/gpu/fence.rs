@@ -26,13 +26,13 @@ impl<'ctx, 'vid, 'dev> Fence<'ctx, 'vid, 'dev> {
     }
 }
 
-impl<'ctx, 'vid, 'dev> Fence<'ctx, 'vid, 'dev> {
+impl<'ctx, 'vid, 'dev> FenceHandle<'ctx, 'vid, 'dev> {
     /// Check whether this fence has been signaled by the GPU.
     ///
     /// `device` is the GPU device associated with the fence. Returns `true` if
     /// the submitted work has signaled the fence, or `false` otherwise.
     #[doc(alias = "SDL_QueryGPUFence")]
-    pub fn is_signaled(&self, device: Ref<'dev, Device<'ctx, 'vid>>) -> bool {
+    pub fn is_signaled(self, device: Ref<'dev, Device<'ctx, 'vid>>) -> bool {
         unsafe { SDL_QueryGPUFence(device.as_raw(), self.as_raw()) }
     }
 }

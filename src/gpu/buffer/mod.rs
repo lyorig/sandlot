@@ -244,7 +244,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// Subsequent commands can assume that the upload has finished.
     #[doc(alias = "SDL_UploadToGPUBuffer")]
     pub fn upload(
-        &self,
+        self,
         copy_pass: Ref<CopyPass>,
         src: &TransferBufferLocation,
         dst: &BufferRegion,
@@ -270,7 +270,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// fence is signaled.
     #[doc(alias = "SDL_DownloadFromGPUBuffer")]
     pub fn download(
-        &self,
+        self,
         copy_pass: Ref<CopyPass>,
         src: &BufferRegion,
         dst: &TransferBufferLocation,
@@ -286,7 +286,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// used by debugging tools. To name a buffer at creation time, prefer the
     /// [`BufferBuilder`] name property when constructing it.
     #[doc(alias = "SDL_SetGPUBufferName")]
-    pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
+    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
             SDL_SetGPUBufferName(device.as_raw(), self.handle.as_ptr(), name.as_ptr());
         };

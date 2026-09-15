@@ -64,7 +64,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// instead.
     #[doc(alias = "SDL_CopyGPUTextureToTexture")]
     pub fn copy_texture_to_texture(
-        &self,
+        self,
         source: &TextureLocation,
         destination: &TextureLocation,
         (w, h, d): (u32, u32, u32),
@@ -94,7 +94,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Subsequent commands can assume that the copy has finished.
     #[doc(alias = "SDL_CopyGPUBufferToBuffer")]
     pub fn copy_buffer_to_buffer(
-        &self,
+        self,
         source: &BufferLocation,
         destination: &BufferLocation,
         size: u32,

@@ -80,13 +80,11 @@ use crate::{
     pixels::BlendMode,
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectF32, RectI32},
-    resource::Ref,
-    resource::resource_new,
+    resource::{Ref, resource_new},
     surface::Surface,
     texture::{Texture, TextureHandle},
     traits,
-    util::mod_reexport,
-    util::{opt2ptr, to_result},
+    util::{c_ptr_to_str, mod_reexport, opt2ptr, to_result},
     window::{Window, WindowHandle},
 };
 
@@ -108,12 +106,13 @@ resource_new! {
 impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Get the name of a renderer.
     #[doc(alias = "SDL_GetRendererName")]
-    pub fn name(&self) -> &str {
+    pub fn name(self) -> &'ctx str {
         unsafe {
             // SAFETY: Renderer name strings are all UTF-8.
-            str::from_utf8_unchecked(
-                CStr::from_ptr(SDL_GetRendererName(self.handle.as_ptr())).to_bytes(),
-            )
+            // And they're stored in per-thread persistent storage
+            // (see the implementation of this SDL function).
+            let ptr = SDL_GetRendererName(self.as_raw());
+            c_ptr_to_str(ptr)
         }
     }
 
@@ -138,7 +137,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Get the window associated with a renderer.
     #[doc(alias = "SDL_GetRenderWindow")]
-    pub fn window(&self) -> Ref<'wnd, Window<'ctx, 'vid>> {
+    pub fn window(self) -> Ref<'wnd, Window<'ctx, 'vid>> {
         unsafe {
             let ptr = SDL_GetRenderWindow(self.handle.as_ptr());
             let handle = WindowHandle::from_ptr(ptr).unwrap_unchecked();
@@ -167,7 +166,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Returns the current vertical refresh sync interval. See
     /// [`RendererHandle::set_vsync`] for the meaning of the value.
     #[doc(alias = "SDL_GetRenderVSync")]
-    pub fn vsync(&self) -> i32 {
+    pub fn vsync(self) -> i32 {
         let mut ret = MaybeUninit::uninit();
         unsafe {
             SDL_GetRenderVSync(self.handle.as_ptr(), ret.as_mut_ptr());
@@ -185,7 +184,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// For the output size of the current rendering target, with logical size
     /// adjustments, use [`RendererHandle::target_output_size`] instead.
     #[doc(alias = "SDL_GetRenderOutputSize")]
-    pub fn output_size(&self) -> PointI32 {
+    pub fn output_size(self) -> PointI32 {
         let mut ret = MaybeUninit::<PointI32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -207,7 +206,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// logical presentation state, dictated by
     /// `SDL_SetRenderLogicalPresentation`.
     #[doc(alias = "SDL_GetCurrentRenderOutputSize")]
-    pub fn target_output_size(&self) -> PointI32 {
+    pub fn target_output_size(self) -> PointI32 {
         let mut ret = MaybeUninit::<PointI32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -226,7 +225,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The alpha value is usually `255` (`SDL_ALPHA_OPAQUE`).
     #[doc(alias = "SDL_GetRenderDrawColor")]
-    pub fn draw_color_u8(&self) -> RgbaU8 {
+    pub fn draw_color_u8(self) -> RgbaU8 {
         let mut ret = MaybeUninit::<RgbaU8>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -247,7 +246,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Get the color used for drawing operations (Rect, Line and Clear),
     /// in floating-point components.
     #[doc(alias = "SDL_GetRenderDrawColorFloat")]
-    pub fn draw_color_f32(&self) -> RgbaF32 {
+    pub fn draw_color_f32(self) -> RgbaF32 {
         let mut ret = MaybeUninit::<RgbaF32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -281,7 +280,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// you're using this on the main rendering target, it should be called
     /// after rendering and before [`RendererHandle::present`].
     #[doc(alias = "SDL_RenderReadPixels")]
-    pub fn read_target(&self) -> Result<Surface> {
+    pub fn read_target(self) -> Result<Surface> {
         Surface::from_ptr(unsafe { SDL_RenderReadPixels(self.handle.as_ptr(), std::ptr::null()) })
     }
 
@@ -302,7 +301,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// you're using this on the main rendering target, it should be called
     /// after rendering and before [`RendererHandle::present`].
     #[doc(alias = "SDL_RenderReadPixels")]
-    pub fn read_target_area(&self, area: RectI32) -> Result<Surface> {
+    pub fn read_target_area(self, area: RectI32) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             SDL_RenderReadPixels(self.handle.as_ptr(), (&raw const area).cast())
         })
@@ -318,7 +317,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// color, so make sure to invoke [`RendererHandle::set_draw_color_u8`]
     /// (or its float variant) when needed.
     #[doc(alias = "SDL_RenderClear")]
-    pub fn clear(&self) -> Result<()> {
+    pub fn clear(self) -> Result<()> {
         to_result(unsafe { SDL_RenderClear(self.handle.as_ptr()) })
     }
 
@@ -350,7 +349,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// backbuffers. Calling this function while rendering to a texture will
     /// fail.
     #[doc(alias = "SDL_RenderPresent")]
-    pub fn present(&self) -> Result<()> {
+    pub fn present(self) -> Result<()> {
         to_result(unsafe { SDL_RenderPresent(self.handle.as_ptr()) })
     }
 
@@ -378,7 +377,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// your best judgment and be prepared to make changes if specific state
     /// needs to be protected.
     #[doc(alias = "SDL_FlushRenderer")]
-    pub fn flush(&self) -> Result<()> {
+    pub fn flush(self) -> Result<()> {
         to_result(unsafe { SDL_FlushRenderer(self.handle.as_ptr()) })
     }
 
@@ -390,7 +389,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// target if [`None`].
     #[doc(alias = "SDL_RenderTexture")]
     pub fn draw(
-        &self,
+        self,
         tex: Ref<Texture>,
         src: Option<&RectF32>,
         dst: Option<&RectF32>,
@@ -420,7 +419,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// mapped to, or the rendering target's bottom-left corner if [`None`].
     #[doc(alias = "SDL_RenderTextureAffine")]
     pub fn draw_affine(
-        &self,
+        self,
         tex: Ref<Texture>,
         src: Option<&RectF32>,
         origin: Option<&PointF32>,
@@ -456,7 +455,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// tiles.
     #[doc(alias = "SDL_RenderTextureTiled")]
     pub fn draw_tiled(
-        &self,
+        self,
         tex: Ref<Texture>,
         src: Option<&RectF32>,
         scale: f32,
@@ -497,7 +496,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// destination rectangle.
     #[doc(alias = "SDL_RenderTexture9Grid")]
     pub fn draw_9grid(
-        &self,
+        self,
         tex: Ref<Texture>,
         src: Option<&RectF32>,
         (width_left, width_right, width_top, width_bottom): (f32, f32, f32, f32),
@@ -523,7 +522,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The arguments are the coordinates of the start and end points.
     #[doc(alias = "SDL_RenderLine")]
-    pub fn draw_line(&self, start: PointF32, end: PointF32) -> Result<()> {
+    pub fn draw_line(self, start: PointF32, end: PointF32) -> Result<()> {
         to_result(unsafe { SDL_RenderLine(self.handle.as_ptr(), start.x, start.y, end.x, end.y) })
     }
 
@@ -532,7 +531,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderLine")]
-    pub fn draw_line_with(&self, start: PointF32, end: PointF32, col: RgbaF32) -> Result<()> {
+    pub fn draw_line_with(self, start: PointF32, end: PointF32, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_line(start, end);
         self.set_draw_color_f32(old);
@@ -546,7 +545,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// `lines` contains the points along the lines; `lines.len() - 1` lines
     /// are drawn.
     #[doc(alias = "SDL_RenderLines")]
-    pub fn draw_lines(&self, lines: &[PointF32]) -> Result<()> {
+    pub fn draw_lines(self, lines: &[PointF32]) -> Result<()> {
         to_result(unsafe {
             SDL_RenderLines(
                 self.handle.as_ptr(),
@@ -561,7 +560,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderLines")]
-    pub fn draw_lines_with(&self, lines: &[PointF32], col: RgbaF32) -> Result<()> {
+    pub fn draw_lines_with(self, lines: &[PointF32], col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_lines(lines);
         self.set_draw_color_f32(old);
@@ -571,7 +570,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a point on the current rendering target at subpixel precision.
     #[doc(alias = "SDL_RenderPoint")]
-    pub fn draw_point(&self, pos: PointF32) -> Result<()> {
+    pub fn draw_point(self, pos: PointF32) -> Result<()> {
         to_result(unsafe { SDL_RenderPoint(self.handle.as_ptr(), pos.x, pos.y) })
     }
 
@@ -580,7 +579,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderPoint")]
-    pub fn draw_point_with(&self, pos: PointF32, col: RgbaF32) -> Result<()> {
+    pub fn draw_point_with(self, pos: PointF32, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_point(pos);
         self.set_draw_color_f32(old);
@@ -591,7 +590,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw multiple points on the current rendering target at subpixel
     /// precision.
     #[doc(alias = "SDL_RenderPoints")]
-    pub fn draw_points(&self, points: &[PointF32]) -> Result<()> {
+    pub fn draw_points(self, points: &[PointF32]) -> Result<()> {
         to_result(unsafe {
             SDL_RenderPoints(
                 self.handle.as_ptr(),
@@ -606,7 +605,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderPoints")]
-    pub fn draw_points_with(&self, points: &[PointF32], col: RgbaF32) -> Result<()> {
+    pub fn draw_points_with(self, points: &[PointF32], col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_points(points);
         self.set_draw_color_f32(old);
@@ -617,7 +616,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw a rectangle on the current rendering target at subpixel
     /// precision.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_rect(&self, rect: RectF32) -> Result<()> {
+    pub fn draw_rect(self, rect: RectF32) -> Result<()> {
         to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), (&raw const rect).cast()) })
     }
 
@@ -626,7 +625,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_rect_with(&self, rect: RectF32, col: RgbaF32) -> Result<()> {
+    pub fn draw_rect_with(self, rect: RectF32, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let res = self.draw_rect(rect);
         self.set_draw_color_f32(old);
@@ -639,7 +638,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// Equivalent to SDL's `SDL_RenderRect` with a `NULL` rectangle.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_target_outline(&self) -> Result<()> {
+    pub fn draw_target_outline(self) -> Result<()> {
         to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), std::ptr::null()) })
     }
 
@@ -648,7 +647,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_target_outline_with(&self, col: RgbaF32) -> Result<()> {
+    pub fn draw_target_outline_with(self, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_target_outline();
         self.set_draw_color_f32(old);
@@ -659,7 +658,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw some number of rectangles on the current rendering target at
     /// subpixel precision.
     #[doc(alias = "SDL_RenderRects")]
-    pub fn draw_rects(&self, rects: &[RectF32]) -> Result<()> {
+    pub fn draw_rects(self, rects: &[RectF32]) -> Result<()> {
         to_result(unsafe {
             SDL_RenderRects(
                 self.handle.as_ptr(),
@@ -674,7 +673,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRects")]
-    pub fn draw_rects_with(&self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
+    pub fn draw_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.draw_rects(rects);
         self.set_draw_color_f32(old);
@@ -687,7 +686,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// Equivalent to SDL's `SDL_RenderFillRect` with a `NULL` rectangle.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_target(&self) -> Result<()> {
+    pub fn fill_target(self) -> Result<()> {
         to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), std::ptr::null()) })
     }
 
@@ -695,7 +694,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_target_with(&self, col: RgbaF32) -> Result<()> {
+    pub fn fill_target_with(self, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.fill_target();
         self.set_draw_color_f32(old);
@@ -706,7 +705,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Fill a rectangle on the current rendering target with the drawing
     /// color at subpixel precision.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_rect(&self, rect: RectF32) -> Result<()> {
+    pub fn fill_rect(self, rect: RectF32) -> Result<()> {
         to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), (&raw const rect).cast()) })
     }
 
@@ -715,7 +714,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_rect_with(&self, rect: RectF32, col: RgbaF32) -> Result<()> {
+    pub fn fill_rect_with(self, rect: RectF32, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let res = self.fill_rect(rect);
         self.set_draw_color_f32(old);
@@ -726,7 +725,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Fill some number of rectangles on the current rendering target with
     /// the drawing color at subpixel precision.
     #[doc(alias = "SDL_RenderFillRects")]
-    pub fn fill_rects(&self, rects: &[RectF32]) -> Result<()> {
+    pub fn fill_rects(self, rects: &[RectF32]) -> Result<()> {
         to_result(unsafe {
             SDL_RenderFillRects(
                 self.handle.as_ptr(),
@@ -741,7 +740,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRects")]
-    pub fn fill_rects_with(&self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
+    pub fn fill_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let ret = self.fill_rects(rects);
         self.set_draw_color_f32(old);
@@ -773,7 +772,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// If the parameter is `Some(tex)`, ensure `tex` lives for as long as it's
     /// used as the target texture.
     #[doc(alias = "SDL_SetRenderTarget")]
-    pub fn set_target_opt(&self, tgt: Option<Ref<Texture>>) -> Result<()> {
+    pub fn set_target_opt(self, tgt: Option<Ref<Texture>>) -> Result<()> {
         to_result(unsafe {
             SDL_SetRenderTarget(
                 self.handle.as_ptr(),
@@ -790,7 +789,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// The targeted texture must be created with the [`TextureAccess::Target`](crate::texture::TextureAccess::Target)
     /// flag. See [`RendererHandle::set_target_opt`] for more details.
     #[doc(alias = "SDL_SetRenderTarget")]
-    pub fn set_target(&self, tgt: Ref<Texture>) -> Result<()> {
+    pub fn set_target(self, tgt: Ref<Texture>) -> Result<()> {
         self.set_target_opt(Some(tgt))
     }
 
@@ -798,7 +797,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// See [`RendererHandle::set_target_opt`] for more details.
     #[doc(alias = "SDL_SetRenderTarget")]
-    pub fn reset_target(&self) -> Result<()> {
+    pub fn reset_target(self) -> Result<()> {
         self.set_target_opt(None)
     }
 
@@ -832,7 +831,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// When a renderer is created, vsync defaults to
     /// [`Renderer::VSYNC_DISABLED`].
     #[doc(alias = "SDL_SetRenderVSync")]
-    pub fn set_vsync(&self, val: i32) -> bool {
+    pub fn set_vsync(self, val: i32) -> bool {
         unsafe { SDL_SetRenderVSync(self.handle.as_ptr(), val) }
     }
 
@@ -846,7 +845,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// [`BlendMode::set_blend_mode`](crate::traits::BlendMode::set_blend_mode)
     /// to specify how the alpha channel is used.
     #[doc(alias = "SDL_SetRenderDrawColor")]
-    pub fn set_draw_color_u8(&self, rgba: RgbaU8) {
+    pub fn set_draw_color_u8(self, rgba: RgbaU8) {
         unsafe {
             SDL_SetRenderDrawColor(
                 self.handle.as_ptr(),
@@ -868,7 +867,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// [`BlendMode::set_blend_mode`](crate::traits::BlendMode::set_blend_mode)
     /// to specify how the alpha channel is used.
     #[doc(alias = "SDL_SetRenderDrawColorFloat")]
-    pub fn set_draw_color_f32(&self, rgba: RgbaF32) {
+    pub fn set_draw_color_f32(self, rgba: RgbaF32) {
         unsafe {
             SDL_SetRenderDrawColorFloat(
                 self.handle.as_ptr(),
@@ -880,26 +879,26 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         }
     }
 
-    pub fn xchg_draw_color_u8(&self, col: RgbaU8) -> RgbaU8 {
+    pub fn xchg_draw_color_u8(self, col: RgbaU8) -> RgbaU8 {
         let old = self.draw_color_u8();
         self.set_draw_color_u8(col);
         old
     }
 
-    pub fn xchg_draw_color_f32(&self, col: RgbaF32) -> RgbaF32 {
+    pub fn xchg_draw_color_f32(self, col: RgbaF32) -> RgbaF32 {
         let old = self.draw_color_f32();
         self.set_draw_color_f32(col);
         old
     }
 
-    pub fn set_render_state(&self, rs: Ref<RenderState>) -> Result<()> {
+    pub fn set_render_state(self, rs: Ref<RenderState>) -> Result<()> {
         to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), rs.as_raw()) })
     }
 
     /// Clear custom GPU render state, reverting to the default rendering
     /// behavior.
     #[doc(alias = "SDL_SetGPURenderState")]
-    pub fn clear_render_state(&self) -> Result<()> {
+    pub fn clear_render_state(self) -> Result<()> {
         to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), std::ptr::null_mut()) })
     }
 }

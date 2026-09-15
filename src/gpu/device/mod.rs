@@ -131,7 +131,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if the window cannot be claimed.
     #[doc(alias = "SDL_ClaimWindowForGPUDevice")]
-    pub fn claim_window(&self, window: Ref<Window>) -> Result<()> {
+    pub fn claim_window(self, window: Ref<Window>) -> Result<()> {
         to_result(unsafe { SDL_ClaimWindowForGPUDevice(self.as_raw(), window.as_raw()) })
     }
 
@@ -139,7 +139,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// `window` must be a window currently claimed by this device.
     #[doc(alias = "SDL_ReleaseWindowFromGPUDevice")]
-    pub fn release_window(&self, window: Ref<Window>) {
+    pub fn release_window(self, window: Ref<Window>) {
         unsafe { SDL_ReleaseWindowFromGPUDevice(self.as_raw(), window.as_raw()) };
     }
 
@@ -148,7 +148,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// `window` must be claimed by this device, and `pm` is the presentation
     /// mode to check. Returns `true` when the mode is supported.
     #[doc(alias = "SDL_WindowSupportsGPUPresentMode")]
-    pub fn window_supports_gpu_present_mode(&self, window: Ref<Window>, pm: PresentMode) -> bool {
+    pub fn window_supports_gpu_present_mode(self, window: Ref<Window>, pm: PresentMode) -> bool {
         unsafe { SDL_WindowSupportsGPUPresentMode(self.as_raw(), window.as_raw(), pm.into()) }
     }
 
@@ -158,7 +158,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// composition to check. Returns `true` when the composition is supported.
     #[doc(alias = "SDL_WindowSupportsGPUSwapchainComposition")]
     pub fn window_supports_gpu_swapchain_composition(
-        &self,
+        self,
         window: Ref<Window>,
         sc: SwapchainComposition,
     ) -> bool {
@@ -175,7 +175,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if SDL cannot wait for the device to become idle.
     #[doc(alias = "SDL_WaitForGPUIdle")]
-    pub fn wait_idle(&self) -> Result<()> {
+    pub fn wait_idle(self) -> Result<()> {
         to_result(unsafe { SDL_WaitForGPUIdle(self.handle.as_ptr()) })
     }
 
@@ -185,7 +185,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if SDL cannot wait for the window's presenting work.
     #[doc(alias = "SDL_WaitForGPUSwapchain")]
-    pub fn wait_swapchain(&self, window: Ref<Window>) -> Result<()> {
+    pub fn wait_swapchain(self, window: Ref<Window>) -> Result<()> {
         to_result(unsafe { SDL_WaitForGPUSwapchain(self.as_raw(), window.as_raw()) })
     }
 
@@ -196,7 +196,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if SDL cannot wait for the fences.
     #[doc(alias = "SDL_WaitForGPUFences")]
-    pub fn wait_fences(&self, wait_all: WaitAll, fences: &[Ref<Fence>]) -> Result<()> {
+    pub fn wait_fences(self, wait_all: WaitAll, fences: &[Ref<Fence>]) -> Result<()> {
         to_result(unsafe {
             SDL_WaitForGPUFences(
                 self.handle.as_ptr(),
@@ -211,7 +211,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if SDL cannot retrieve the driver name.
     #[doc(alias = "SDL_GetGPUDeviceDriver")]
-    pub fn driver(&self) -> Result<&'static str> {
+    pub fn driver(self) -> Result<&'static str> {
         let raw = unsafe { SDL_GetGPUDeviceDriver(self.handle.as_ptr()) };
         if raw.is_null() {
             Err(Error::current())
@@ -242,7 +242,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// `window` must be claimed by this device. The format can change when the
     /// swapchain parameters change.
     #[doc(alias = "SDL_GetGPUSwapchainTextureFormat")]
-    pub fn swapchain_texture_format(&self, window: Ref<Window>) -> TextureFormat {
+    pub fn swapchain_texture_format(self, window: Ref<Window>) -> TextureFormat {
         unsafe {
             let fmt = SDL_GetGPUSwapchainTextureFormat(self.as_raw(), window.as_raw());
             TextureFormat::from_sdl_unchecked(fmt)
@@ -256,7 +256,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// Returns `true` when the format is supported for all requested uses.
     #[doc(alias = "SDL_GPUTextureSupportsFormat")]
     pub fn texture_supports_format(
-        &self,
+        self,
         format: TextureFormat,
         kind: TextureType,
         usage: TextureUsageFlags,
@@ -277,7 +277,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// sample count to check. Returns `true` when the combination is supported.
     #[doc(alias = "SDL_GPUTextureSupportsSampleCount")]
     pub fn texture_supports_sample_count(
-        &self,
+        self,
         format: TextureFormat,
         sample_count: SampleCount,
     ) -> bool {
@@ -306,7 +306,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// SDL error occurs.
     #[doc(alias = "SDL_SetGPUSwapchainParameters")]
     pub fn set_swapchain_parameters(
-        &self,
+        self,
         window: Ref<Window>,
         composition: SwapchainComposition,
         present_mode: PresentMode,
@@ -326,7 +326,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// The returned bitflags identify the shader formats that the driver can
     /// consume.
     #[doc(alias = "SDL_GetGPUShaderFormats")]
-    pub fn shader_formats(&self) -> ShaderFormats {
+    pub fn shader_formats(self) -> ShaderFormats {
         let fmts = unsafe { SDL_GetGPUShaderFormats(self.handle.as_ptr()) };
         ShaderFormats::from_bits_retain(fmts.0)
     }
@@ -344,7 +344,7 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     /// Returns [`Err`] if `n` is outside the supported range or SDL cannot apply
     /// the setting.
     #[doc(alias = "SDL_SetGPUAllowedFramesInFlight")]
-    pub fn set_allowed_frames_in_flight(&self, n: u32) -> Result<()> {
+    pub fn set_allowed_frames_in_flight(self, n: u32) -> Result<()> {
         to_result(unsafe { SDL_SetGPUAllowedFramesInFlight(self.handle.as_ptr(), n) })
     }
 }

@@ -28,22 +28,12 @@ resource_new! {
 }
 
 impl Clone for Font<'_> {
-    /// Create a copy of an existing font.
-    ///
-    /// # Remarks
-    ///
-    /// The copy will be distinct from the original, but will share the font
-    /// file and have the same size and style as the original.
-    #[doc(alias = "TTF_CopyFont")]
     fn clone(&self) -> Self {
-        let ptr = unsafe { TTF_CopyFont(self.handle.as_ptr()) };
-        let inner = FontHandle::from_ptr(ptr).expect("A valid font should be copyable");
-
-        Self { inner }
+        self.inner.clone()
     }
 }
 
-impl FontHandle<'_> {
+impl<'ttf> FontHandle<'ttf> {
     /// Render a single UNICODE codepoint at high quality to a new ARGB
     /// surface.
     ///
@@ -60,7 +50,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_glyph_shaded`], and
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Blended")]
-    pub fn render_glyph_blended(&self, ch: char, color: RgbaU8) -> Result<Surface> {
+    pub fn render_glyph_blended(self, ch: char, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderGlyph_Blended(self.handle.as_ptr(), ch.into(), color.into())
         })
@@ -82,7 +72,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_glyph_shaded`], and
     /// [`FontHandle::render_glyph_blended`].
     #[doc(alias = "TTF_RenderGlyph_LCD")]
-    pub fn render_glyph_lcd(&self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_glyph_lcd(self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderGlyph_LCD(self.handle.as_ptr(), ch.into(), fg.into(), bg.into())
         })
@@ -105,7 +95,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_glyph_blended`], and
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Shaded")]
-    pub fn render_glyph_shaded(&self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_glyph_shaded(self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderGlyph_Shaded(self.handle.as_ptr(), ch.into(), fg.into(), bg.into())
         })
@@ -127,7 +117,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_glyph_blended`], and
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Solid")]
-    pub fn render_glyph_solid(&self, ch: char, color: RgbaU8) -> Result<Surface> {
+    pub fn render_glyph_solid(self, ch: char, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderGlyph_Solid(self.handle.as_ptr(), ch.into(), color.into())
         })
@@ -152,7 +142,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_shaded`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Blended")]
-    pub fn render_text_blended(&self, text: RtStr, color: RgbaU8) -> Result<Surface> {
+    pub fn render_text_blended(self, text: RtStr, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Blended(
                 self.handle.as_ptr(),
@@ -182,7 +172,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_shaded`], and
     /// [`FontHandle::render_text_blended`].
     #[doc(alias = "TTF_RenderText_LCD")]
-    pub fn render_text_lcd(&self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_text_lcd(self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_LCD(
                 self.handle.as_ptr(),
@@ -214,7 +204,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_blended`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Shaded")]
-    pub fn render_text_shaded(&self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
+    pub fn render_text_shaded(self, text: RtStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Shaded(
                 self.handle.as_ptr(),
@@ -246,7 +236,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_blended`], and
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Solid")]
-    pub fn render_text_solid(&self, text: RtStr, color: RgbaU8) -> Result<Surface> {
+    pub fn render_text_solid(self, text: RtStr, color: RgbaU8) -> Result<Surface> {
         Surface::from_ptr(unsafe {
             TTF_RenderText_Solid(
                 self.handle.as_ptr(),
@@ -275,7 +265,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_lcd_wrapped`].
     #[doc(alias = "TTF_RenderText_Blended_Wrapped")]
     pub fn render_text_blended_wrapped(
-        &self,
+        self,
         text: RtStr,
         color: RgbaU8,
         wrap_length: i32,
@@ -310,7 +300,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_blended_wrapped`].
     #[doc(alias = "TTF_RenderText_LCD_Wrapped")]
     pub fn render_text_lcd_wrapped(
-        &self,
+        self,
         text: RtStr,
         fg: RgbaU8,
         bg: RgbaU8,
@@ -348,7 +338,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_lcd_wrapped`].
     #[doc(alias = "TTF_RenderText_Shaded_Wrapped")]
     pub fn render_text_shaded_wrapped(
-        &self,
+        self,
         text: RtStr,
         fg: RgbaU8,
         bg: RgbaU8,
@@ -386,7 +376,7 @@ impl FontHandle<'_> {
     /// [`FontHandle::render_text_lcd_wrapped`].
     #[doc(alias = "TTF_RenderText_Solid_Wrapped")]
     pub fn render_text_solid_wrapped(
-        &self,
+        self,
         text: RtStr,
         color: RgbaU8,
         wrap_length: i32,
@@ -427,7 +417,7 @@ impl FontHandle<'_> {
     /// processors, web pages, etc) are more likely to not be fixed-width in
     /// most cases.
     #[doc(alias = "TTF_FontIsFixedWidth")]
-    pub fn is_mono(&self) -> bool {
+    pub fn is_mono(self) -> bool {
         unsafe { TTF_FontIsFixedWidth(self.as_raw()) }
     }
 
@@ -437,8 +427,22 @@ impl FontHandle<'_> {
     ///
     /// Scalability lets us distinguish between outline and bitmap fonts.
     #[doc(alias = "TTF_FontIsScalable")]
-    pub fn is_scalable(&self) -> bool {
+    pub fn is_scalable(self) -> bool {
         unsafe { TTF_FontIsScalable(self.as_raw()) }
+    }
+
+    /// Create a copy of an existing font.
+    ///
+    /// # Remarks
+    ///
+    /// The copy will be distinct from the original, but will share the font
+    /// file and have the same size and style as the original.
+    #[doc(alias = "TTF_CopyFont")]
+    fn clone(self) -> Font<'ttf> {
+        let ptr = unsafe { TTF_CopyFont(self.handle.as_ptr()) };
+        let inner = FontHandle::from_ptr(ptr).expect("A valid font should be copyable");
+
+        Font { inner }
     }
 }
 

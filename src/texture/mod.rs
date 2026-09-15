@@ -79,7 +79,7 @@ resource_new! {
 impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// Get the size of a texture, as floating point values.
     #[doc(alias = "SDL_GetTextureSize")]
-    pub fn size(&self) -> PointF32 {
+    pub fn size(self) -> PointF32 {
         let mut ret = MaybeUninit::<PointF32>::uninit();
         let ptr = ret.as_mut_ptr();
 
@@ -92,7 +92,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
 
     /// Get the scale mode used for texture scale operations.
     #[doc(alias = "SDL_GetTextureScaleMode")]
-    pub fn scale_mode(&self) -> ScaleMode {
+    pub fn scale_mode(self) -> ScaleMode {
         let mut ret = MaybeUninit::<SDL_ScaleMode>::uninit();
 
         // SAFETY: This function only reads struct fields.
@@ -106,7 +106,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     ///
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRendererFromTexture")]
-    pub fn renderer(&self) -> Option<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>> {
+    pub fn renderer(self) -> Option<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>> {
         RendererHandle::from_ptr(unsafe { SDL_GetRendererFromTexture(self.handle.as_ptr()) })
             .map(|handle| unsafe { Ref::from_handle(handle) })
     }
@@ -120,7 +120,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// If the scale mode is not supported, the closest supported mode is
     /// chosen.
     #[doc(alias = "SDL_SetTextureScaleMode")]
-    pub fn set_scale_mode(&mut self, sm: ScaleMode) {
+    pub fn set_scale_mode(self, sm: ScaleMode) {
         unsafe {
             SDL_SetTextureScaleMode(self.handle.as_ptr(), sm.to_sdl());
         }

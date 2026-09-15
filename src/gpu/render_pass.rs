@@ -358,7 +358,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> {
 impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Set the current viewport state.
     #[doc(alias = "SDL_SetGPUViewport")]
-    pub fn set_viewport(&self, viewport: &Viewport) {
+    pub fn set_viewport(self, viewport: &Viewport) {
         unsafe {
             SDL_SetGPUViewport(self.handle.as_ptr(), &raw const viewport.0);
         }
@@ -366,7 +366,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
 
     /// Set the current blend-constant color.
     #[doc(alias = "SDL_SetGPUBlendConstants")]
-    pub fn set_blend_constants(&self, blend_constants: RgbaF32) {
+    pub fn set_blend_constants(self, blend_constants: RgbaF32) {
         unsafe {
             SDL_SetGPUBlendConstants(self.handle.as_ptr(), blend_constants.into());
         }
@@ -374,7 +374,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
 
     /// Set the current stencil reference value.
     #[doc(alias = "SDL_SetGPUStencilReference")]
-    pub fn set_stencil_reference(&self, reference: u8) {
+    pub fn set_stencil_reference(self, reference: u8) {
         unsafe {
             SDL_SetGPUStencilReference(self.handle.as_ptr(), reference);
         }
@@ -382,7 +382,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
 
     /// Set the current scissor area.
     #[doc(alias = "SDL_SetGPUScissor")]
-    pub fn set_scissor(&self, scissor: &RectI32) {
+    pub fn set_scissor(self, scissor: &RectI32) {
         unsafe {
             SDL_SetGPUScissor(self.handle.as_ptr(), scissor.as_sdl_ptr());
         }
@@ -391,7 +391,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind vertex buffers to consecutive slots beginning at `first_slot`.
     /// `bindings` supplies each buffer and byte offset for subsequent draw calls.
     #[doc(alias = "SDL_BindGPUVertexBuffers")]
-    pub fn bind_vertex_buffers(&self, first_slot: u32, bindings: &[BufferBinding]) {
+    pub fn bind_vertex_buffers(self, first_slot: u32, bindings: &[BufferBinding]) {
         unsafe {
             SDL_BindGPUVertexBuffers(
                 self.handle.as_ptr(),
@@ -404,7 +404,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
 
     /// Bind an index buffer and specify its element size.
     #[doc(alias = "SDL_BindGPUIndexBuffer")]
-    pub fn bind_index_buffer(&self, binding: &BufferBinding, index_element_size: IndexElementSize) {
+    pub fn bind_index_buffer(self, binding: &BufferBinding, index_element_size: IndexElementSize) {
         unsafe {
             SDL_BindGPUIndexBuffer(
                 self.handle.as_ptr(),
@@ -417,7 +417,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind texture-sampler pairs to consecutive vertex-shader slots.
     /// Textures must have sampler usage enabled.
     #[doc(alias = "SDL_BindGPUVertexSamplers")]
-    pub fn bind_vertex_samplers(&self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
+    pub fn bind_vertex_samplers(self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
         unsafe {
             SDL_BindGPUVertexSamplers(
                 self.handle.as_ptr(),
@@ -432,7 +432,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Textures must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUVertexStorageTextures")]
     pub fn bind_vertex_storage_textures(
-        &self,
+        self,
         first_slot: u32,
         textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
     ) {
@@ -449,7 +449,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind graphics-storage buffers to consecutive vertex-shader slots.
     /// Buffers must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUVertexStorageBuffers")]
-    pub fn bind_vertex_storage_buffers(&self, first_slot: u32, buffers: &[Ref<Buffer>]) {
+    pub fn bind_vertex_storage_buffers(self, first_slot: u32, buffers: &[Ref<Buffer>]) {
         unsafe {
             SDL_BindGPUVertexStorageBuffers(
                 self.handle.as_ptr(),
@@ -463,7 +463,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind texture-sampler pairs to consecutive fragment-shader slots.
     /// Textures must have sampler usage enabled.
     #[doc(alias = "SDL_BindGPUFragmentSamplers")]
-    pub fn bind_fragment_samplers(&self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
+    pub fn bind_fragment_samplers(self, first_slot: u32, bindings: &[TextureSamplerBinding]) {
         unsafe {
             SDL_BindGPUFragmentSamplers(
                 self.handle.as_ptr(),
@@ -478,7 +478,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Textures must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUFragmentStorageTextures")]
     pub fn bind_fragment_storage_textures(
-        &self,
+        self,
         first_slot: u32,
         textures: &[Ref<Texture<'ctx, 'vid, 'dev>>],
     ) {
@@ -495,7 +495,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// Bind graphics-storage buffers to consecutive fragment-shader slots.
     /// Buffers must have graphics storage-read usage enabled.
     #[doc(alias = "SDL_BindGPUFragmentStorageBuffers")]
-    pub fn bind_fragment_storage_buffers(&self, first_slot: u32, buffers: &[Ref<Buffer>]) {
+    pub fn bind_fragment_storage_buffers(self, first_slot: u32, buffers: &[Ref<Buffer>]) {
         unsafe {
             SDL_BindGPUFragmentStorageBuffers(
                 self.handle.as_ptr(),
@@ -511,7 +511,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// The arguments are vertex count, instance count, first vertex, and first
     /// instance. A graphics pipeline must be bound first.
     #[doc(alias = "SDL_DrawGPUPrimitives")]
-    pub fn draw_primitives(&self, n_verts: u32, n_insts: u32, first_vert: u32, first_inst: u32) {
+    pub fn draw_primitives(self, n_verts: u32, n_insts: u32, first_vert: u32, first_inst: u32) {
         unsafe {
             SDL_DrawGPUPrimitives(
                 self.handle.as_ptr(),
@@ -528,7 +528,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// `offset`, reading `draw_count` parameter sets.
     /// A graphics pipeline must be bound first.
     #[doc(alias = "SDL_DrawGPUPrimitivesIndirect")]
-    pub fn draw_primitives_indirect(&self, buffer: Ref<Buffer>, offset: u32, draw_count: u32) {
+    pub fn draw_primitives_indirect(self, buffer: Ref<Buffer>, offset: u32, draw_count: u32) {
         unsafe {
             SDL_DrawGPUPrimitivesIndirect(self.as_raw(), buffer.as_raw(), offset, draw_count);
         }
@@ -540,7 +540,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// vertex offset, and first instance. A graphics pipeline must be bound first.
     #[doc(alias = "SDL_DrawGPUIndexedPrimitives")]
     pub fn draw_indexed_primitives(
-        &self,
+        self,
         num_indices: u32,
         num_instances: u32,
         first_index: u32,
@@ -565,7 +565,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPassHandle<'ctx, 'vid, 'dev, 'cmdbuf> {
     /// A graphics pipeline and index buffer must be bound first.
     #[doc(alias = "SDL_DrawGPUIndexedPrimitivesIndirect")]
     pub fn draw_indexed_primitives_indirect(
-        &self,
+        self,
         buffer: Ref<Buffer>,
         offset: u32,
         draw_count: u32,

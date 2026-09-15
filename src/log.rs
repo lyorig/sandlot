@@ -9,7 +9,7 @@
 //! quiet by default.
 //!
 //! You can change the log verbosity programmatically using [`set_priority`],
-//! with `SDL_SetHint`(`SDL_HINT_LOGGING`, ...), or with the `SDL_LOGGING`
+//! with `SDL_SetHint(SDL_HINT_LOGGING, ...)`, or with the `SDL_LOGGING`
 //! environment variable. This variable is a comma separated set of
 //! category=level tokens that define the default logging levels for SDL
 //! applications.

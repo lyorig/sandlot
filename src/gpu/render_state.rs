@@ -97,7 +97,7 @@ impl RenderStateHandle {
     ///
     /// Returns [`Err`] if SDL cannot set the uniform data.
     #[doc(alias = "SDL_SetGPURenderStateFragmentUniforms")]
-    pub fn set_fragment_uniforms(&self, slot_index: u32, data: &[u8]) -> Result<()> {
+    pub fn set_fragment_uniforms(self, slot_index: u32, data: &[u8]) -> Result<()> {
         to_result(unsafe {
             SDL_SetGPURenderStateFragmentUniforms(
                 self.as_raw(),

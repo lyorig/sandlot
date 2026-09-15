@@ -70,7 +70,7 @@ impl<'ctx, 'vid, 'dev> GpuEngineHandle<'ctx, 'vid, 'dev> {
     ///
     /// Returns [`Err`] in case of failure.
     #[doc(alias = "TTF_GetGPUTextEngineWinding")]
-    pub fn winding(&self) -> Result<Winding> {
+    pub fn winding(self) -> Result<Winding> {
         let wind = unsafe { TTF_GetGPUTextEngineWinding(self.as_raw()) };
         Winding::from_sdl(wind).ok_or_else(Error::current)
     }
@@ -78,7 +78,7 @@ impl<'ctx, 'vid, 'dev> GpuEngineHandle<'ctx, 'vid, 'dev> {
     /// Set the winding order of the vertices returned by
     /// [`GpuText::gpu_draw_data`](super::GpuText::gpu_draw_data) for this GPU text engine.
     #[doc(alias = "TTF_SetGPUTextEngineWinding")]
-    pub fn set_winding(&self, wind: Winding) {
+    pub fn set_winding(self, wind: Winding) {
         unsafe {
             TTF_SetGPUTextEngineWinding(self.as_raw(), wind.to_sdl());
         }

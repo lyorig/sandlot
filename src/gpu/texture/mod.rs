@@ -666,7 +666,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     /// fence is signaled.
     #[doc(alias = "SDL_DownloadFromGPUTexture")]
     pub fn download(
-        &self,
+        self,
         copy_pass: Ref<CopyPass>,
         src: &TextureRegion,
         dst: &TextureTransferInfo,
@@ -688,7 +688,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     /// data must be aligned to a multiple of the texture format's texel size.
     #[doc(alias = "SDL_UploadToGPUTexture")]
     pub fn upload(
-        &self,
+        self,
         copy_pass: Ref<CopyPass>,
         src: &TextureTransferInfo,
         dst: &TextureRegion,
@@ -710,7 +710,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     /// used by debugging tools. To name a texture at creation time, prefer the
     /// texture-create name property when constructing it.
     #[doc(alias = "SDL_SetGPUTextureName")]
-    pub fn set_name(&self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
+    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
         unsafe {
             SDL_SetGPUTextureName(device.as_raw(), self.as_raw(), name.as_ptr());
         }
