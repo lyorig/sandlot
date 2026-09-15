@@ -560,7 +560,7 @@ impl Surface {
     ///
     /// The pixels of the new surface are initialized to zero.
     #[doc(alias = "SDL_CreateSurface")]
-    pub fn from_size_and_format(size: PointI32, format: PixelFormat) -> Result<Self> {
+    pub fn new(size: PointI32, format: PixelFormat) -> Result<Self> {
         Self::from_ptr(unsafe { SDL_CreateSurface(size.x, size.y, format.to_sdl()) })
     }
 }
