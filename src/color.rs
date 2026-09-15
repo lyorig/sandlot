@@ -31,15 +31,15 @@ impl<T: OpacityBounds> Rgb<T> {
     pub const CYAN: Self = Self::new(T::MIN_OPACITY, T::MAX_OPACITY, T::MAX_OPACITY);
     pub const WHITE: Self = Self::new(T::MAX_OPACITY, T::MAX_OPACITY, T::MAX_OPACITY);
 
-    pub const fn to_rgba(&self) -> Rgba<T> {
+    pub const fn to_rgba(self) -> Rgba<T> {
         Rgba {
-            rgb: *self,
+            rgb: self,
             a: T::MAX_OPACITY,
         }
     }
 
-    pub const fn with_alpha(&self, a: T) -> Rgba<T> {
-        Rgba { rgb: *self, a }
+    pub const fn with_alpha(self, a: T) -> Rgba<T> {
+        Rgba { rgb: self, a }
     }
 }
 
