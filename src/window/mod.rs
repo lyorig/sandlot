@@ -6,17 +6,17 @@
 //! - [x] SDL_CreateWindowWithProperties
 //! - [x] SDL_DestroyWindow
 //! - [x] SDL_DestroyWindowSurface
-//! - [x] SDL_DisableScreenSaver
+//! - [x] SDL_DisableScreenSaver (impl'd as [`VideoHandle::disable_screen_saver`])
 //! - [ ] SDL_EGL_GetCurrentConfig
 //! - [ ] SDL_EGL_GetCurrentDisplay
 //! - [ ] SDL_EGL_GetProcAddress
 //! - [ ] SDL_EGL_GetWindowSurface
 //! - [ ] SDL_EGL_SetAttributeCallbacks
-//! - [x] SDL_EnableScreenSaver
+//! - [x] SDL_EnableScreenSaver (impl'd as [`VideoHandle::enable_screen_saver`])
 //! - [x] SDL_FlashWindow
 //! - [x] SDL_GetCurrentVideoDriver
 //! - [x] SDL_GetDisplayForWindow
-//! - [x] SDL_GetGrabbedWindow (impl'd as [`crate::init::VideoHandle::grabbed_window`])
+//! - [x] SDL_GetGrabbedWindow (impl'd as [`VideoHandle::grabbed_window`])
 //! - [x] SDL_GetNumVideoDrivers
 //! - [x] SDL_GetSystemTheme
 //! - [x] SDL_GetVideoDriver
@@ -41,7 +41,7 @@
 //! - [x] SDL_GetWindowProgressState
 //! - [x] SDL_GetWindowProgressValue
 //! - [x] SDL_GetWindowProperties
-//! - [x] SDL_GetWindows (impl'd as [`crate::init::VideoHandle::windows`])
+//! - [x] SDL_GetWindows (impl'd as [`VideoHandle::windows`])
 //! - [x] SDL_GetWindowSafeArea
 //! - [x] SDL_GetWindowSize
 //! - [x] SDL_GetWindowSizeInPixels
@@ -68,7 +68,7 @@
 //! - [x] SDL_MinimizeWindow
 //! - [x] SDL_RaiseWindow
 //! - [x] SDL_RestoreWindow
-//! - [x] SDL_ScreenSaverEnabled
+//! - [x] SDL_ScreenSaverEnabled (impl'd as [`VideoHandle::is_screen_saver_enabled`])
 //! - [x] SDL_SetWindowAlwaysOnTop
 //! - [x] SDL_SetWindowAspectRatio
 //! - [x] SDL_SetWindowBordered
@@ -122,7 +122,7 @@ use crate::{
 
 // doc-only
 #[expect(unused_imports)]
-use crate::event::Event;
+use crate::{event::Event, init::VideoHandle};
 
 use bitflags::bitflags;
 use sdl3_sys::{
@@ -357,39 +357,6 @@ pub fn current_video_driver() -> Option<&'static str> {
 pub fn system_theme() -> Option<SystemTheme> {
     let st = unsafe { SDL_GetSystemTheme() };
     SystemTheme::from_sdl(st)
-}
-
-/// Check whether the screensaver is currently enabled.
-///
-/// # Remarks
-///
-/// The screensaver is disabled by default.
-///
-/// The default can also be changed using
-/// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
-#[doc(alias = "SDL_ScreenSaverEnabled")]
-pub fn screen_saver_enabled() -> bool {
-    unsafe { SDL_ScreenSaverEnabled() }
-}
-
-/// Allow the screen to be blanked by a screen saver.
-#[doc(alias = "SDL_EnableScreenSaver")]
-pub fn enable_screen_saver() -> Result<()> {
-    to_result(unsafe { SDL_EnableScreenSaver() })
-}
-
-/// Prevent the screen from being blanked by a screen saver.
-///
-/// # Remarks
-///
-/// If you disable the screensaver, it is automatically re-enabled when SDL
-/// quits.
-///
-/// The screensaver is disabled by default, but this may be changed by
-/// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
-#[doc(alias = "SDL_DisableScreenSaver")]
-pub fn disable_screen_saver() -> Result<()> {
-    to_result(unsafe { SDL_DisableScreenSaver() })
 }
 
 impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {

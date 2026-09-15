@@ -2,17 +2,26 @@
 
 ## v0.1.4
 
-- SDL functions
-  - `SDL_SetError` (`Error::set`)
-  - `SDL_ClearError` (`Error::clear`)
-  - `SDL_SetAppMetadataProperty` (`Context::builder`)
-  - `SDL_GetAppMetadataProperty` (`Context::metadata`)
-- Renames
-  - `Context::{new` -> `init}`
-- `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
-- `init::Context` and `ttf::Context` both implement `Subsystem` and are segmented into handles and owned types, enabling usage with `init::Ref`
+- API additions
+  - `init::Context` and `ttf::Context` both implement `Subsystem` and are segmented into handles and owned types, enabling usage with `init::Ref`
+  - app metadata setting using the `Context` builder, and its later retrieval
+  - `Display` properties
+  - `Error` setting and clearing
+  - TTF "engine'd text objects" (see `ttf::Text` docs for specifics)
+- API changes
+  - `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
   - places which previously used `&Context` have migrated to `Ref<Context>`
-- Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
+  - almost all handle methods take `self` by value
+  - TTF objects and builders have added lifetimes
+  - TTF `Text` cannot be drawn by itself (needs engine'd text object)
+  - `EventIter` is now tied to the `Events` subsystem
+  - Several functions have been moved to subsystems due to lifetime safety (display, clipboard)
+- Docs
+  - Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
+  - `Self` no longer used in links
+- Fixes
+  - Moved struct methods which were unnecessarily implemented on the owned type
+  - `Ref` manually impl's `Clone` + `Copy` to fix some edge cases
 
 ## v0.1.3
 - Lifetimes!

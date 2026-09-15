@@ -473,8 +473,12 @@ impl<'ctx> VideoHandle<'ctx> {
     }
 
     /// Get a list of valid windows.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only use the returned handles before their respective windows are destroyed.
     #[doc(alias = "SDL_GetWindows")]
-    pub fn windows<'a>(&self) -> Result<Box<[resource::Ref<'a, Window<'ctx, '_>>]>> {
+    pub unsafe fn windows(&self) -> Result<Box<[WindowHandle<'ctx, '_>]>> {
         let mut count = MaybeUninit::uninit();
         let ptr = unsafe { SDL_GetWindows(count.as_mut_ptr()) };
 
@@ -489,21 +493,16 @@ impl<'ctx> VideoHandle<'ctx> {
     ///
     /// # Safety
     ///
-    /// The lifetime of the returned reference is inferred.
-    /// In practice, it's going to be valid until the window is destroyed.
-    /// It is your responsibility to only use it before that happens.
+    /// The caller must only use the returned handle before its respective window is destroyed.
     ///
     /// # Remarks
     ///
     /// The numeric ID is what [`SDL_WindowEvent`] references, and is necessary
     /// to map these events to specific window objects.
     #[doc(alias = "SDL_GetWindowFromID")]
-    pub unsafe fn window_from_id<'a>(
-        &self,
-        id: WindowId,
-    ) -> Option<resource::Ref<'a, Window<'ctx, '_>>> {
+    pub unsafe fn window_from_id(&self, id: WindowId) -> Option<WindowHandle<'ctx, '_>> {
         let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
-        WindowHandle::from_ptr(ptr).map(|h| unsafe { resource::Ref::from_handle(h) })
+        WindowHandle::from_ptr(ptr)
     }
 
     /// Get a list of currently connected displays.
@@ -595,6 +594,39 @@ impl<'ctx> VideoHandle<'ctx> {
     #[doc(alias = "SDL_SetClipboardText")]
     pub fn clipboard_set_text(self, text: &CStr) -> Result<()> {
         to_result(unsafe { SDL_SetClipboardText(text.as_ptr()) })
+    }
+
+    /// Check whether the screensaver is currently enabled.
+    ///
+    /// # Remarks
+    ///
+    /// The screensaver is disabled by default.
+    ///
+    /// The default can also be changed using
+    /// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
+    #[doc(alias = "SDL_ScreenSaverEnabled")]
+    pub fn is_screen_saver_enabled(self) -> bool {
+        unsafe { SDL_ScreenSaverEnabled() }
+    }
+
+    /// Allow the screen to be blanked by a screen saver.
+    #[doc(alias = "SDL_EnableScreenSaver")]
+    pub fn enable_screen_saver(self) -> Result<()> {
+        to_result(unsafe { SDL_EnableScreenSaver() })
+    }
+
+    /// Prevent the screen from being blanked by a screen saver.
+    ///
+    /// # Remarks
+    ///
+    /// If you disable the screensaver, it is automatically re-enabled when SDL
+    /// quits.
+    ///
+    /// The screensaver is disabled by default, but this may be changed by
+    /// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
+    #[doc(alias = "SDL_DisableScreenSaver")]
+    pub fn disable_screen_saver(self) -> Result<()> {
+        to_result(unsafe { SDL_DisableScreenSaver() })
     }
 }
 
