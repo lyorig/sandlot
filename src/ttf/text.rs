@@ -36,7 +36,7 @@
 //! - [x] TTF_SetTextEngine
 //! - [x] TTF_GetTextEngine
 
-use std::{mem::MaybeUninit, ptr::NonNull};
+use std::{marker::PhantomData, mem::MaybeUninit, ptr::NonNull};
 
 use sdl3_sys::stdinc::SDL_free;
 use sdl3_ttf_sys::ttf::*;
@@ -49,14 +49,14 @@ use crate::{
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource, resource_new},
     surface::Surface,
-    ttf::{Font, FontHandle, RtStr},
+    ttf::{Font, FontHandle, GpuEngine, RendererEngine, RtStr, SurfaceEngine},
     util::{impl_enum_transmute, opt2res, to_result},
 };
 
 resource_new! {
    /// A text object to be drawn using a text engine.
-   pub struct Text<> : TTF_Text {
-       marker: PhantomData<()>,
+   pub struct Text<'ttf, 'font> : TTF_Text {
+       marker: PhantomData<(Ref<'font, Font<'ttf>>)>,
    }
 
    /// Destroys a text object created by a text engine.
@@ -135,33 +135,7 @@ impl From<TTF_SubString> for SubString {
     }
 }
 
-impl TextHandle {
-    /// # Safety
-    /// Currently provided only for API coverage completeness, without a proper wrapper.
-    /// See [`TTF_GetGPUTextDrawData`] docs for more info.
-    ///
-    /// Get the geometry data needed for drawing the text.
-    ///
-    /// Returns a NULL terminated linked list of atlas draw sequences, or an
-    /// error if the passed text is empty or in case of failure.
-    ///
-    /// # Remarks
-    ///
-    /// The text must have been created using a GPU text engine.
-    ///
-    /// The positive X-axis is taken towards the right and the positive Y-axis
-    /// is taken upwards for both the vertex and the texture coordinates, i.e,
-    /// it follows the same convention used by the SDL_GPU API. If you want to
-    /// use a different coordinate system you will need to transform the
-    /// vertices yourself.
-    ///
-    /// If the text looks blocky use linear filtering.
-    #[doc(alias = "TTF_GetGPUTextDrawData")]
-    pub unsafe fn gpu_draw_data(&self) -> Result<NonNull<TTF_GPUAtlasDrawSequence>> {
-        let data = unsafe { TTF_GetGPUTextDrawData(self.as_raw()) };
-        opt2res(NonNull::new(data))
-    }
-
+impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     /// Get the size of a text object, in pixels.
     ///
     /// # Remarks
@@ -181,7 +155,7 @@ impl TextHandle {
 
     /// Get the color of a text object, in 8-bit components.
     #[doc(alias = "TTF_GetTextColor")]
-    pub fn color(&self) -> RgbaU8 {
+    pub fn color_u8(&self) -> RgbaU8 {
         let mut col = MaybeUninit::<RgbaU8>::uninit();
         let ptr = col.as_mut_ptr();
 
@@ -204,7 +178,7 @@ impl TextHandle {
     ///
     /// The default text color is white (255, 255, 255, 255).
     #[doc(alias = "TTF_SetTextColor")]
-    pub fn set_color(&self, color: RgbaU8) -> Result<()> {
+    pub fn set_color_u8(&self, color: RgbaU8) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColor(
                 self.as_raw(),
@@ -219,7 +193,7 @@ impl TextHandle {
     /// Get the color of a text object, in floating-point components
     /// (normally in the range of 0-1).
     #[doc(alias = "TTF_GetTextColorFloat")]
-    pub fn color_float(&self) -> RgbaF32 {
+    pub fn color_f32(&self) -> RgbaF32 {
         let mut color = MaybeUninit::<RgbaF32>::uninit();
         let ptr = color.as_mut_ptr();
         unsafe {
@@ -241,7 +215,7 @@ impl TextHandle {
     ///
     /// The default text color is white (1.0, 1.0, 1.0, 1.0).
     #[doc(alias = "TTF_SetTextColorFloat")]
-    pub fn set_color_float(&self, color: RgbaF32) -> Result<()> {
+    pub fn set_color_f32(&self, color: RgbaF32) -> Result<()> {
         to_result(unsafe {
             TTF_SetTextColorFloat(
                 self.as_raw(),
@@ -382,7 +356,7 @@ impl TextHandle {
 
     /// Get the font used by a text object.
     #[doc(alias = "TTF_GetTextFont")]
-    pub fn font(&self) -> Result<Ref<'_, Font<'_>>> {
+    pub fn font(&self) -> Result<Ref<'font, Font<'ttf>>> {
         let font = unsafe { TTF_GetTextFont(self.as_raw()) };
         let handle = FontHandle::from_ptr(font).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
@@ -400,7 +374,7 @@ impl TextHandle {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextFont")]
-    pub fn set_font<'a>(&self, font: Option<Ref<'a, Font<'a>>>) -> Result<()> {
+    pub fn set_font(&self, font: Option<Ref<'font, Font<'ttf>>>) -> Result<()> {
         let font = font.map_or(std::ptr::null_mut(), |font| font.as_raw());
         to_result(unsafe { TTF_SetTextFont(self.as_raw(), font) })
     }
@@ -532,45 +506,14 @@ impl TextHandle {
         to_result(unsafe { TTF_UpdateText(self.as_raw()) })
     }
 
-    /// Draw text to an SDL surface.
-    ///
-    /// `pos` is the coordinate in pixels, positive from the top left edge
-    /// towards the bottom right.
-    ///
-    /// # Remarks
-    ///
-    /// The text must have been created using a surface text engine, i.e.
-    /// [`Text::new`] combined with
-    /// [`TTF_SetTextEngine`] and
-    /// [`SurfaceEngine::new`](crate::ttf::SurfaceEngine::new).
-    #[doc(alias = "TTF_DrawSurfaceText")]
-    pub fn draw_to_surface(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
-        to_result(unsafe { TTF_DrawSurfaceText(self.as_raw(), pos.x, pos.y, surf.as_raw()) })
-    }
-
-    /// Draw text to an SDL renderer.
-    ///
-    /// `pos` is the coordinate in pixels, positive from the top left edge
-    /// towards the bottom right.
-    ///
-    /// # Remarks
-    ///
-    /// The text must have been created using a renderer text engine, and will
-    /// draw using the renderer passed to that engine.
-    #[doc(alias = "TTF_DrawRendererText")]
-    pub fn draw_to_renderer(&self, pos: PointF32) -> Result<()> {
-        to_result(unsafe { TTF_DrawRendererText(self.as_raw(), pos.x, pos.y) })
-    }
-
     /// Set the text engine used by this text object.
     ///
     /// # Remarks
     ///
     /// This function may cause the internal text representation to be rebuilt.
     #[doc(alias = "TTF_SetTextEngine")]
-    pub fn set_engine<'this, 'eng, H, R>(&'this self, engine: Ref<'eng, R>) -> Result<()>
+    fn set_engine<H, R>(&self, engine: Ref<R>) -> Result<()>
     where
-        'eng: 'this,
         H: Handle<Raw = *mut TTF_TextEngine>,
         R: Resource<Handle = H>,
     {
@@ -589,13 +532,12 @@ impl TextHandle {
     }
 }
 
-impl Text {
+impl<'ttf, 'font> Text<'ttf, 'font> {
     /// Create a text object from UTF-8 text and a text engine.
     ///
-    /// The engine may be set afterwards via [`TTF_SetTextEngine`].
+    /// The engine may be set afterwards via [`TextHandle::set_engine`].
     #[doc(alias = "TTF_CreateText")]
-    pub fn new(font: Ref<Font>, text: &str) -> Result<Self> {
-        let text = RtStr::new(text);
+    fn new(font: Ref<'font, Font<'ttf>>, text: RtStr) -> Result<Self> {
         Self::from_ptr(unsafe {
             TTF_CreateText(
                 std::ptr::null_mut(),
@@ -613,8 +555,7 @@ impl Text {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_SetTextString")]
-    pub fn set_string(&self, text: &str) -> Result<()> {
-        let text = RtStr::new(text);
+    pub fn set_string(&self, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_SetTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -630,8 +571,7 @@ impl Text {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_InsertTextString")]
-    pub fn insert_string(&self, offset: i32, text: &str) -> Result<()> {
-        let text = RtStr::new(text);
+    pub fn insert_string(&self, offset: i32, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_InsertTextString(self.as_raw(), offset, text.as_ptr(), text.len()) })
     }
 
@@ -642,8 +582,7 @@ impl Text {
     /// This function may cause the internal text representation to be
     /// rebuilt.
     #[doc(alias = "TTF_AppendTextString")]
-    pub fn append_string(&self, text: &str) -> Result<()> {
-        let text = RtStr::new(text);
+    pub fn append_string(&self, text: RtStr) -> Result<()> {
         to_result(unsafe { TTF_AppendTextString(self.as_raw(), text.as_ptr(), text.len()) })
     }
 
@@ -662,5 +601,153 @@ impl Text {
     #[doc(alias = "TTF_DeleteTextString")]
     pub fn delete_string(&self, offset: i32, length: i32) -> Result<()> {
         to_result(unsafe { TTF_DeleteTextString(self.as_raw(), offset, length) })
+    }
+}
+
+pub struct RendererText<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd> {
+    text: Text<'ttf, 'font>,
+    marker: PhantomData<Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>>,
+}
+
+impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
+    RendererText<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
+{
+    pub fn new(
+        font: Ref<'font, Font<'ttf>>,
+        text: RtStr,
+        eng: Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>,
+    ) -> Result<Self> {
+        let text = Text::new(font, text)?;
+        text.set_engine(eng)?;
+
+        Ok(Self {
+            text,
+            marker: PhantomData,
+        })
+    }
+
+    /// Draw text to an SDL renderer.
+    ///
+    /// `pos` is the coordinate in pixels, positive from the top left edge
+    /// towards the bottom right.
+    ///
+    /// # Remarks
+    ///
+    /// The text must have been created using a renderer text engine, and will
+    /// draw using the renderer passed to that engine.
+    #[doc(alias = "TTF_DrawRendererText")]
+    pub fn draw(&self, pos: PointF32) -> Result<()> {
+        to_result(unsafe { TTF_DrawRendererText(self.as_raw(), pos.x, pos.y) })
+    }
+}
+
+impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd> std::ops::Deref
+    for RendererText<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
+{
+    type Target = Text<'ttf, 'font>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.text
+    }
+}
+
+pub struct SurfaceText<'ttf, 'font, 'eng> {
+    text: Text<'ttf, 'font>,
+    marker: PhantomData<Ref<'eng, SurfaceEngine>>,
+}
+
+impl<'ttf, 'font, 'eng> SurfaceText<'ttf, 'font, 'eng> {
+    pub fn new(
+        font: Ref<'font, Font<'ttf>>,
+        text: RtStr,
+        eng: Ref<'eng, SurfaceEngine>,
+    ) -> Result<Self> {
+        let text = Text::new(font, text)?;
+        text.set_engine(eng)?;
+
+        Ok(Self {
+            text,
+            marker: PhantomData,
+        })
+    }
+
+    /// Draw text to an SDL surface.
+    ///
+    /// `pos` is the coordinate in pixels, positive from the top left edge
+    /// towards the bottom right.
+    ///
+    /// # Remarks
+    ///
+    /// The text must have been created using a surface text engine, i.e.
+    /// [`Text::new`] combined with [`TextHandle::set_engine`] and [`SurfaceEngine::new`](super::SurfaceEngine::new).
+    #[doc(alias = "TTF_DrawSurfaceText")]
+    fn draw(&self, surf: Ref<Surface>, pos: PointI32) -> Result<()> {
+        to_result(unsafe { TTF_DrawSurfaceText(self.as_raw(), pos.x, pos.y, surf.as_raw()) })
+    }
+}
+
+impl<'ttf, 'font, 'eng> std::ops::Deref for SurfaceText<'ttf, 'font, 'eng> {
+    type Target = Text<'ttf, 'font>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.text
+    }
+}
+
+pub struct GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
+    text: Text<'ttf, 'font>,
+    marker: PhantomData<Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>>,
+}
+
+impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
+    pub fn new(
+        font: Ref<'font, Font<'ttf>>,
+        text: RtStr,
+        eng: Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>,
+    ) -> Result<Self> {
+        let text = Text::new(font, text)?;
+        text.set_engine(eng)?;
+
+        Ok(Self {
+            text,
+            marker: PhantomData,
+        })
+    }
+
+    /// # Safety
+    ///
+    /// Currently provided only for API coverage completeness, without a proper wrapper.
+    /// See [`TTF_GetGPUTextDrawData`] docs for more info.
+    ///
+    /// Get the geometry data needed for drawing the text.
+    ///
+    /// Returns a NULL terminated linked list of atlas draw sequences, or an
+    /// error if the passed text is empty or in case of failure.
+    ///
+    /// # Remarks
+    ///
+    /// The text must have been created using a GPU text engine.
+    ///
+    /// The positive X-axis is taken towards the right and the positive Y-axis
+    /// is taken upwards for both the vertex and the texture coordinates, i.e,
+    /// it follows the same convention used by the SDL_GPU API. If you want to
+    /// use a different coordinate system you will need to transform the
+    /// vertices yourself.
+    ///
+    /// If the text looks blocky use linear filtering.
+    #[doc(alias = "TTF_GetGPUTextDrawData")]
+    pub unsafe fn gpu_draw_data(&self) -> Result<NonNull<TTF_GPUAtlasDrawSequence>> {
+        let data = unsafe { TTF_GetGPUTextDrawData(self.as_raw()) };
+        opt2res(NonNull::new(data))
+    }
+}
+
+impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> std::ops::Deref
+    for GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev>
+{
+    type Target = Text<'ttf, 'font>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.text
     }
 }

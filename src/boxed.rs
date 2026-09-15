@@ -163,19 +163,19 @@ impl<T: ?Sized> Borrow<T> for Box<T> {
 }
 
 impl<T: ?Sized> fmt::Pointer for Box<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         fmt::Pointer::fmt(&self.ptr, f)
     }
 }
 
 impl<T: Debug + ?Sized> Debug for Box<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         T::fmt(self, f)
     }
 }
 
 impl<T: Display + ?Sized> Display for Box<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         T::fmt(self, f)
     }
 }

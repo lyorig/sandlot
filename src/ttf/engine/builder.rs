@@ -1,4 +1,4 @@
-use std::{ffi::c_char, marker::PhantomData};
+use std::ffi::c_char;
 
 use sdl3_ttf_sys::ttf::*;
 
@@ -19,22 +19,18 @@ const RENDERER_CREATE_PROPERTIES: [*const c_char; 2] = [
 /// Builder for [`GpuEngine`], using
 /// [`TTF_CreateGPUTextEngineWithProperties`](https://wiki.libsdl.org/SDL3_ttf/TTF_CreateGPUTextEngineWithProperties).
 #[derive(Clone, Copy)]
-pub struct GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
+pub struct GpuEngineBuilder<'p> {
     inner: Ref<'p, Properties>,
-    marker: PhantomData<Ref<'dev, Device<'ctx, 'vid>>>,
 }
 
-impl<'p, 'dev, 'ctx, 'vid> GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
+impl<'p> GpuEngineBuilder<'p> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
-        Self {
-            inner,
-            marker: PhantomData,
-        }
+        Self { inner }
     }
 
     /// The GPU device used to create textures and draw text.
     #[doc(alias = "TTF_PROP_GPU_TEXT_ENGINE_DEVICE")]
-    pub fn device(self, value: Ref<'dev, Device>) -> Self {
+    fn device(self, value: Ref<Device>) -> Self {
         self.set_pointer(TTF_PROP_GPU_TEXT_ENGINE_DEVICE, value.as_raw().cast());
         self
     }
@@ -55,15 +51,22 @@ impl<'p, 'dev, 'ctx, 'vid> GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
 
     /// Build the GPU text engine.
     #[doc(alias = "TTF_CreateGPUTextEngineWithProperties")]
-    pub fn build(self) -> Result<GpuEngine> {
+    pub fn build<'ctx, 'vid, 'dev>(
+        self,
+        dev: Ref<'dev, Device<'ctx, 'vid>>,
+    ) -> Result<GpuEngine<'ctx, 'vid, 'dev>> {
+        self.device(dev);
         GpuEngine::from_ptr(unsafe { TTF_CreateGPUTextEngineWithProperties(self.inner.id()) })
     }
 
     /// Build the GPU text engine, and clean up its creation properties.
     /// See the [`crate::properties`] module docs for more information.
     #[doc(alias = "TTF_CreateGPUTextEngineWithProperties")]
-    pub fn build_cleanup(self) -> Result<GpuEngine> {
-        let result = self.build();
+    pub fn build_cleanup<'ctx, 'vid, 'dev>(
+        self,
+        dev: Ref<'dev, Device<'ctx, 'vid>>,
+    ) -> Result<GpuEngine<'ctx, 'vid, 'dev>> {
+        let result = self.build(dev);
         Self::clear_from(self.inner);
         result
     }
@@ -80,22 +83,18 @@ impl<'p, 'dev, 'ctx, 'vid> GpuEngineBuilder<'p, 'dev, 'ctx, 'vid> {
 /// Builder for [`RendererEngine`], using
 /// [`TTF_CreateRendererTextEngineWithProperties`](https://wiki.libsdl.org/SDL3_ttf/TTF_CreateRendererTextEngineWithProperties).
 #[derive(Clone, Copy)]
-pub struct RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wnd> {
+pub struct RendererEngineBuilder<'p> {
     inner: Ref<'p, Properties>,
-    marker: PhantomData<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>>,
 }
 
-impl<'p, 'rnd, 'ctx, 'vid, 'wnd> RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wnd> {
+impl<'p> RendererEngineBuilder<'p> {
     pub(super) fn new(inner: Ref<'p, Properties>) -> Self {
-        Self {
-            inner,
-            marker: PhantomData,
-        }
+        Self { inner }
     }
 
     /// The renderer used to create textures and draw text.
     #[doc(alias = "TTF_PROP_RENDERER_TEXT_ENGINE_RENDERER")]
-    pub fn renderer(self, value: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>) -> Self {
+    fn renderer(self, value: Ref<Renderer>) -> Self {
         self.set_pointer(
             TTF_PROP_RENDERER_TEXT_ENGINE_RENDERER,
             value.as_raw().cast(),
@@ -119,7 +118,11 @@ impl<'p, 'rnd, 'ctx, 'vid, 'wnd> RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wn
 
     /// Build the renderer text engine.
     #[doc(alias = "TTF_CreateRendererTextEngineWithProperties")]
-    pub fn build(self) -> Result<RendererEngine> {
+    pub fn build<'ctx, 'vid, 'wnd, 'rnd>(
+        self,
+        rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
+    ) -> Result<RendererEngine<'ctx, 'vid, 'wnd, 'rnd>> {
+        self.renderer(rnd);
         RendererEngine::from_ptr(unsafe {
             TTF_CreateRendererTextEngineWithProperties(self.inner.id())
         })
@@ -128,8 +131,11 @@ impl<'p, 'rnd, 'ctx, 'vid, 'wnd> RendererEngineBuilder<'p, 'rnd, 'ctx, 'vid, 'wn
     /// Build the renderer text engine, and clean up its creation properties.
     /// See the [`crate::properties`] module docs for more information.
     #[doc(alias = "TTF_CreateRendererTextEngineWithProperties")]
-    pub fn build_cleanup(self) -> Result<RendererEngine> {
-        let result = self.build();
+    pub fn build_cleanup<'ctx, 'vid, 'wnd, 'rnd>(
+        self,
+        rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
+    ) -> Result<RendererEngine<'ctx, 'vid, 'wnd, 'rnd>> {
+        let result = self.build(rnd);
         Self::clear_from(self.inner);
         result
     }
