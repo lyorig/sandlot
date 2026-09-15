@@ -10,7 +10,6 @@ use sandlot::{
     event::Event,
     gpu::*,
     init::{AppKind, Context, Video},
-    properties::Properties,
     rect::Point,
     resource::Ref,
     window::Window,
@@ -214,7 +213,7 @@ fn run() -> Result<()> {
     let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
 
     // SDL provides an existing property set, which we can conveniently abuse.
-    let props = Properties::global()?;
+    let props = ctx.global_properties()?;
 
     let device = Device::builder(props)
         .debug_mode(false)

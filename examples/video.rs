@@ -7,7 +7,6 @@ use sandlot::{
     color::Rgba,
     event::Event,
     init::{AppKind, Context, Video},
-    properties::Properties,
     rect::{Point, Rect},
     renderer::{Renderer, RendererProperties},
     window::Window,
@@ -38,7 +37,7 @@ fn run() -> Result<()> {
     let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
     let events = video.events();
 
-    let props = Properties::global()?;
+    let props = ctx.global_properties()?;
 
     let wnd = Window::builder(props)
         .position(Point::new(Window::POS_CENTERED, Window::POS_CENTERED))

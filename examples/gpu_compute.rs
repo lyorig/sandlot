@@ -6,7 +6,6 @@ use sandlot::{
     Result,
     gpu::*,
     init::{AppKind, Context, Video},
-    properties::Properties,
 };
 
 cfg_select! {
@@ -36,7 +35,7 @@ fn run() -> Result<()> {
 
     let video = Video::init(ctx.as_ref())?;
 
-    let props = Properties::global()?;
+    let props = ctx.global_properties()?;
 
     let device = Device::builder(props)
         .debug_mode(false)

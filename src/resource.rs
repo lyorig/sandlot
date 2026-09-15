@@ -43,13 +43,15 @@ pub trait Handle: Copy {
 pub trait Resource: Sized {
     type Handle: Handle;
 
-    /// Get this type's underlying handle. See the [`Handle`] trait's
-    /// documentation for what this represents.
+    /// Obtain a raw handle to this resource.
+    ///
+    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+    /// that the API relies on.
     ///
     /// # Safety
     ///
-    /// The caller must only use the returned handle within
-    /// the lifetime of the backing resource.
+    /// The caller must only use the returned handle within the lifetime of the backing resource.
     unsafe fn as_handle(&self) -> Self::Handle;
 
     /// Create a new reference tied to this object.
@@ -253,10 +255,15 @@ macro_rules! resource_new {
                     unsafe { $crate::resource::Ref::from_handle(self.inner) }
                 }
 
+                /// Obtain a raw handle to this resource.
+                ///
+                /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+                /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+                /// that the API relies on.
+                ///
                 /// # Safety
                 ///
-                /// The caller must only use the returned handle within the lifetime
-                /// of the backing resource.
+                /// The caller must only use the returned handle within the lifetime of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$owned Handle>]<$($lt),*> {
                     unsafe { $crate::resource::Resource::as_handle(self) }
                 }

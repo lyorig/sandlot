@@ -10,7 +10,6 @@ use sandlot::{
     event::Event,
     gpu::*,
     init::{AppKind, Context, Video},
-    properties::Properties,
     rect::Point,
     window::Window,
 };
@@ -58,7 +57,7 @@ fn run() -> Result<()> {
     let events = video.events();
 
     // SDL provides an existing property set, which we can conveniently abuse.
-    let props = Properties::global()?;
+    let props = ctx.global_properties()?;
 
     let device = Device::builder(props)
         .debug_mode(false)

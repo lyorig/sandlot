@@ -64,7 +64,7 @@
 //! - [x] SDL_EnumerateProperties
 //! - [x] SDL_GetBooleanProperty
 //! - [x] SDL_GetFloatProperty
-//! - [x] SDL_GetGlobalProperties
+//! - [x] SDL_GetGlobalProperties (impl'd as [`ContextHandle::global_properties`])
 //! - [x] SDL_GetNumberProperty
 //! - [x] SDL_GetPointerProperty
 //! - [x] SDL_GetPropertyType
@@ -95,6 +95,9 @@ use crate::{
     resource::{Handle, Ref, RefMut, Resource},
     util::{opt2res_map, to_result},
 };
+
+#[expect(unused_imports)]
+use crate::init::ContextHandle;
 
 /// An ID that represents a properties set.
 ///
@@ -259,20 +262,15 @@ impl Properties {
         }
     }
 
-    /// Get the global SDL properties.
-    #[doc(alias = "SDL_GetGlobalProperties")]
-    pub fn global() -> Result<Ref<'static, Properties>> {
-        let id = unsafe { SDL_GetGlobalProperties() };
-        match PropertiesHandle::from_id(id) {
-            Some(p) => Ok(unsafe { Ref::from_handle(p) }),
-            None => Err(Error::current()),
-        }
-    }
-
+    /// Obtain a raw handle to this resource.
+    ///
+    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+    /// that the API relies on.
+    ///
     /// # Safety
     ///
-    /// The caller must only use the returned handle within the lifetime
-    /// of the backing property group.
+    /// The caller must only use the returned handle within the lifetime of the backing resource.
     pub unsafe fn as_handle(&self) -> PropertiesHandle {
         self.inner
     }

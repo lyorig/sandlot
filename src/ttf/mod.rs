@@ -183,6 +183,15 @@ impl Drop for Context {
 impl init::Subsystem for Context {
     type Handle = ContextHandle;
 
+    /// Obtain a raw handle to this resource.
+    ///
+    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+    /// that the API relies on.
+    ///
+    /// # Safety
+    ///
+    /// The caller must only use the returned handle within the lifetime of the backing resource.
     unsafe fn as_handle(&self) -> Self::Handle {
         self.handle
     }

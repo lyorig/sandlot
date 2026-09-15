@@ -99,6 +99,7 @@ use sdl3_sys::{
     filesystem::{SDL_GetBasePath, SDL_GetUserFolder},
     init::*,
     keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
+    properties::SDL_GetGlobalProperties,
     video::*,
 };
 
@@ -109,6 +110,7 @@ use crate::{
     error::Error,
     event::{Event, EventIter},
     fs::Folder,
+    properties::{Properties, PropertiesHandle},
     rect::{PointI32, RectI32},
     resource,
     string::String,
@@ -190,6 +192,16 @@ impl ContextHandle {
             })
         }
     }
+
+    /// Get the global SDL properties.
+    #[doc(alias = "SDL_GetGlobalProperties")]
+    pub fn global_properties(&self) -> Result<resource::Ref<'_, Properties>> {
+        let id = unsafe { SDL_GetGlobalProperties() };
+        match PropertiesHandle::from_id(id) {
+            Some(p) => Ok(unsafe { resource::Ref::from_handle(p) }),
+            None => Err(Error::current()),
+        }
+    }
 }
 
 /// A zero-sized type that mainly exists to call [`SDL_Quit`].
@@ -221,7 +233,7 @@ impl Context {
     /// Create a [`Context`], specifying metadata about your app through a builder-like interface.
     ///
     /// This metadata is stored in [`Properties::global`](crate::properties::Properties::global).
-    /// Although it **doesn't seem to be used** by SDL by version 3.4.16, specifying it is
+    /// Although it **doesn't seem to be used** by SDL as of version 3.4.16, specifying it is
     /// still recommended, as future versions may make use of it.
     ///
     /// # Remarks
@@ -238,10 +250,15 @@ impl Context {
         ContextBuilder::new()
     }
 
+    /// Obtain a raw handle to this resource.
+    ///
+    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+    /// that the API relies on.
+    ///
     /// # Safety
     ///
-    /// The caller must only use the returned handle within
-    /// the lifetime of the backing [`Context`].
+    /// The caller must only use the returned handle within the lifetime of the backing resource.
     pub unsafe fn as_handle(&self) -> ContextHandle {
         unsafe { Subsystem::as_handle(self) }
     }
@@ -278,10 +295,15 @@ impl Drop for Context {
 pub trait Subsystem: Sized {
     type Handle: Copy;
 
+    /// Obtain a raw handle to this resource.
+    ///
+    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+    /// that the API relies on.
+    ///
     /// # Safety
     ///
-    /// The caller must only use the returned handle within
-    /// the lifetime of the backing subsystem.
+    /// The caller must only use the returned handle within the lifetime of the backing resource.
     unsafe fn as_handle(&self) -> Self::Handle;
 
     fn as_ref(&self) -> Ref<'_, Self> {
@@ -374,10 +396,15 @@ macro_rules! subsystem_new {
                     }
                 }
 
+                /// Obtain a raw handle to this resource.
+                ///
+                /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
+                /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
+                /// that the API relies on.
+                ///
                 /// # Safety
                 ///
-                /// The caller must only use the returned handle within
-                /// the lifetime of the backing subsystem.
+                /// The caller must only use the returned handle within the lifetime of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$name Handle>]<'ctx> {
                     unsafe { $crate::init::Subsystem::as_handle(self) }
                 }
