@@ -602,7 +602,7 @@ subsystem_new!(
     /// The events subsystem provides access to the event queue.
     Events, EVENTS);
 
-impl EventsHandle<'_> {
+impl<'ctx> EventsHandle<'ctx> {
     /// Add an event to the event queue.
     ///
     /// The event is copied into the queue.
@@ -707,7 +707,7 @@ impl EventsHandle<'_> {
 
     /// Returns an iterator over all [`Event`]s acquired since the last call
     /// (implicit or explicit) to [`EventsHandle::pump`].
-    pub fn iter(self) -> EventIter {
+    pub fn iter(&self) -> EventIter<'ctx, '_> {
         EventIter::new()
     }
 }

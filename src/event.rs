@@ -45,10 +45,11 @@
 //! - [x] SDL_WaitEvent
 //! - [ ] SDL_WaitEventTimeout
 
-use std::{iter::FusedIterator, mem::MaybeUninit, ptr};
+use std::{iter::FusedIterator, marker::PhantomData, mem::MaybeUninit, ptr};
 
 use sdl3_sys::events::*;
 
+use crate::init;
 #[expect(unused_imports)]
 use crate::init::EventsHandle;
 
@@ -460,23 +461,19 @@ impl From<&Event> for SDL_Event {
     }
 }
 
-pub struct EventIter {
-    _private: (),
+pub struct EventIter<'ctx, 'evt> {
+    marker: PhantomData<init::Ref<'evt, init::Events<'ctx>>>,
 }
 
-impl EventIter {
+impl<'ctx, 'evt> EventIter<'ctx, 'evt> {
     pub(crate) fn new() -> Self {
-        Self { _private: () }
+        Self {
+            marker: PhantomData,
+        }
     }
 }
 
-impl Default for EventIter {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Iterator for EventIter {
+impl<'ctx, 'evt> Iterator for EventIter<'ctx, 'evt> {
     type Item = Event;
 
     /// Incredibly cursed function that maps an [`SDL_Event`] to our own [`Event`]
@@ -499,4 +496,4 @@ impl Iterator for EventIter {
     }
 }
 
-impl FusedIterator for EventIter {}
+impl<'ctx, 'evt> FusedIterator for EventIter<'ctx, 'evt> {}
