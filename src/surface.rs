@@ -16,7 +16,7 @@
 //! - [ ] SDL_ConvertSurfaceAndColorspace
 //! - [x] SDL_CreateSurface
 //! - [ ] SDL_CreateSurfaceFrom
-//! - [ ] SDL_CreateSurfacePalette
+//! - [x] SDL_CreateSurfacePalette
 //! - [x] SDL_DestroySurface
 //! - [x] SDL_DuplicateSurface
 //! - [x] SDL_FillSurfaceRect
@@ -29,7 +29,7 @@
 //! - [x] SDL_GetSurfaceColorMod
 //! - [ ] SDL_GetSurfaceColorspace
 //! - [ ] SDL_GetSurfaceImages
-//! - [ ] SDL_GetSurfacePalette
+//! - [x] SDL_GetSurfacePalette
 //! - [ ] SDL_GetSurfaceProperties
 //! - [ ] SDL_LoadBMP
 //! - [ ] SDL_LoadBMP_IO
@@ -50,7 +50,7 @@
 //! - [ ] SDL_SetSurfaceColorKey
 //! - [x] SDL_SetSurfaceColorMod
 //! - [ ] SDL_SetSurfaceColorspace
-//! - [ ] SDL_SetSurfacePalette
+//! - [x] SDL_SetSurfacePalette
 //! - [ ] SDL_SetSurfaceRLE
 //! - [x] SDL_StretchSurface
 //! - [ ] SDL_SurfaceHasAlternateImages
@@ -60,12 +60,13 @@
 //! - [ ] SDL_WriteSurfacePixel
 //! - [ ] SDL_WriteSurfacePixelFloat
 
-use std::mem::MaybeUninit;
+use std::{ffi::CStr, mem::MaybeUninit};
 
 use crate::{
     Result,
     color::{RgbU8, RgbaF32, RgbaU8},
-    pixels::{BlendMode, FlipMode, PixelFormat, ScaleMode},
+    error::Error,
+    pixels::{BlendMode, FlipMode, Palette, PaletteHandle, PixelFormat, ScaleMode},
     rect::{PointI32, RectI32},
     resource::{Ref, resource_new},
     traits,
@@ -115,7 +116,8 @@ impl SurfaceHandle {
 
     /// Perform a fast fill of the entire surface with a specific color.
     ///
-    /// Equivalent to SDL's `SDL_FillSurfaceRect` with a `NULL` rectangle.
+    /// An optional area can be specified. If [`None`] is passed, the entire
+    /// surface is filled.
     ///
     /// # Remarks
     ///
@@ -127,25 +129,9 @@ impl SurfaceHandle {
     /// `SDL_SetSurfaceClipRect`), then this function will fill based on the
     /// intersection of the clip rectangle and the whole surface.
     #[doc(alias = "SDL_FillSurfaceRect")]
-    pub fn fill(self, c: RgbaU8) -> Result<()> {
-        to_result(unsafe { SDL_FillSurfaceRect(self.as_raw(), std::ptr::null(), self.map_rgba(c)) })
-    }
-
-    /// Perform a fast fill of a rectangle with a specific color.
-    ///
-    /// # Remarks
-    ///
-    /// If the color value contains an alpha component then the destination
-    /// is simply filled with that alpha information, no blending takes
-    /// place.
-    ///
-    /// If there is a clip rectangle set on the destination (set via
-    /// `SDL_SetSurfaceClipRect`), then this function will fill based on the
-    /// intersection of the clip rectangle and `pos`.
-    #[doc(alias = "SDL_FillSurfaceRect")]
-    pub fn fill_rect(self, pos: RectI32, c: RgbaU8) -> Result<()> {
+    pub fn fill(self, c: RgbaU8, area: Option<&RectI32>) -> Result<()> {
         to_result(unsafe {
-            SDL_FillSurfaceRect(self.as_raw(), (&raw const pos).cast(), self.map_rgba(c))
+            SDL_FillSurfaceRect(self.as_raw(), opt2ptr(area).cast(), self.map_rgba(c))
         })
     }
 
@@ -466,6 +452,48 @@ impl SurfaceHandle {
                 opt2ptr(dst).cast(),
             )
         })
+    }
+
+    /// Create a palette associated with this surface.
+    ///
+    /// This can only be done for surfaces using an indexed format,
+    /// i.e. [`PixelFormat::Index1Msb`] and friends. [`Err`] is returned
+    /// with an accompanying message if that is not the case.
+    #[doc(alias = "SDL_CreateSurfacePalette")]
+    pub fn create_palette(&self) -> Result<Ref<'_, Palette>> {
+        PaletteHandle::from_ptr(unsafe { SDL_CreateSurfacePalette(self.as_raw()) })
+            .map(|h| unsafe { Ref::from_handle(h) })
+            .ok_or_else(Error::current)
+    }
+
+    /// Get the palette used by a surface.
+    ///
+    /// Returns [`None`] if there is no palette used.
+    #[doc(alias = "SDL_GetSurfacePalette")]
+    pub fn palette(&self) -> Option<Ref<'_, Palette>> {
+        PaletteHandle::from_ptr(unsafe { SDL_GetSurfacePalette(self.as_raw()) })
+            .map(|h| unsafe { Ref::from_handle(h) })
+    }
+
+    /// Set the palette used by a surface.
+    ///
+    /// Setting the palette keeps an internal reference to the palette, which can be safely destroyed afterwards.
+    ///
+    /// A single palette can be shared with many surfaces.
+    #[doc(alias = "SDL_SetSurfacePalette")]
+    pub fn set_palette(self, pal: Ref<Palette>) -> Result<()> {
+        to_result(unsafe { SDL_SetSurfacePalette(self.as_raw(), pal.as_raw()) })
+    }
+
+    /// Save a surface to a file in BMP format.
+    ///
+    /// Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the BMP directly.
+    /// Other RGB formats with 8-bit or higher get converted to a 24-bit surface or, if they have
+    /// an alpha mask or a colorkey, to a 32-bit surface before they are saved. YUV and paletted
+    /// 1-bit and 4-bit formats are not supported.
+    #[doc(alias = "SDL_SaveBMP")]
+    pub fn save_bmp(self, path: &CStr) -> Result<()> {
+        to_result(unsafe { SDL_SaveBMP(self.as_raw(), path.as_ptr()) })
     }
 }
 

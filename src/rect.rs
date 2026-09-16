@@ -1,4 +1,4 @@
-use std::{fmt::Display, ops::Mul, ptr};
+use std::{fmt::Display, mem, ops::Mul, ptr};
 
 use sdl3_sys::rect::*;
 
@@ -33,7 +33,11 @@ impl PointI32 {
     }
 
     pub const fn from_sdl(rect: SDL_Point) -> Self {
-        unsafe { std::mem::transmute(rect) }
+        unsafe { mem::transmute(rect) }
+    }
+
+    pub const fn to_sdl(self) -> SDL_Point {
+        unsafe { mem::transmute(self) }
     }
 }
 
@@ -50,7 +54,11 @@ impl PointF32 {
     }
 
     pub const fn from_sdl(rect: SDL_FPoint) -> Self {
-        unsafe { std::mem::transmute(rect) }
+        unsafe { mem::transmute(rect) }
+    }
+
+    pub const fn to_sdl(self) -> SDL_FPoint {
+        unsafe { mem::transmute(self) }
     }
 }
 
@@ -128,7 +136,7 @@ impl RectI32 {
     }
 
     pub const fn from_sdl(rect: SDL_Rect) -> Self {
-        unsafe { std::mem::transmute(rect) }
+        unsafe { mem::transmute(rect) }
     }
 }
 
@@ -145,7 +153,7 @@ impl RectF32 {
     }
 
     pub const fn from_sdl(rect: SDL_FRect) -> Self {
-        unsafe { std::mem::transmute(rect) }
+        unsafe { mem::transmute(rect) }
     }
 }
 

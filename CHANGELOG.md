@@ -8,6 +8,7 @@
   - `Display` properties
   - `Error` setting and clearing
   - TTF "engine'd text objects" (see `ttf::Text` docs for specifics)
+  - Subsystem `leak` constructor
 - API changes
   - `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
   - places which previously used `&Context` have migrated to `Ref<Context>`
@@ -20,6 +21,7 @@
     - display getters
     - everything from `sandlot::clipboard` (which has been removed)
     - screen saver functions from `sandlot::window`
+    - state fetching functions from `sandlot::keyboard`
 - Docs
   - Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
   - `Self` no longer used in links

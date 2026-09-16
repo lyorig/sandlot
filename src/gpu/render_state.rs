@@ -80,15 +80,15 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
 
 resource_new! {
     /// A custom GPU render state.
-    pub struct RenderState<> : SDL_GPURenderState {
-        marker: PhantomData<()>,
+    pub struct RenderState<'ctx, 'vid, 'wnd, 'rnd> : SDL_GPURenderState {
+        marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 
     /// Destroys custom GPU render state.
     ~SDL_DestroyGPURenderState
 }
 
-impl RenderStateHandle {
+impl<'ctx, 'vid, 'wnd, 'rnd> RenderState<'ctx, 'vid, 'wnd, 'rnd> {
     /// Set fragment-shader uniform data in a custom GPU render state.
     ///
     /// `slot_index` selects the fragment uniform slot and `data` contains the
@@ -109,7 +109,7 @@ impl RenderStateHandle {
     }
 }
 
-impl RenderState {
+impl<'ctx, 'vid, 'wnd, 'rnd> RenderState<'ctx, 'vid, 'wnd, 'rnd> {
     /// Create custom GPU render state for a renderer.
     ///
     /// `rnd` is the renderer that owns the state, and `ci` describes the
@@ -117,7 +117,10 @@ impl RenderState {
     ///
     /// Returns [`Err`] if SDL cannot create the render state.
     #[doc(alias = "SDL_CreateGPURenderState")]
-    pub fn new(rnd: Ref<Renderer>, ci: &RenderStateCreateInfo) -> Result<Self> {
+    pub fn new(
+        rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
+        ci: &RenderStateCreateInfo,
+    ) -> Result<Self> {
         Self::from_ptr(unsafe { SDL_CreateGPURenderState(rnd.as_raw(), &raw const ci.0) })
     }
 }

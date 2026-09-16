@@ -1,4 +1,4 @@
-//! Various enums related to pixels and/or graphics.
+//! Various enums and structs related to pixels and/or graphics.
 //!
 //! SDL offers facilities for pixel management.
 //!
@@ -104,8 +104,10 @@ use sdl3_sys::{
 
 use crate::{
     Result,
+    color::RgbaU8,
     error::Error,
-    util::{c_ptr_to_str, impl_enum_transmute},
+    resource::resource_new,
+    util::{c_ptr_to_str, impl_enum_transmute, to_result},
 };
 
 /// A set of blend modes used in drawing operations.
@@ -571,5 +573,47 @@ impl PixelFormat {
 impl std::fmt::Display for PixelFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.write_str(self.name())
+    }
+}
+
+resource_new! {
+    /// A set of indexed colors representing a palette.
+    ///
+    /// Palettes are ref-counted, so think of this as internally containing an [`Rc`](std::rc::Rc).
+    pub struct Palette<> : SDL_Palette {
+        marker: PhantomData<()>,
+    }
+
+    /// Free a palette created with [`SDL_CreatePalette`].
+    ~SDL_DestroyPalette
+}
+
+impl Palette {
+    /// Create a palette structure with the specified number of color entries.
+    ///
+    /// The palette entries are initialized to white.
+    ///
+    /// Returns [`Err`] if there is not enough memory available.
+    #[doc(alias = "SDL_CreatePalette")]
+    pub fn new(num_colors: i32) -> Result<Self> {
+        Self::from_ptr(unsafe { SDL_CreatePalette(num_colors) })
+    }
+}
+
+impl PaletteHandle {
+    /// Set a range of colors in a palette.
+    ///
+    /// Returns [`Err`] if `cols` is longer than the palette's length - `start_index`,
+    /// although the first N values that will fit are still set.
+    #[doc(alias = "SDL_SetPaletteColors")]
+    pub fn set_colors(self, cols: &[RgbaU8], start_index: i32) -> Result<()> {
+        to_result(unsafe {
+            SDL_SetPaletteColors(
+                self.as_raw(),
+                cols.as_ptr().cast(),
+                start_index,
+                cols.len() as i32,
+            )
+        })
     }
 }

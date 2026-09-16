@@ -32,12 +32,14 @@ impl<'ctx, 'vid, 'disp> DisplayProperties<'ctx, 'vid, 'disp> {
     /// the requested display orientation.
     #[doc(alias = "SDL_PROP_DISPLAY_KMSDRM_PANEL_ORIENTATION")]
     pub fn kmsdrm_panel_orientation(self) -> Option<i64> {
+        const SENTINEL: i64 = i64::MAX;
+
         let val = unsafe {
             self.inner
-                .number(SDL_PROP_DISPLAY_KMSDRM_PANEL_ORIENTATION_NUMBER, i64::MAX)
+                .number(SDL_PROP_DISPLAY_KMSDRM_PANEL_ORIENTATION_NUMBER, SENTINEL)
         };
 
-        (val != i64::MAX).then_some(val)
+        (val != SENTINEL).then_some(val)
     }
 
     /// The Wayland `wl_output` associated with the display.

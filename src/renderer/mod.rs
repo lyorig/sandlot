@@ -39,7 +39,7 @@
 //! - [ ] SDL_RenderDebugTextFormat
 //! - [x] SDL_RenderFillRect
 //! - [x] SDL_RenderFillRects
-//! - [ ] SDL_RenderGeometry
+//! - [x] SDL_RenderGeometry
 //! - [ ] SDL_RenderGeometryRaw
 //! - [x] SDL_RenderLine
 //! - [x] SDL_RenderLines
@@ -280,30 +280,9 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// you're using this on the main rendering target, it should be called
     /// after rendering and before [`RendererHandle::present`].
     #[doc(alias = "SDL_RenderReadPixels")]
-    pub fn read_target(self) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_RenderReadPixels(self.handle.as_ptr(), std::ptr::null()) })
-    }
-
-    /// Read pixels from the current rendering target.
-    ///
-    /// `area` represents the area to read, which will be clipped to the
-    /// current viewport. Returns a new surface containing pixels inside the
-    /// desired area clipped to the current viewport.
-    ///
-    /// Note that this returns the actual pixels on the screen, so if you are
-    /// using logical presentation you should use
-    /// `SDL_GetRenderLogicalPresentationRect` to get the area containing your
-    /// content.
-    ///
-    /// # Warning
-    ///
-    /// This is a very slow operation, and should not be used frequently. If
-    /// you're using this on the main rendering target, it should be called
-    /// after rendering and before [`RendererHandle::present`].
-    #[doc(alias = "SDL_RenderReadPixels")]
-    pub fn read_target_area(self, area: RectI32) -> Result<Surface> {
+    pub fn read_target(self, area: Option<&RectI32>) -> Result<Surface> {
         Surface::from_ptr(unsafe {
-            SDL_RenderReadPixels(self.handle.as_ptr(), (&raw const area).cast())
+            SDL_RenderReadPixels(self.handle.as_ptr(), opt2ptr(area).cast())
         })
     }
 
@@ -518,6 +497,55 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         })
     }
 
+    /// Render a list of triangles, optionally using a texture and indices into the vertex array.
+    ///
+    /// `vertices`' length must be a multiple of 3.
+    ///
+    /// Color and alpha modulation is done per vertex (the alpha/color mod of `tex` are ignored).
+    #[doc(alias = "SDL_RenderGeometry")]
+    pub fn draw_geometry(
+        self,
+        vertices: &[SDL_Vertex],
+        indices: Option<&[i32]>,
+        tex: Option<Ref<Texture>>,
+    ) -> Result<()> {
+        let (indices, indices_len) =
+            indices.map_or((std::ptr::null(), 0), |i| (i.as_ptr(), i.len() as i32));
+
+        let tex = tex.map_or(std::ptr::null_mut(), |t| t.as_raw());
+
+        to_result(unsafe {
+            SDL_RenderGeometry(
+                self.as_raw(),
+                tex,
+                vertices.as_ptr(),
+                vertices.len() as i32,
+                indices,
+                indices_len,
+            )
+        })
+    }
+
+    /// Render a list of triangles, optionally using a texture and indices into the vertex array, with a temporary color.
+    ///
+    /// Color and alpha modulation is done per vertex (the alpha/color mod of `tex` are ignored).
+    ///
+    /// The previous drawing color is restored afterwards.
+    #[doc(alias = "SDL_RenderGeometry")]
+    pub fn draw_geometry_with(
+        self,
+        vertices: &[SDL_Vertex],
+        indices: Option<&[i32]>,
+        tex: Option<Ref<Texture>>,
+        col: RgbaF32,
+    ) -> Result<()> {
+        let old = self.xchg_draw_color_f32(col);
+        let ret = self.draw_geometry(vertices, indices, tex);
+        self.set_draw_color_f32(old);
+
+        ret
+    }
+
     /// Draw a line on the current rendering target at subpixel precision.
     ///
     /// The arguments are the coordinates of the start and end points.
@@ -616,8 +644,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw a rectangle on the current rendering target at subpixel
     /// precision.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_rect(self, rect: RectF32) -> Result<()> {
-        to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), (&raw const rect).cast()) })
+    pub fn draw_rect(self, rect: Option<&RectF32>) -> Result<()> {
+        to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), opt2ptr(rect).cast()) })
     }
 
     /// Draw a rectangle on the current rendering target at subpixel
@@ -625,34 +653,12 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_rect_with(self, rect: RectF32, col: RgbaF32) -> Result<()> {
+    pub fn draw_rect_with(self, rect: Option<&RectF32>, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let res = self.draw_rect(rect);
         self.set_draw_color_f32(old);
 
         res
-    }
-
-    /// Draw a rectangle outlining the entire rendering target, at subpixel
-    /// precision.
-    ///
-    /// Equivalent to SDL's `SDL_RenderRect` with a `NULL` rectangle.
-    #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_target_outline(self) -> Result<()> {
-        to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), std::ptr::null()) })
-    }
-
-    /// Draw a rectangle outlining the entire rendering target, at subpixel
-    /// precision, temporarily using `col` as the drawing color.
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_target_outline_with(self, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_target_outline();
-        self.set_draw_color_f32(old);
-
-        ret
     }
 
     /// Draw some number of rectangles on the current rendering target at
@@ -681,32 +687,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         ret
     }
 
-    /// Fill the entire rendering target with the drawing color at subpixel
-    /// precision.
-    ///
-    /// Equivalent to SDL's `SDL_RenderFillRect` with a `NULL` rectangle.
-    #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_target(self) -> Result<()> {
-        to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), std::ptr::null()) })
-    }
-
-    /// Fill the entire rendering target with `col` at subpixel precision.
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_target_with(self, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.fill_target();
-        self.set_draw_color_f32(old);
-
-        ret
-    }
-
     /// Fill a rectangle on the current rendering target with the drawing
     /// color at subpixel precision.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_rect(self, rect: RectF32) -> Result<()> {
-        to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), (&raw const rect).cast()) })
+    pub fn fill_rect(self, rect: Option<&RectF32>) -> Result<()> {
+        to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), opt2ptr(rect).cast()) })
     }
 
     /// Fill a rectangle on the current rendering target with `col` at
@@ -714,7 +699,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_rect_with(self, rect: RectF32, col: RgbaF32) -> Result<()> {
+    pub fn fill_rect_with(self, rect: Option<&RectF32>, col: RgbaF32) -> Result<()> {
         let old = self.xchg_draw_color_f32(col);
         let res = self.fill_rect(rect);
         self.set_draw_color_f32(old);
@@ -776,10 +761,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         to_result(unsafe {
             SDL_SetRenderTarget(
                 self.handle.as_ptr(),
-                match tgt {
-                    Some(h) => h.as_raw(),
-                    None => std::ptr::null_mut(),
-                },
+                tgt.map_or(std::ptr::null_mut(), |t| t.as_raw()),
             )
         })
     }
@@ -891,15 +873,20 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         old
     }
 
-    pub fn set_render_state(self, rs: Ref<RenderState>) -> Result<()> {
-        to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), rs.as_raw()) })
-    }
-
-    /// Clear custom GPU render state, reverting to the default rendering
-    /// behavior.
+    /// Set or clear custom GPU render state.
+    ///
+    /// This function sets custom GPU render state for subsequent draw calls.
+    /// This allows using custom shaders with the GPU renderer.
+    ///
+    /// Pass [`None`] to clear the custom render state and revert to the default.
     #[doc(alias = "SDL_SetGPURenderState")]
-    pub fn clear_render_state(self) -> Result<()> {
-        to_result(unsafe { SDL_SetGPURenderState(self.as_raw(), std::ptr::null_mut()) })
+    pub fn set_render_state(self, rs: Option<Ref<RenderState>>) -> Result<()> {
+        to_result(unsafe {
+            SDL_SetGPURenderState(
+                self.as_raw(),
+                rs.map_or(std::ptr::null_mut(), |r| r.as_raw()),
+            )
+        })
     }
 }
 
