@@ -459,7 +459,7 @@ impl<'ttf> Font<'ttf> {
         unsafe { Self::open_unchecked(file, point_size) }
     }
 
-    /// Create a font from a file, using a specified point size.
+    /// Unsafe version of [`Font::open`].
     ///
     /// # Safety
     ///

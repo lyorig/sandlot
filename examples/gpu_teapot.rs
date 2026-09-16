@@ -2,8 +2,6 @@
 
 #![windows_subsystem = "windows"]
 
-use std::mem::ManuallyDrop;
-
 use sandlot::{
     Result,
     color::{RgbaF32, RgbaU8},
@@ -210,7 +208,7 @@ fn run() -> Result<()> {
         .url(c"https://github.com/lyorig/sandlot")
         .build()?;
 
-    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
+    let video = Video::leak(ctx.as_ref())?;
 
     // SDL provides an existing property set, which we can conveniently abuse.
     let props = ctx.global_properties()?;
@@ -220,14 +218,14 @@ fn run() -> Result<()> {
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
-        .build_cleanup(video.as_ref())?;
+        .build_cleanup(video)?;
 
     sandlot::log!("Driver = {}", device.driver().unwrap_or("[unknown]"));
 
     let wnd = Window::builder(props)
         .title(c"sandlot Teapot Example")
         .size(Point::new(1280, 720))
-        .build_cleanup(video.as_ref())?;
+        .build_cleanup(video)?;
 
     device.claim_window(wnd.as_ref())?;
     device.set_swapchain_parameters(wnd.as_ref(), SwapchainComposition::Sdr, PresentMode::Vsync)?;

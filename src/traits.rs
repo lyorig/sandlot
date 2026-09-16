@@ -7,6 +7,7 @@ pub trait BlendMode: Copy {
     fn blend_mode(self) -> pixels::BlendMode;
     fn set_blend_mode(self, bm: pixels::BlendMode);
 
+    /// Exchanges the blend mode, returning the old one.
     fn xchg_blend_mode(self, bm: pixels::BlendMode) -> pixels::BlendMode {
         let old = self.blend_mode();
         self.set_blend_mode(bm);
@@ -28,21 +29,21 @@ pub trait ColorModU8: Copy {
         self.set_alpha_mod_u8(col.a);
     }
 
-    /// Sets the RGB mod, returning the old one.
+    /// Exchanges the RGB mod, returning the old one.
     fn xchg_rgb_mod_u8(self, rm: RgbU8) -> RgbU8 {
         let old = self.rgb_mod_u8();
         self.set_rgb_mod_u8(rm);
         old
     }
 
-    /// Sets the alpha mod, returning the old one.
+    /// Exchanges the alpha mod, returning the old one.
     fn xchg_alpha_mod_u8(self, am: u8) -> u8 {
         let old = self.alpha_mod_u8();
         self.set_alpha_mod_u8(am);
         old
     }
 
-    /// Sets the color mod, returning the old one.
+    /// Exchanges the color mod, returning the old one.
     fn xchg_color_mod_u8(self, col: RgbaU8) -> RgbaU8 {
         let old = self.color_mod_u8();
         self.set_color_mod_u8(col);
@@ -64,21 +65,21 @@ pub trait ColorModF32: Copy {
         self.set_alpha_mod_f32(col.a);
     }
 
-    /// Sets the RGB mod, returning the old one.
+    /// Exchanges the RGB mod, returning the old one.
     fn xchg_rgb_mod_f32(self, rm: RgbF32) -> RgbF32 {
         let old = self.rgb_mod_f32();
         self.set_rgb_mod_f32(rm);
         old
     }
 
-    /// Sets the alpha mod, returning the old one.
+    /// Exchanges the alpha mod, returning the old one.
     fn xchg_alpha_mod_f32(self, am: f32) -> f32 {
         let old = self.alpha_mod_f32();
         self.set_alpha_mod_f32(am);
         old
     }
 
-    /// Sets the color mod, returning the old one.
+    /// Exchanges the color mod, returning the old one.
     fn xchg_color_mod_f32(self, col: RgbaF32) -> RgbaF32 {
         let old = self.color_mod_f32();
         self.set_color_mod_f32(col);

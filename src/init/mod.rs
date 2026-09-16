@@ -91,35 +91,32 @@
 //! - [x] SDL_SetClipboardText
 //! - [ ] SDL_SetPrimarySelectionText
 
-use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, ops::Deref, ptr::NonNull};
+use std::{marker::PhantomData, ops::Deref, ptr::NonNull};
 
 use sdl3_sys::{
-    clipboard::*,
-    events::*,
     filesystem::{SDL_GetBasePath, SDL_GetUserFolder},
     init::*,
-    keyboard::{SDL_StartTextInput, SDL_StopTextInput, SDL_TextInputActive},
     properties::SDL_GetGlobalProperties,
-    video::*,
 };
 
 use crate::{
     Result,
-    boxed::Box,
-    display::Display,
     error::Error,
-    event::{Event, EventIter},
     fs::Folder,
     properties::{Properties, PropertiesHandle},
-    rect::{PointI32, RectI32},
     resource,
-    string::String,
-    util::{c_ptr_to_str, mod_reexport, opt2res_map, to_result},
-    window::{Window, WindowHandle, WindowId},
+    util::{c_ptr_to_str, mod_reexport, opt2res_map},
+};
+
+#[expect(unused_imports)]
+use sdl3_sys::clipboard::{
+    SDL_GetPrimarySelectionText, SDL_SetClipboardData, SDL_SetPrimarySelectionText,
 };
 
 mod_reexport!(builder);
 mod_reexport!(metadata);
+mod_reexport!(video);
+mod_reexport!(events);
 
 #[derive(Clone, Copy)]
 pub struct ContextHandle;
@@ -353,8 +350,8 @@ macro_rules! subsystem_new {
         paste::paste! {
             #[derive(Clone, Copy)]
             pub struct [<$name Handle>]<'ctx> {
-                $(pub $accessor: [<$implied Handle>]<'ctx>,)*
-                marker: ::std::marker::PhantomData<&'ctx $crate::init::Context>,
+                $($accessor: $crate::init::[<$implied Handle>]<'ctx>,)*
+                pub(crate) marker: ::std::marker::PhantomData<&'ctx $crate::init::Context>,
             }
 
             impl<'ctx> [<$name Handle>]<'ctx> {
@@ -384,7 +381,7 @@ macro_rules! subsystem_new {
                         Ok(Self {
                             handle: [<$name Handle>] {
                                 $(
-                                    $accessor: [<$implied Handle>] {
+                                    $accessor: $crate::init::[<$implied Handle>] {
                                         marker: ::std::marker::PhantomData
                                     },
                                 )*
@@ -394,6 +391,17 @@ macro_rules! subsystem_new {
                     } else {
                         Err($crate::error::Error::current())
                     }
+                }
+
+                /// Initialize this subsystem, deferring its deinitialization to the [`Context`](crate::init::Context) drop.
+                ///
+                /// Returns [`Err`] if initialization fails.
+                #[doc(alias = "SDL_InitSubSystem")]
+                pub fn leak(ctx: $crate::init::Ref<'ctx, $crate::init::Context>) -> $crate::Result<$crate::init::Ref<'ctx, $name<'ctx>>> {
+                    let sub = Self::init(ctx)?;
+                    let md = ::std::mem::ManuallyDrop::new(sub);
+
+                    Ok(unsafe { $crate::init::Ref::from_handle(md.as_handle())})
                 }
 
                 /// Obtain a raw handle to this resource.
@@ -421,7 +429,7 @@ macro_rules! subsystem_new {
                 }
             }
 
-            impl<'ctx> Subsystem for $name<'ctx> {
+            impl<'ctx> $crate::init::Subsystem for $name<'ctx> {
                 type Handle = [<$name Handle>]<'ctx>;
 
                 unsafe fn as_handle(&self) -> Self::Handle {
@@ -449,7 +457,7 @@ macro_rules! subsystem_new {
                 /// # Remarks
                 ///
                 /// You still need to call SDL's quit function even if you close all open
-                /// subsystems (dropping the [`Context`] does this automatically).
+                /// subsystems (dropping the [`Context`](crate::init::Context) does this automatically).
                 fn drop(&mut self) {
                     unsafe { ::sdl3_sys::init::SDL_QuitSubSystem(::sdl3_sys::init::SDL_InitFlags::$flag) };
                 }
@@ -458,288 +466,4 @@ macro_rules! subsystem_new {
     };
 }
 
-subsystem_new!(
-    /// The video subsystem provides access to the display and windowing system.
-    /// Also initializes the events subsystem, accessible via [`VideoHandle::events`].
-    Video, VIDEO, Events => events);
-
-impl<'ctx> VideoHandle<'ctx> {
-    /// Get the window that currently has an input grab enabled.
-    ///
-    /// Returns [`None`] if input is not grabbed.
-    #[doc(alias = "SDL_GetGrabbedWindow")]
-    pub fn grabbed_window(&self) -> Option<WindowHandle<'ctx, '_>> {
-        WindowHandle::from_ptr(unsafe { SDL_GetGrabbedWindow() })
-    }
-
-    /// Get a list of valid windows.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only use the returned handles before their respective windows are destroyed.
-    #[doc(alias = "SDL_GetWindows")]
-    pub unsafe fn windows(&self) -> Result<Box<[WindowHandle<'ctx, '_>]>> {
-        let mut count = MaybeUninit::uninit();
-        let ptr = unsafe { SDL_GetWindows(count.as_mut_ptr()) };
-
-        // SAFETY: On success, SDL allocates `count` window pointers.
-        // `Ref<Window>` as the same size and alignment as `*mut SDL_Window`.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as usize) }
-    }
-
-    /// Get a window from a stored ID.
-    ///
-    /// Returns [`None`] if no window with that ID exists.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only use the returned handle before its respective window is destroyed.
-    ///
-    /// # Remarks
-    ///
-    /// The numeric ID is what [`SDL_WindowEvent`] references, and is necessary
-    /// to map these events to specific window objects.
-    #[doc(alias = "SDL_GetWindowFromID")]
-    pub unsafe fn window_from_id(&self, id: WindowId) -> Option<WindowHandle<'ctx, '_>> {
-        let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
-        WindowHandle::from_ptr(ptr)
-    }
-
-    /// Get a list of currently connected displays.
-    #[doc(alias = "SDL_GetDisplays")]
-    pub fn displays_all(&self) -> Result<Box<[Display<'ctx, '_>]>> {
-        let mut count = MaybeUninit::uninit();
-        let ptr = unsafe { SDL_GetDisplays(count.as_mut_ptr()) };
-
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
-    }
-
-    /// Return the primary display.
-    #[doc(alias = "SDL_GetPrimaryDisplay")]
-    pub fn display_primary(&self) -> Result<Display<'ctx, '_>> {
-        Display::from_sdl(unsafe { SDL_GetPrimaryDisplay() })
-    }
-
-    /// Get the display containing a point.
-    #[doc(alias = "SDL_GetDisplayForPoint")]
-    pub fn display_for_point(&self, point: PointI32) -> Result<Display<'ctx, '_>> {
-        Display::from_sdl(unsafe { SDL_GetDisplayForPoint(point.as_sdl_ptr()) })
-    }
-
-    /// Get the display primarily containing a rect.
-    ///
-    /// Returns the display entirely containing the rect, or closest to the
-    /// center of the rect.
-    #[doc(alias = "SDL_GetDisplayForRect")]
-    pub fn display_for_rect(&self, rect: RectI32) -> Result<Display<'ctx, '_>> {
-        Display::from_sdl(unsafe { SDL_GetDisplayForRect(rect.as_sdl_ptr()) })
-    }
-
-    /// Clear the clipboard data.
-    #[doc(alias = "SDL_ClearClipboardData")]
-    pub fn clipboard_clear_data(self) -> Result<()> {
-        to_result(unsafe { SDL_ClearClipboardData() })
-    }
-
-    /// Get the data from the clipboard for a given mime type.
-    ///
-    /// Returns the retrieved data buffer.
-    ///
-    /// # Remarks
-    ///
-    /// The size of text data does not include the terminator, but the text is
-    /// guaranteed to be null-terminated.
-    #[doc(alias = "SDL_GetClipboardData")]
-    pub fn clipboard_data(self, mime_type: &CStr) -> Result<Box<[u8]>> {
-        let mut len = MaybeUninit::<usize>::uninit();
-        let ptr = unsafe { SDL_GetClipboardData(mime_type.as_ptr(), len.as_mut_ptr()) };
-        // SAFETY: On success, SDL allocates `len` bytes.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init() as _) }
-    }
-
-    /// Retrieve the list of mime types available in the clipboard.
-    #[doc(alias = "SDL_GetClipboardMimeTypes")]
-    pub fn clipboard_mime_types(self) -> Result<Box<[NonNull<i8>]>> {
-        let mut len = MaybeUninit::<usize>::uninit();
-        let ptr = unsafe { SDL_GetClipboardMimeTypes(len.as_mut_ptr()) };
-        // SAFETY: On success, SDL allocates `len` mime type strings.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init()) }
-    }
-
-    /// Get UTF-8 text from the clipboard.
-    ///
-    /// Returns an empty string if there is not enough memory left for a copy of
-    /// the clipboard's content.
-    #[doc(alias = "SDL_GetClipboardText")]
-    pub fn clipboard_text(self) -> String {
-        let ptr = unsafe { SDL_GetClipboardText() };
-
-        // SAFETY: `SDL_GetClipboardText()` always returns a valid string.
-        unsafe { String::from_raw(ptr) }
-    }
-
-    /// Query whether there is data in the clipboard for the provided mime type.
-    #[doc(alias = "SDL_HasClipboardData")]
-    pub fn clipboard_has_data(self, mime_type: &CStr) -> bool {
-        unsafe { SDL_HasClipboardData(mime_type.as_ptr()) }
-    }
-
-    /// Query whether the clipboard exists and contains a non-empty text string.
-    #[doc(alias = "SDL_HasClipboardText")]
-    pub fn clipboard_has_text(self) -> bool {
-        unsafe { SDL_HasClipboardText() }
-    }
-
-    /// Put UTF-8 text into the clipboard.
-    #[doc(alias = "SDL_SetClipboardText")]
-    pub fn clipboard_set_text(self, text: &CStr) -> Result<()> {
-        to_result(unsafe { SDL_SetClipboardText(text.as_ptr()) })
-    }
-
-    /// Check whether the screensaver is currently enabled.
-    ///
-    /// # Remarks
-    ///
-    /// The screensaver is disabled by default.
-    ///
-    /// The default can also be changed using
-    /// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
-    #[doc(alias = "SDL_ScreenSaverEnabled")]
-    pub fn is_screen_saver_enabled(self) -> bool {
-        unsafe { SDL_ScreenSaverEnabled() }
-    }
-
-    /// Allow the screen to be blanked by a screen saver.
-    #[doc(alias = "SDL_EnableScreenSaver")]
-    pub fn enable_screen_saver(self) -> Result<()> {
-        to_result(unsafe { SDL_EnableScreenSaver() })
-    }
-
-    /// Prevent the screen from being blanked by a screen saver.
-    ///
-    /// # Remarks
-    ///
-    /// If you disable the screensaver, it is automatically re-enabled when SDL
-    /// quits.
-    ///
-    /// The screensaver is disabled by default, but this may be changed by
-    /// `SDL_HINT_VIDEO_ALLOW_SCREENSAVER`.
-    #[doc(alias = "SDL_DisableScreenSaver")]
-    pub fn disable_screen_saver(self) -> Result<()> {
-        to_result(unsafe { SDL_DisableScreenSaver() })
-    }
-}
-
-subsystem_new!(
-    /// The events subsystem provides access to the event queue.
-    Events, EVENTS);
-
-impl<'ctx> EventsHandle<'ctx> {
-    /// Add an event to the event queue.
-    ///
-    /// The event is copied into the queue.
-    ///
-    /// Returns [`Err`] if the event was filtered or on failure; a common
-    /// reason for error is the event queue being full.
-    ///
-    /// # Remarks
-    ///
-    /// The event queue can actually be used as a two way communication
-    /// channel. Not only can events be read from the queue, but the user can
-    /// also push their own events onto it.
-    ///
-    /// Note: Pushing device input events onto the queue doesn't modify the
-    /// state of the device within SDL.
-    ///
-    /// Note: Events pushed onto the queue get passed through the event
-    /// filter.
-    ///
-    /// For pushing application-specific events, please use
-    /// `SDL_RegisterEvents` to get an event type that does not conflict with
-    /// other code that also wants its own custom event types.
-    #[doc(alias = "SDL_PushEvent")]
-    pub fn push(self, e: &Event) -> Result<()> {
-        // NOTE: The timestamp is set internally in `SDL_PushEvent()`.
-        let mut e = SDL_Event::from(e);
-        to_result(unsafe { SDL_PushEvent(&raw mut e) })
-    }
-
-    /// Pump the event loop, gathering events from the input devices.
-    ///
-    /// # Remarks
-    ///
-    /// This function updates the event queue and internal input device state.
-    ///
-    /// This function gathers all the pending input information from devices
-    /// and places it in the event queue. Without calls to this function no
-    /// events would ever be placed on the queue. Usually the need for calls
-    /// to it is hidden, since polling via [`EventIter`] or waiting via
-    /// [`EventsHandle::wait`] implicitly pump the event loop. However, if you are not
-    /// polling or waiting for events (e.g. you are filtering them), then you
-    /// must call this function to force an event queue update.
-    #[doc(alias = "SDL_PumpEvents")]
-    pub fn pump(self) {
-        unsafe { SDL_PumpEvents() };
-    }
-
-    /// Wait indefinitely for the next available event.
-    ///
-    /// Returns [`Err`] if there was an error while waiting for events.
-    ///
-    /// # Remarks
-    ///
-    /// This function may implicitly pump the event loop (see [`EventsHandle::pump`]).
-    #[doc(alias = "SDL_WaitEvent")]
-    pub fn wait(self) -> Result<Event> {
-        let mut e = MaybeUninit::<SDL_Event>::uninit();
-
-        if unsafe { SDL_WaitEvent(e.as_mut_ptr()) } {
-            // SAFETY: SDL fully initializes the event on success.
-            // The layouts of both types match.
-            Ok(unsafe { e.assume_init_ref() }.into())
-        } else {
-            Err(Error::current())
-        }
-    }
-
-    /// Stop receiving any text input events in a window.
-    ///
-    /// # Remarks
-    ///
-    /// If [`EventsHandle::enable_text_input`] showed the screen keyboard,
-    /// this function will hide it.
-    #[doc(alias = "SDL_StopTextInput")]
-    pub fn disable_text_input(self, wnd: resource::Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StopTextInput(wnd.as_raw()) })
-    }
-
-    /// Check whether or not Unicode text input events are enabled for a window.
-    #[doc(alias = "SDL_TextInputActive")]
-    pub fn is_text_input_enabled(self, wnd: resource::Ref<Window>) -> bool {
-        unsafe { SDL_TextInputActive(wnd.as_raw()) }
-    }
-
-    /// Start accepting Unicode text input events in a window.
-    ///
-    /// # Remarks
-    ///
-    /// This function will enable text input ([`Event::TextInput`] and
-    /// [`Event::TextEditing`] events) in the specified window. Please use
-    /// this function paired with [`EventsHandle::disable_text_input`].
-    ///
-    /// Text input events are not received by default.
-    ///
-    /// On some platforms using this function shows the screen keyboard and/or
-    /// activates an IME, which can prevent some key press events from being
-    /// passed through.
-    #[doc(alias = "SDL_StartTextInput")]
-    pub fn enable_text_input(self, wnd: resource::Ref<Window>) -> Result<()> {
-        to_result(unsafe { SDL_StartTextInput(wnd.as_raw()) })
-    }
-
-    /// Returns an iterator over all [`Event`]s acquired since the last call
-    /// (implicit or explicit) to [`EventsHandle::pump`].
-    pub fn iter(&self) -> EventIter<'ctx, '_> {
-        EventIter::new()
-    }
-}
+pub(crate) use subsystem_new;

@@ -23,25 +23,60 @@
 //! - [ ] SDL_ScreenKeyboardShown
 //! - [ ] SDL_SetModState
 //! - [ ] SDL_SetScancodeName
-//! - [x] SDL_StartTextInput (impl'd as [`EventsHandle::enable_text_input`])
+//! - [x] SDL_StartTextInput (impl'd as [`VideoHandle::enable_text_input`])
 //! - [ ] SDL_StartTextInputWithProperties
-//! - [x] SDL_StopTextInput (impl'd as [`EventsHandle::disable_text_input`])
-//! - [x] SDL_TextInputActive (impl'd as [`EventsHandle::is_text_input_enabled`])
+//! - [x] SDL_StopTextInput (impl'd as [`VideoHandle::disable_text_input`])
+//! - [x] SDL_TextInputActive (impl'd as [`VideoHandle::is_text_input_enabled`])
 //! - [ ] SDL_SetTextInputArea
 
-use std::ffi::CStr;
+use std::marker::PhantomData;
 
-use sdl3_sys::{
-    keyboard::*,
-    keycode::{SDL_Keycode, SDL_Keymod},
-    scancode::{SDL_SCANCODE_COUNT, SDL_Scancode},
-};
+use sdl3_sys::{keyboard::*, keycode::SDL_Keycode, scancode::SDL_Scancode};
+
+use crate::{init, util::c_ptr_to_str};
 
 // doc-only
 #[expect(unused_imports)]
-use crate::init::EventsHandle;
+use crate::init::{EventsHandle, VideoHandle};
 
-const NUM_SCANCODES: usize = SDL_SCANCODE_COUNT.0 as usize;
+const NUM_SCANCODES: usize = SDL_Scancode::COUNT.0 as _;
+
+/// Wrapper around the pointer returned by [`SDL_GetKeyboardState`].
+#[derive(Clone, Copy)]
+pub struct KeyboardState<'ctx, 'vid> {
+    state: &'vid [bool; NUM_SCANCODES],
+    marker: PhantomData<init::Ref<'vid, init::Video<'ctx>>>,
+}
+
+impl<'ctx, 'vid> KeyboardState<'ctx, 'vid> {
+    /// # Safety
+    ///
+    /// The caller must only read the array before SDL has a chance to modify it
+    /// (e.g. between frames).
+    ///
+    /// This is because the contained reference violates Rust's aliasing rules.
+    /// SDL modifies the array during event pumping, so it's only immutable between
+    /// calls to [`EventsHandle::pump`] (often called implicitly by other functions).
+    ///
+    /// Keeping the reference across these "pumps" risks the underlying data
+    /// being mutated by SDL and causing UB.
+    pub(crate) unsafe fn new() -> Self {
+        let state = {
+            let ptr = unsafe { SDL_GetKeyboardState(std::ptr::null_mut()) };
+            unsafe { ptr.cast::<[bool; NUM_SCANCODES]>().as_ref_unchecked() }
+        };
+
+        Self {
+            state,
+            marker: PhantomData,
+        }
+    }
+
+    /// Returns whether `sc` has been pressed during the last call to [`EventsHandle::pump`].
+    pub fn pressed(self, sc: SDL_Scancode) -> bool {
+        self.state[sc.0 as usize]
+    }
+}
 
 /// Get a human-readable name for a scancode.
 ///
@@ -60,8 +95,8 @@ const NUM_SCANCODES: usize = SDL_SCANCODE_COUNT.0 as usize;
 #[doc(alias = "SDL_GetScancodeName")]
 pub fn scancode_name(scancode: SDL_Scancode) -> &'static str {
     unsafe {
-        let cstr = CStr::from_ptr(SDL_GetScancodeName(scancode)).to_bytes();
-        str::from_utf8_unchecked(cstr)
+        let ptr = SDL_GetScancodeName(scancode);
+        c_ptr_to_str(ptr)
     }
 }
 
@@ -75,43 +110,7 @@ pub fn scancode_name(scancode: SDL_Scancode) -> &'static str {
 #[doc(alias = "SDL_GetKeyName")]
 pub fn key_name(key: SDL_Keycode) -> &'static str {
     unsafe {
-        let cstr = CStr::from_ptr(SDL_GetKeyName(key)).to_bytes();
-        str::from_utf8_unchecked(cstr)
+        let ptr = SDL_GetKeyName(key);
+        c_ptr_to_str(ptr)
     }
-}
-
-/// Get a snapshot of the current state of the keyboard.
-///
-/// Returns an array indexed by [`SDL_Scancode`] values, whose elements are
-/// `true` when the key is pressed and `false` when it is not.
-///
-/// # Remarks
-///
-/// The returned slice points to an internal SDL array. It will be valid for
-/// the whole lifetime of the application and should not be freed by the
-/// caller.
-///
-/// Use [`EventsHandle::pump`] to update the state array.
-///
-/// This function gives you the current state after all events have been
-/// processed, so if a key or button has been pressed and released before you
-/// process events, then the pressed state will never show up in the
-/// returned snapshot.
-///
-/// Note: This function doesn't take into account whether shift has been
-/// pressed or not.
-#[doc(alias = "SDL_GetKeyboardState")]
-pub fn keyboard_state() -> &'static [bool; NUM_SCANCODES] {
-    unsafe {
-        let ptr = SDL_GetKeyboardState(std::ptr::null_mut()).cast::<[bool; NUM_SCANCODES]>();
-        ptr.as_ref_unchecked()
-    }
-}
-
-/// Get the current key modifier state for the keyboard.
-///
-/// Returns an OR'd combination of the modifier keys for the keyboard.
-#[doc(alias = "SDL_GetModState")]
-pub fn mod_state() -> SDL_Keymod {
-    unsafe { SDL_GetModState() }
 }

@@ -1,7 +1,5 @@
 #![windows_subsystem = "windows"]
 
-use std::mem::ManuallyDrop;
-
 use sandlot::{
     Result,
     color::Rgba,
@@ -34,7 +32,7 @@ fn run() -> Result<()> {
         .kind(AppKind::Application)
         .build()?;
 
-    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
+    let video = Video::leak(ctx.as_ref())?;
     let events = video.events();
 
     let props = ctx.global_properties()?;
@@ -43,7 +41,7 @@ fn run() -> Result<()> {
         .position(Point::new(Window::POS_CENTERED, Window::POS_CENTERED))
         .title(c"sandlot Example")
         .size(Point::new(640, 480))
-        .build_cleanup(video.as_ref())?;
+        .build_cleanup(video)?;
 
     wnd.sync()?;
 

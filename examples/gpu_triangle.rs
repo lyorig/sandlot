@@ -2,8 +2,6 @@
 
 #![windows_subsystem = "windows"]
 
-use std::mem::ManuallyDrop;
-
 use sandlot::{
     Result,
     color::RgbaF32,
@@ -53,7 +51,7 @@ fn run() -> Result<()> {
         .url(c"https://github.com/lyorig/sandlot")
         .build()?;
 
-    let video = ManuallyDrop::new(Video::init(ctx.as_ref())?);
+    let video = Video::leak(ctx.as_ref())?;
     let events = video.events();
 
     // SDL provides an existing property set, which we can conveniently abuse.
@@ -64,12 +62,12 @@ fn run() -> Result<()> {
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
-        .build_cleanup(video.as_ref())?;
+        .build_cleanup(video)?;
 
     let wnd = Window::builder(props)
         .title(c"sandlot GPU")
         .size(Point::new(720, 480))
-        .build_cleanup(video.as_ref())?;
+        .build_cleanup(video)?;
 
     print_properties(device.properties());
 

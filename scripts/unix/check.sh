@@ -12,5 +12,5 @@ fi
 
 set -x
 
-cargo doc --no-deps
 cargo clippy --examples
+cargo doc --no-deps
