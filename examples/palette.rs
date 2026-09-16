@@ -34,6 +34,7 @@ fn run() -> Result<()> {
             surf.lock_with(|px| {
                 let len = surf.pixel_row_len();
                 sandlot::log!("Pitch: {}, pixel row len: {}", surf.pitch(), len);
+                sandlot::log!("Must lock? {}", surf.must_lock());
 
                 // 00 01 10 11 (red, green, blue, white)
                 let mut value = 0b00011011;
@@ -44,7 +45,7 @@ fn run() -> Result<()> {
                         row.fill(value);
                         value = value.rotate_right(2);
                     });
-            })?;
+            });
 
             sandlot::log!(
                 "Closest palette index to `#117003`: {:x}",

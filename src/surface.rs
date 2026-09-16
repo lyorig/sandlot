@@ -512,6 +512,9 @@ impl SurfaceHandle {
     }
 
     /// Returns whether the surface needs to be locked before access.
+    ///
+    /// This happens when the surface is RLE-encoded. Locking ensures the
+    /// pixels are "uncompressed" before they are accessed.
     #[doc(alias = "SDL_MUSTLOCK")]
     pub fn must_lock(self) -> bool {
         unsafe { SDL_MUSTLOCK(self.as_raw()) }
@@ -525,42 +528,42 @@ impl SurfaceHandle {
     /// Not all surfaces require locking. If [`SurfaceHandle::must_lock`] evaluates to `false`,
     /// then you can read and write to the surface at any time, and the pixel format of the surface will not change.
     #[doc(alias = "SDL_LockSurface")]
-    fn lock(self) -> Result<()> {
-        to_result(unsafe { SDL_LockSurface(self.as_raw()) })
+    fn lock(self) {
+        // Cannot fail unless the surface is invalid.
+        unsafe { SDL_LockSurface(self.as_raw()) };
     }
 
     /// Release a surface after directly accessing its pixels.
     #[doc(alias = "SDL_UnlockSurface")]
     fn unlock(self) {
-        unsafe { SDL_UnlockSurface(self.as_raw()) }
+        unsafe { SDL_UnlockSurface(self.as_raw()) };
     }
 
-    /// Attempts to lock this surface, then calls `f` with a byte buffer containing raw pixel data.
+    /// Locks this surface (if necessary), calls `f` with a byte buffer containing raw pixel data, then unlocks it.
     ///
     /// Pixels are stored in a contiguous buffer. Rows are stored in chunks of [`SurfaceHandle::pitch`]
-    /// bytes, which includes padding at the end. [`SurfaceHandle::pixel_row_len`] can be used to retreive
+    /// bytes, which includes optional padding at the end. [`SurfaceHandle::pixel_row_len`] can be used to retreive
     /// the actual used number of bytes.
     ///
     /// How much space a pixel occupies depends on the pixel format. [`PixelFormat::bytes_per_pixel`]
     /// will tell you just that, with the exception of indexed formats ([`PixelFormat::Index1Lsb`] et al.),
     /// where (with the exception of [`PixelFormat::Index8`]) each pixel occupies 1, 2, or 4 bits,
     /// so multiple pixels are packed together in a single byte.
-    ///
-    /// Propagates errors returned by:
-    /// - [`SurfaceHandle::lock`]
-    ///
-    /// The surface is unlocked after calling `f`, regardless of its return value.
-    pub fn lock_with<'a, F: FnOnce(&mut [u8])>(&'a self, f: F) -> Result<()> {
-        self.lock()?;
+    pub fn lock_with<'a, F: FnOnce(&mut [u8])>(&'a self, f: F) {
+        let run = || {
+            let surf = unsafe { self.handle.as_ref() };
+            let sz = (surf.h * surf.pitch) as usize;
+            let slice = unsafe { std::slice::from_raw_parts_mut(surf.pixels.cast::<u8>(), sz) };
+            f(slice);
+        };
 
-        let surf = unsafe { self.handle.as_ref() };
-        let sz = (surf.h * surf.pitch) as usize;
-        let slice = unsafe { std::slice::from_raw_parts_mut(surf.pixels.cast::<u8>(), sz) };
-        f(slice);
-
-        self.unlock();
-
-        Ok(())
+        if self.must_lock() {
+            self.lock();
+            run();
+            self.unlock();
+        } else {
+            run();
+        }
     }
 }
 
