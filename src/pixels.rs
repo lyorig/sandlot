@@ -568,6 +568,16 @@ impl PixelFormat {
             c_ptr_to_str(ptr)
         }
     }
+
+    #[doc(alias = "SDL_BYTESPERPIXEL")]
+    pub const fn bytes_per_pixel(self) -> u8 {
+        SDL_BYTESPERPIXEL(self.to_sdl())
+    }
+
+    #[doc(alias = "SDL_BITSPERPIXEL")]
+    pub const fn bits_per_pixel(self) -> u8 {
+        SDL_BITSPERPIXEL(self.to_sdl())
+    }
 }
 
 impl std::fmt::Display for PixelFormat {
