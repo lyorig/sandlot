@@ -38,8 +38,8 @@ fn print_optional_property<T: std::fmt::Display>(name: &str, opt: Option<T>) {
 
 fn print_properties(props: SurfaceProperties) {
     sandlot::log!("Properties:");
-    sandlot::log!("- SDR white point: {}", props.sdr_white_point());
-    sandlot::log!("- HDR headroom: {}", props.hdr_headroom());
+    print_optional_property("SDR white point", props.sdr_white_point());
+    print_optional_property("HDR headroom", props.hdr_headroom());
     print_optional_property(
         "Tone map operator",
         props.tonemap_operator().map(|s| s.to_string_lossy()),

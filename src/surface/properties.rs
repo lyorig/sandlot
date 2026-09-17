@@ -14,29 +14,40 @@ impl<'surf> SurfaceProperties<'surf> {
         Self { props }
     }
 
-    /// For HDR10 and floating point surfaces, this defines the value of 100%
+    /// (HDR10 and floating point formats only) Defines the value of 100%
     /// diffuse white, with higher values being displayed in the High Dynamic
     /// Range headroom.
     ///
     /// This defaults to 203 for HDR10 surfaces and 1.0 for floating point surfaces.
     #[doc(alias = "SDL_PROP_SURFACE_SDR_WHITE_POINT_FLOAT")]
-    pub fn sdr_white_point(self) -> f32 {
-        unsafe {
+    pub fn sdr_white_point(self) -> Option<f32> {
+        const SENTINEL: f32 = f32::INFINITY;
+
+        let val = unsafe {
             self.props
-                .float(SDL_PROP_SURFACE_SDR_WHITE_POINT_FLOAT, 0.0)
-        }
+                .float(SDL_PROP_SURFACE_SDR_WHITE_POINT_FLOAT, SENTINEL)
+        };
+
+        (val != SENTINEL).then_some(val)
     }
 
-    /// For HDR10 and floating point surfaces, this defines the maximum dynamic
+    /// (HDR10 and floating point formats only) Defines the maximum dynamic
     /// range used by the content, in terms of the SDR white point.
     ///
     /// This defaults to 0.0, which disables tone mapping.
     #[doc(alias = "SDL_PROP_SURFACE_HDR_HEADROOM_FLOAT")]
-    pub fn hdr_headroom(self) -> f32 {
-        unsafe { self.props.float(SDL_PROP_SURFACE_HDR_HEADROOM_FLOAT, 0.0) }
+    pub fn hdr_headroom(self) -> Option<f32> {
+        const SENTINEL: f32 = f32::INFINITY;
+
+        let val = unsafe {
+            self.props
+                .float(SDL_PROP_SURFACE_HDR_HEADROOM_FLOAT, SENTINEL)
+        };
+
+        (val != SENTINEL).then_some(val)
     }
 
-    /// The tone mapping operator used when compressing from a surface with high
+    /// (HDR10 formats only) The tone mapping operator used when compressing from a surface with high
     /// dynamic range to another with lower dynamic range.
     ///
     /// Currently this supports "chrome", which uses the same tone mapping that
@@ -54,7 +65,7 @@ impl<'surf> SurfaceProperties<'surf> {
         (!ptr.is_null()).then(|| unsafe { CStr::from_ptr(ptr) })
     }
 
-    /// The hotspot pixel offset from the left edge of the image, if this surface is being used as a cursor.
+    /// (Cursor surfaces only) The hotspot pixel offset from the left edge of the image.
     #[doc(alias = "SDL_PROP_SURFACE_HOTSPOT_X_NUMBER")]
     pub fn hotspot_x(self) -> Option<i64> {
         const SENTINEL: i64 = i64::MIN;
@@ -66,7 +77,7 @@ impl<'surf> SurfaceProperties<'surf> {
         (val != SENTINEL).then_some(val)
     }
 
-    /// The hotspot pixel offset from the top edge of the image, if this surface is being used as a cursor.
+    /// (Cursor surfaces only) The hotspot pixel offset from the top edge of the image.
     #[doc(alias = "SDL_PROP_SURFACE_HOTSPOT_Y_NUMBER")]
     pub fn hotspot_y(self) -> Option<i64> {
         const SENTINEL: i64 = i64::MIN;
