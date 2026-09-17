@@ -20,6 +20,7 @@ mod log;
 mod string;
 mod texture;
 mod ttf;
+mod utf8cstr;
 
 /// Basic initialization stuff.
 #[test]

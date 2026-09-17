@@ -34,6 +34,7 @@ pub mod surface;
 pub mod texture;
 pub mod traits;
 pub mod ttf;
+pub mod utf8cstr;
 pub mod util;
 pub mod window;
 
