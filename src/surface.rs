@@ -122,6 +122,11 @@ impl SurfaceHandle {
 
     /// Get the number of bytes in a row that is actually used to store pixels
     /// (the rest is padding).
+    ///
+    /// # See also
+    ///
+    /// - [`SurfaceHandle::pitch`]
+    /// - [`PixelFormat::bits_per_pixel`]
     pub fn pixel_row_len(self) -> usize {
         let width = unsafe { self.handle.as_ref() }.w as usize;
         let bpp = self.format().bits_per_pixel() as usize;
@@ -520,12 +525,13 @@ impl SurfaceHandle {
         unsafe { SDL_MUSTLOCK(self.as_raw()) }
     }
 
-    /// Set up a surface for directly accessing the pixels.
-    /// Between calls to [`SurfaceHandle::lock`] / [`SurfaceHandle::unlock`], you can write to and read from surface->pixels,
-    /// using the pixel format stored in surface->format. Once you are done accessing the surface, you should
-    /// use SDL_UnlockSurface to release it.
+    /// Set up a surface for direct pixel access.
     ///
-    /// Not all surfaces require locking. If [`SurfaceHandle::must_lock`] evaluates to `false`,
+    /// Between calls to [`SurfaceHandle::lock`] / [`SurfaceHandle::unlock`], you can write to and read from
+    /// this surface's pixel buffer, using [`SurfaceHandle::format`]. Once you are done accessing the surface,
+    /// you should use [`SurfaceHandle::unlock`] to release it.
+    ///
+    /// Not all surfaces require locking. If [`SurfaceHandle::must_lock`] is `false`,
     /// then you can read and write to the surface at any time, and the pixel format of the surface will not change.
     #[doc(alias = "SDL_LockSurface")]
     fn lock(self) {
@@ -541,15 +547,10 @@ impl SurfaceHandle {
 
     /// Locks this surface (if necessary), calls `f` with a byte buffer containing raw pixel data, then unlocks it.
     ///
-    /// Pixels are stored in a contiguous buffer. Rows are stored in chunks of [`SurfaceHandle::pitch`]
-    /// bytes, which includes optional padding at the end. [`SurfaceHandle::pixel_row_len`] can be used to retreive
+    /// Pixels are stored in a contiguous buffer. made up of rows of [`SurfaceHandle::pitch`] bytes,
+    /// which may include padding at the end. [`SurfaceHandle::pixel_row_len`] can be used to retreive
     /// the actual used number of bytes.
-    ///
-    /// How much space a pixel occupies depends on the pixel format. [`PixelFormat::bytes_per_pixel`]
-    /// will tell you just that, with the exception of indexed formats ([`PixelFormat::Index1Lsb`] et al.),
-    /// where (with the exception of [`PixelFormat::Index8`]) each pixel occupies 1, 2, or 4 bits,
-    /// so multiple pixels are packed together in a single byte.
-    pub fn lock_with<'a, F: FnOnce(&mut [u8])>(&'a self, f: F) {
+    pub fn lock_pixels<F: FnOnce(&mut [u8])>(&self, f: F) {
         let run = || {
             let surf = unsafe { self.handle.as_ref() };
             let sz = (surf.h * surf.pitch) as usize;

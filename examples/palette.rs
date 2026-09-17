@@ -31,7 +31,7 @@ fn run() -> Result<()> {
             let pal = surf.create_palette()?;
             pal.set_colors(&[Rgba::RED, Rgba::GREEN, Rgba::BLUE, Rgba::WHITE], 0)?;
 
-            surf.lock_with(|px| {
+            surf.lock_pixels(|px| {
                 let len = surf.pixel_row_len();
                 sandlot::log!("Pitch: {}, pixel row len: {}", surf.pitch(), len);
                 sandlot::log!("Must lock? {}", surf.must_lock());

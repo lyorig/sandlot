@@ -77,9 +77,9 @@ fn run() -> Result<()> {
     ])?;
 
     let verts = [
-        vert(PointF32::new(300., 200.), RgbaF32::RED),
-        vert(PointF32::new(500., 400.), RgbaF32::GREEN),
-        vert(PointF32::new(100., 400.), RgbaF32::BLUE),
+        vert(PointF32::new(640., 300.), RgbaF32::RED),
+        vert(PointF32::new(400., 480.), RgbaF32::GREEN),
+        vert(PointF32::new(640., 480.), RgbaF32::BLUE),
     ];
 
     rnd.draw_geometry(&verts, None, None)?;

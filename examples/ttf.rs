@@ -40,7 +40,7 @@ fn run() -> Result<()> {
         let eng = RendererEngine::new(rnd.as_ref())?;
         let text = {
             let text = Text::new(font.as_ref(), rt("And now I see,"))?;
-            RendererText::new(text, eng.as_ref())?
+            RendererText::new(text, eng.as_ref())
         };
 
         rnd.clear()?;
@@ -60,7 +60,7 @@ fn run() -> Result<()> {
 
         let tex = {
             let eng = SurfaceEngine::new()?;
-            let text = SurfaceText::new(text.into_text(), eng.as_ref())?;
+            let text = SurfaceText::new(text.into_text(), eng.as_ref());
 
             text.set_direction(Direction::LeftToRight)?;
             text.set_string(rt("Look ma, I'm a texture!"))?;

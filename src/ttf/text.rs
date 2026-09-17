@@ -49,7 +49,7 @@ use crate::{
     rect::{PointF32, PointI32, RectI32},
     resource::{Handle, Ref, Resource, resource_new},
     surface::Surface,
-    ttf::{Font, FontHandle, GpuEngine, RendererEngine, TtfStr, SurfaceEngine},
+    ttf::{Font, FontHandle, GpuEngine, RendererEngine, SurfaceEngine, TtfStr},
     util::{impl_enum_transmute, opt2res, to_result},
 };
 
@@ -531,12 +531,13 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This function may cause the internal text representation to be rebuilt.
     #[doc(alias = "TTF_SetTextEngine")]
-    fn set_engine<H, R>(self, engine: Ref<R>) -> Result<()>
+    fn set_engine<H, R>(self, engine: Ref<R>)
     where
         H: Handle<Raw = *mut TTF_TextEngine>,
         R: Resource<Handle = H>,
     {
-        to_result(unsafe { TTF_SetTextEngine(self.as_raw(), engine.as_raw()) })
+        // NOTE: Infallible, since the only error condition is an invalid engine object.
+        unsafe { TTF_SetTextEngine(self.as_raw(), engine.as_raw()) };
     }
 
     /// # Safety
@@ -621,6 +622,8 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     }
 }
 
+/// A capsule for a [`Text`] object, during whose existence it is possible
+/// to draw it using a [`RendererEngine`].
 pub struct RendererText<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd> {
     text: Text<'ttf, 'font>,
     marker: PhantomData<Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>>,
@@ -632,13 +635,13 @@ impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
     pub fn new(
         text: Text<'ttf, 'font>,
         eng: Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>,
-    ) -> Result<Self> {
-        text.set_engine(eng)?;
+    ) -> Self {
+        text.set_engine(eng);
 
-        Ok(Self {
+        Self {
             text,
             marker: PhantomData,
-        })
+        }
     }
 
     /// Consumes `self`, returning the underlying [`Text`].
@@ -673,19 +676,21 @@ impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd> std::ops::Deref
     }
 }
 
+/// A capsule for a [`Text`] object, during whose existence it is possible
+/// to draw it using a [`SurfaceEngine`].
 pub struct SurfaceText<'ttf, 'font, 'eng> {
     text: Text<'ttf, 'font>,
     marker: PhantomData<Ref<'eng, SurfaceEngine>>,
 }
 
 impl<'ttf, 'font, 'eng> SurfaceText<'ttf, 'font, 'eng> {
-    pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, SurfaceEngine>) -> Result<Self> {
-        text.set_engine(eng)?;
+    pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, SurfaceEngine>) -> Self {
+        text.set_engine(eng);
 
-        Ok(Self {
+        Self {
             text,
             marker: PhantomData,
-        })
+        }
     }
 
     /// Consumes `self`, returning the underlying [`Text`].
@@ -713,22 +718,21 @@ impl<'ttf, 'font, 'eng> std::ops::Deref for SurfaceText<'ttf, 'font, 'eng> {
     }
 }
 
+/// A capsule for a [`Text`] object, during whose existence it is possible
+/// to draw it using a [`GpuEngine`].
 pub struct GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
     text: Text<'ttf, 'font>,
     marker: PhantomData<Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>>,
 }
 
 impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
-    pub fn new(
-        text: Text<'ttf, 'font>,
-        eng: Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>,
-    ) -> Result<Self> {
-        text.set_engine(eng)?;
+    pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>) -> Self {
+        text.set_engine(eng);
 
-        Ok(Self {
+        Self {
             text,
             marker: PhantomData,
-        })
+        }
     }
 
     /// Consumes `self`, returning the underlying [`Text`].

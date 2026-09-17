@@ -9,6 +9,8 @@
   - `Error` setting and clearing
   - TTF "engine'd text objects" (see `ttf::Text` docs for specifics)
   - Subsystem `leak` constructor
+  - `PixelFormat::{bits,bytes}_per_pixel`
+  - Surface locking
 - API changes
   - `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
   - places which previously used `&Context` have migrated to `Ref<Context>`
@@ -27,9 +29,10 @@
   - `Self` no longer used in links
 - Fixes
   - Moved struct methods which were unnecessarily implemented on the owned type
-  - `Ref` manually impl's `Clone` + `Copy` to fix some edge cases
+  - `Ref` manually impl's `Clone` + `Copy` to fix some compilation edge cases
 
 ## v0.1.3
+
 - Lifetimes!
   - several structs now have lifetimes representing the initialization hierarchy
   - this adds a LOT of lifetimes to the source code (see `RenderStateCreateInfo` for the motherlode), but also shouldn't break **well-formed** existing code
