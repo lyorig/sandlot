@@ -19,6 +19,9 @@ use crate::{
     window::{Window, WindowHandle},
 };
 
+#[expect(unused_imports)]
+use crate::event::Event;
+
 /// Read-only properties of a renderer, as documented by
 /// [`SDL_GetRendererProperties`](https://wiki.libsdl.org/SDL3/SDL_GetRendererProperties).
 ///
@@ -55,11 +58,13 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         NonNull::new(p)
     }
 
+    /// The name of the rendering driver.
     #[doc(alias = "SDL_PROP_RENDERER_NAME_STRING")]
     pub fn name(self) -> &'rnd str {
         self.get_str(SDL_PROP_RENDERER_NAME_STRING)
     }
 
+    /// The window where rendering is displayed, if any.
     #[doc(alias = "SDL_PROP_RENDERER_WINDOW_POINTER")]
     pub fn window(self) -> Option<Ref<'wnd, Window<'ctx, 'vid>>> {
         let p = unsafe {
@@ -70,6 +75,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         WindowHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
+    /// The window where rendering is displayed, if this is a surface renderer without a window.
     #[doc(alias = "SDL_PROP_RENDERER_SURFACE_POINTER")]
     pub fn surface(self) -> Option<Ref<'rnd, Surface>> {
         let p = unsafe {
@@ -80,11 +86,13 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         SurfaceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
+    /// The current VSync setting.
     #[doc(alias = "SDL_PROP_RENDERER_VSYNC_NUMBER")]
     pub fn vsync(self) -> i64 {
         unsafe { self.inner.number(SDL_PROP_RENDERER_VSYNC_NUMBER, 0) }
     }
 
+    /// The maximum texture width/height.
     #[doc(alias = "SDL_PROP_RENDERER_MAX_TEXTURE_SIZE_NUMBER")]
     pub fn max_texture_size(self) -> i64 {
         unsafe {
@@ -93,6 +101,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         }
     }
 
+    /// The available texture formats for this renderer.
     #[doc(alias = "SDL_PROP_RENDERER_TEXTURE_FORMATS_POINTER")]
     pub fn texture_formats(self) -> &'rnd [PixelFormat] {
         let begin = unsafe {
@@ -110,14 +119,18 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         unsafe { std::slice::from_raw_parts(begin.cast::<PixelFormat>(), len) }
     }
 
+    /// Whether the renderer supports [`SDL_TEXTURE_ADDRESS_WRAP`] on non-power-of-two textures.
     #[doc(alias = "SDL_PROP_RENDERER_TEXTURE_WRAPPING_BOOLEAN")]
-    pub fn texture_wrapping(self) -> bool {
+    pub fn supports_texture_wrapping(self) -> bool {
         unsafe {
             self.inner
                 .bool(SDL_PROP_RENDERER_TEXTURE_WRAPPING_BOOLEAN, false)
         }
     }
 
+    /// The colorspace for output to the display.
+    ///
+    /// Defaults to [`Colorspace::Srgb`].
     #[doc(alias = "SDL_PROP_RENDERER_OUTPUT_COLORSPACE_NUMBER")]
     pub fn output_colorspace(self) -> Colorspace {
         let cs = SDL_Colorspace::new(unsafe {
@@ -128,14 +141,22 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         unsafe { Colorspace::from_sdl_unchecked(cs) }
     }
 
+    /// True when the output colorspace is [`Colorspace::SrgbLinear`] and the renderer
+    /// is showing on a display with HDR enabled.
+    ///
+    /// This can change dynamically when [`Event::WindowHdrStateChanged`] is sent.
     #[doc(alias = "SDL_PROP_RENDERER_HDR_ENABLED_BOOLEAN")]
-    pub fn hdr_enabled(self) -> bool {
+    pub fn is_hdr_enabled(self) -> bool {
         unsafe {
             self.inner
                 .bool(SDL_PROP_RENDERER_HDR_ENABLED_BOOLEAN, false)
         }
     }
 
+    /// The value of SDR white in [`Colorspace::SrgbLinear`].
+    ///
+    /// When enabled, this value is automatically multiplied into the color scale.
+    /// This property can change dynamically when [`Event::WindowHdrStateChanged`] is sent.
     #[doc(alias = "SDL_PROP_RENDERER_SDR_WHITE_POINT_FLOAT")]
     pub fn sdr_white_point(self) -> f32 {
         unsafe {
@@ -144,6 +165,11 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         }
     }
 
+    /// The additional high dynamic range that can be displayed, in terms of the
+    /// SDR white point.
+    ///
+    /// When HDR is not enabled, this will be 1.0. This property can change dynamically
+    /// when [`Event::WindowHdrStateChanged`] is sent.
     #[doc(alias = "SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT")]
     pub fn hdr_headroom(self) -> f32 {
         unsafe { self.inner.float(SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT, 0.) }

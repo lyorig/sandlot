@@ -27,38 +27,38 @@
 //! - [ ] SDL_GetSurfaceClipRect
 //! - [ ] SDL_GetSurfaceColorKey
 //! - [x] SDL_GetSurfaceColorMod
-//! - [ ] SDL_GetSurfaceColorspace
+//! - [x] SDL_GetSurfaceColorspace
 //! - [ ] SDL_GetSurfaceImages
 //! - [x] SDL_GetSurfacePalette
-//! - [ ] SDL_GetSurfaceProperties
-//! - [ ] SDL_LoadBMP
+//! - [x] SDL_GetSurfaceProperties
+//! - [x] SDL_LoadBMP
 //! - [ ] SDL_LoadBMP_IO
-//! - [ ] SDL_LockSurface
+//! - [x] SDL_LockSurface
 //! - [x] SDL_MapSurfaceRGB
 //! - [x] SDL_MapSurfaceRGBA
 //! - [ ] SDL_PremultiplyAlpha
 //! - [ ] SDL_PremultiplySurfaceAlpha
-//! - [ ] SDL_ReadSurfacePixel
-//! - [ ] SDL_ReadSurfacePixelFloat
+//! - [x] SDL_ReadSurfacePixel
+//! - [x] SDL_ReadSurfacePixelFloat
 //! - [ ] SDL_RemoveSurfaceAlternateImages
-//! - [ ] SDL_SaveBMP
+//! - [x] SDL_SaveBMP
 //! - [ ] SDL_SaveBMP_IO
 //! - [x] SDL_ScaleSurface
 //! - [x] SDL_SetSurfaceAlphaMod
 //! - [x] SDL_SetSurfaceBlendMode
 //! - [ ] SDL_SetSurfaceClipRect
-//! - [ ] SDL_SetSurfaceColorKey
+//! - [x] SDL_SetSurfaceColorKey
 //! - [x] SDL_SetSurfaceColorMod
-//! - [ ] SDL_SetSurfaceColorspace
+//! - [x] SDL_SetSurfaceColorspace
 //! - [x] SDL_SetSurfacePalette
-//! - [ ] SDL_SetSurfaceRLE
+//! - [x] SDL_SetSurfaceRLE
 //! - [x] SDL_StretchSurface
 //! - [ ] SDL_SurfaceHasAlternateImages
-//! - [ ] SDL_SurfaceHasColorKey
-//! - [ ] SDL_SurfaceHasRLE
-//! - [ ] SDL_UnlockSurface
-//! - [ ] SDL_WriteSurfacePixel
-//! - [ ] SDL_WriteSurfacePixelFloat
+//! - [x] SDL_SurfaceHasColorKey
+//! - [x] SDL_SurfaceHasRLE
+//! - [x] SDL_UnlockSurface
+//! - [x] SDL_WriteSurfacePixel
+//! - [x] SDL_WriteSurfacePixelFloat
 
 use std::{ffi::CStr, mem::MaybeUninit};
 
@@ -66,14 +66,17 @@ use crate::{
     Result,
     color::{RgbU8, RgbaF32, RgbaU8},
     error::Error,
-    pixels::{BlendMode, FlipMode, Palette, PaletteHandle, PixelFormat, ScaleMode},
+    pixels::{BlendMode, Colorspace, FlipMode, Palette, PaletteHandle, PixelFormat, ScaleMode},
+    properties::PropertiesHandle,
     rect::{PointI32, RectI32},
     resource::{Ref, resource_new},
     traits,
-    util::{opt2ptr, to_result},
+    util::{mod_reexport, opt2ptr, to_result},
 };
 
 use sdl3_sys::surface::*;
+
+mod_reexport!(properties);
 
 resource_new! {
     /// A collection of pixels used in software blitting.
@@ -476,9 +479,9 @@ impl SurfaceHandle {
 
     /// Create a palette associated with this surface.
     ///
-    /// This can only be done for surfaces using an indexed format,
-    /// i.e. [`PixelFormat::Index1Msb`] and friends. [`Err`] is returned
-    /// with an accompanying message if that is not the case.
+    /// This can only be done for surfaces for whose pixel format [`PixelFormat::is_indexed`] holds true,
+    /// i.e. [`PixelFormat::Index1Msb`] and friends. [`Err`] is returned with an accompanying message if
+    /// that is not the case.
     #[doc(alias = "SDL_CreateSurfacePalette")]
     pub fn create_palette(&self) -> Result<Ref<'_, Palette>> {
         PaletteHandle::from_ptr(unsafe { SDL_CreateSurfacePalette(self.as_raw()) })
@@ -545,7 +548,7 @@ impl SurfaceHandle {
         unsafe { SDL_UnlockSurface(self.as_raw()) };
     }
 
-    /// Locks this surface (if necessary), calls `f` with a byte buffer containing raw pixel data, then unlocks it.
+    /// Locks this surface (if RLE is enabled), calls `f` with a byte buffer containing raw pixel data, then unlocks it.
     ///
     /// Pixels are stored in a contiguous buffer. made up of rows of [`SurfaceHandle::pitch`] bytes,
     /// which may include padding at the end. [`SurfaceHandle::pixel_row_len`] can be used to retreive
@@ -565,6 +568,187 @@ impl SurfaceHandle {
         } else {
             run();
         }
+    }
+
+    /// Writes a single pixel to a surface.
+    ///
+    /// This function prioritizes correctness over speed: it is suitable for unit tests,
+    /// but is not intended for use in a game engine.
+    ///
+    /// Like [`SurfaceHandle::map_rgba`], this uses the entire 0..255 range when converting color components
+    /// from pixel formats with less than 8 bits per RGB component.
+    #[doc(alias = "SDL_WriteSurfacePixel")]
+    pub fn write_pixel_u8(self, coord: PointI32, color: RgbaU8) -> Result<()> {
+        to_result(unsafe {
+            SDL_WriteSurfacePixel(
+                self.as_raw(),
+                coord.x,
+                coord.y,
+                color.rgb.r,
+                color.rgb.g,
+                color.rgb.b,
+                color.a,
+            )
+        })
+    }
+
+    /// Writes a single pixel to a surface.
+    ///
+    /// This function prioritizes correctness over speed: it is suitable for unit tests,
+    /// but is not intended for use in a game engine.
+    #[doc(alias = "SDL_WriteSurfacePixelFloat")]
+    pub fn write_pixel_f32(self, coord: PointI32, color: RgbaF32) -> Result<()> {
+        to_result(unsafe {
+            SDL_WriteSurfacePixelFloat(
+                self.as_raw(),
+                coord.x,
+                coord.y,
+                color.rgb.r,
+                color.rgb.g,
+                color.rgb.b,
+                color.a,
+            )
+        })
+    }
+
+    /// Retrieves a single pixel from a surface.
+    ///
+    /// This function prioritizes correctness over speed: it is suitable for unit tests,
+    /// but is not intended for use in a game engine.
+    ///
+    /// Like [`RgbaU8::from_pixel`], this uses the entire 0..255 range when converting color components
+    /// from pixel formats with less than 8 bits per RGB component.
+    #[doc(alias = "SDL_ReadSurfacePixel")]
+    pub fn read_pixel_u8(self, coord: PointI32) -> Result<RgbaU8> {
+        let mut ret = MaybeUninit::<RgbaU8>::uninit();
+        let ptr = ret.as_mut_ptr();
+
+        if unsafe {
+            SDL_ReadSurfacePixel(
+                self.as_raw(),
+                coord.x,
+                coord.y,
+                &raw mut (*ptr).rgb.r,
+                &raw mut (*ptr).rgb.g,
+                &raw mut (*ptr).rgb.b,
+                &raw mut (*ptr).a,
+            )
+        } {
+            unsafe { Ok(ret.assume_init()) }
+        } else {
+            Err(Error::current())
+        }
+    }
+
+    /// Retrieves a single pixel from a surface.
+    ///
+    /// This function prioritizes correctness over speed: it is suitable for unit tests,
+    /// but is not intended for use in a game engine.
+    #[doc(alias = "SDL_ReadSurfacePixelFloat")]
+    pub fn read_pixel_f32(self, coord: PointI32) -> Result<RgbaF32> {
+        let mut ret = MaybeUninit::<RgbaF32>::uninit();
+        let ptr = ret.as_mut_ptr();
+
+        if unsafe {
+            SDL_ReadSurfacePixelFloat(
+                self.as_raw(),
+                coord.x,
+                coord.y,
+                &raw mut (*ptr).rgb.r,
+                &raw mut (*ptr).rgb.g,
+                &raw mut (*ptr).rgb.b,
+                &raw mut (*ptr).a,
+            )
+        } {
+            unsafe { Ok(ret.assume_init()) }
+        } else {
+            Err(Error::current())
+        }
+    }
+
+    /// Set the RLE (run-length encoding) acceleration hint for a surface.
+    ///
+    /// If RLE is enabled, color key and alpha blending blits are much faster,
+    /// but the surface must be locked before directly accessing the pixels.
+    #[doc(alias = "SDL_SetSurfaceRLE")]
+    pub fn set_rle(self, value: bool) {
+        unsafe {
+            SDL_SetSurfaceRLE(self.as_raw(), value);
+        }
+    }
+
+    /// Returns whether the surface is RLE enabled.
+    ///
+    /// See [`SurfaceHandle::set_rle`] for what this implies.
+    #[doc(alias = "SDL_SurfaceHasRLE")]
+    pub fn has_rle(self) -> bool {
+        unsafe { SDL_SurfaceHasRLE(self.as_raw()) }
+    }
+
+    /// Get the colorspace used by a surface.
+    ///
+    /// The colorspace defaults to [`Colorspace::SrgbLinear`] for floating point formats,
+    /// [`Colorspace::Hdr10`] for 10-bit formats, [`Colorspace::Srgb`] for other RGB surfaces
+    /// and [`Colorspace::Bt709Full`] for YUV textures.
+    #[doc(alias = "SDL_GetSurfaceColorspace")]
+    pub fn colorspace(self) -> Colorspace {
+        unsafe {
+            let cs = SDL_GetSurfaceColorspace(self.as_raw());
+            Colorspace::from_sdl_unchecked(cs)
+        }
+    }
+
+    /// Set the colorspace used by this surface.
+    ///
+    /// Setting the colorspace doesn't change the pixels, only how they are interpreted in color operations.
+    #[doc(alias = "SDL_SetSurfaceColorspace")]
+    pub fn set_colorspace(self, cs: Colorspace) {
+        unsafe {
+            SDL_SetSurfaceColorspace(self.as_raw(), cs.to_sdl());
+        }
+    }
+
+    /// Set the color key (transparent pixel) in a surface.
+    ///
+    /// The color key defines a pixel value that will be treated as transparent in a blit.
+    /// For example, one can use this to specify that cyan pixels should be considered transparent,
+    /// and therefore not rendered.
+    ///
+    /// It is a pixel of the format used by the surface, as generated by [`SurfaceHandle::map_rgb`].
+    #[doc(alias = "SDL_SetSurfaceColorKey")]
+    pub fn set_color_key(self, enabled: bool, key: u32) {
+        unsafe {
+            SDL_SetSurfaceColorKey(self.as_raw(), enabled, key);
+        }
+    }
+
+    /// Returns whether the surface has a color key.
+    #[doc(alias = "SDL_SurfaceHasColorKey")]
+    pub fn has_color_key(self) -> bool {
+        unsafe { SDL_SurfaceHasColorKey(self.as_raw()) }
+    }
+
+    /// Save a surface to a file in BMP format.
+    ///
+    /// Surfaces with a 24-bit, 32-bit and paletted 8-bit format get saved in the BMP directly.
+    /// Other RGB formats with 8-bit or higher get converted to a 24-bit surface or, if they have
+    /// an alpha mask or a colorkey, to a 32-bit surface before they are saved. YUV and paletted
+    /// 1-bit and 4-bit formats are not supported.
+    #[doc(alias = "SDL_SaveBMP")]
+    pub fn save_to_bmp(self, path: &CStr) -> Result<()> {
+        to_result(unsafe { SDL_SaveBMP(self.as_raw(), path.as_ptr()) })
+    }
+
+    #[doc(alias = "SDL_GetSurfaceProperties")]
+    pub fn properties(&self) -> SurfaceProperties<'_> {
+        let r = unsafe {
+            let id = SDL_GetSurfaceProperties(self.as_raw());
+            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+
+            Ref::from_handle(handle)
+        };
+
+        SurfaceProperties::new(r)
     }
 }
 
@@ -661,5 +845,11 @@ impl Surface {
     #[doc(alias = "SDL_CreateSurface")]
     pub fn new(size: PointI32, format: PixelFormat) -> Result<Self> {
         Self::from_ptr(unsafe { SDL_CreateSurface(size.x, size.y, format.to_sdl()) })
+    }
+
+    /// Load a BMP image from a file.
+    #[doc(alias = "SDL_LoadBMP")]
+    pub fn from_bmp(path: &CStr) -> Result<Self> {
+        Self::from_ptr(unsafe { SDL_LoadBMP(path.as_ptr()) })
     }
 }

@@ -1,3 +1,5 @@
+//! Enumerates displays connected to the system.
+
 use sandlot::{Result, init::Context, init::Video};
 
 fn print_optional_property<T: std::fmt::Display>(name: &str, opt: Option<T>) {

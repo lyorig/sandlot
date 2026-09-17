@@ -1,3 +1,5 @@
+//! Demonstrates key structs of the video subsystem, along with various drawing functions.
+
 #![windows_subsystem = "windows"]
 
 use sandlot::{
@@ -13,7 +15,7 @@ use sdl3_sys::render::SDL_Vertex;
 
 fn print_properties(props: RendererProperties) {
     sandlot::log!("Renderer name: \"{}\"", props.name());
-    sandlot::log!("HDR enabled: {}", props.hdr_enabled());
+    sandlot::log!("HDR enabled: {}", props.is_hdr_enabled());
     sandlot::log!("HDR headroom: {}", props.hdr_headroom());
     sandlot::log!("Max texture size: {} px", props.max_texture_size());
 

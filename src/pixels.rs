@@ -389,6 +389,45 @@ impl PixelFormatMask {
     }
 }
 
+#[repr(i32)]
+#[derive(Clone, Copy)]
+#[doc(alias = "SDL_PackedLayout")]
+pub enum PackedLayout {
+    _332 = SDL_PackedLayout::_332.0,
+    _4444 = SDL_PackedLayout::_4444.0,
+    _1555 = SDL_PackedLayout::_1555.0,
+    _5551 = SDL_PackedLayout::_5551.0,
+    _565 = SDL_PackedLayout::_565.0,
+    _8888 = SDL_PackedLayout::_8888.0,
+    _2101010 = SDL_PackedLayout::_2101010.0,
+    _1010102 = SDL_PackedLayout::_1010102.0,
+}
+
+impl_enum_transmute!(SDL_PackedLayout, PackedLayout, NONE);
+
+#[repr(i32)]
+#[derive(Clone, Copy)]
+#[doc(alias = "SDL_PixelType")]
+pub enum PixelKind {
+    Index1 = SDL_PixelType::INDEX1.0,
+    Index2 = SDL_PixelType::INDEX2.0,
+    Index4 = SDL_PixelType::INDEX4.0,
+    Index8 = SDL_PixelType::INDEX8.0,
+
+    Packed8 = SDL_PixelType::PACKED8.0,
+    Packed16 = SDL_PixelType::PACKED16.0,
+    Packed32 = SDL_PixelType::PACKED32.0,
+
+    ArrayU8 = SDL_PixelType::ARRAYU8.0,
+    ArrayU16 = SDL_PixelType::ARRAYU16.0,
+    ArrayU32 = SDL_PixelType::ARRAYU32.0,
+
+    ArrayF16 = SDL_PixelType::ARRAYF16.0,
+    ArrayF32 = SDL_PixelType::ARRAYF32.0,
+}
+
+impl_enum_transmute!(SDL_PixelType, PixelKind, UNKNOWN);
+
 /// Pixel format.
 ///
 /// # Remarks
@@ -577,6 +616,62 @@ impl PixelFormat {
     #[doc(alias = "SDL_BITSPERPIXEL")]
     pub const fn bits_per_pixel(self) -> u8 {
         SDL_BITSPERPIXEL(self.to_sdl())
+    }
+
+    /// Is this a 10-bit format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_10BIT")]
+    pub const fn is_10bit(self) -> bool {
+        SDL_ISPIXELFORMAT_10BIT(self.to_sdl())
+    }
+
+    /// Does this format have an alpha channel?
+    #[doc(alias = "SDL_ISPIXELFORMAT_ALPHA")]
+    pub const fn has_alpha(self) -> bool {
+        SDL_ISPIXELFORMAT_ALPHA(self.to_sdl())
+    }
+
+    /// Is this an array format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_ARRAY")]
+    pub const fn is_array(self) -> bool {
+        SDL_ISPIXELFORMAT_ARRAY(self.to_sdl())
+    }
+
+    /// Is this a floating-point format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_FLOAT")]
+    pub const fn is_float(self) -> bool {
+        SDL_ISPIXELFORMAT_FLOAT(self.to_sdl())
+    }
+
+    /// Is this a [FourCC](https://en.wikipedia.org/wiki/FourCC) format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_FOURCC")]
+    pub const fn is_fourcc(self) -> bool {
+        SDL_ISPIXELFORMAT_FOURCC(self.to_sdl())
+    }
+
+    /// Is this an indexed format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_INDEXED")]
+    pub const fn is_indexed(self) -> bool {
+        SDL_ISPIXELFORMAT_INDEXED(self.to_sdl())
+    }
+
+    /// Is this a packed format?
+    #[doc(alias = "SDL_ISPIXELFORMAT_PACKED")]
+    pub const fn is_packed(self) -> bool {
+        SDL_ISPIXELFORMAT_PACKED(self.to_sdl())
+    }
+
+    /// Returns the kind of this pixel format. See the [`PixelKind`] enum
+    /// for all possible kinds.
+    #[doc(alias = "SDL_PIXELTYPE")]
+    pub const fn kind(self) -> PixelKind {
+        unsafe { PixelKind::from_sdl_unchecked(SDL_PIXELTYPE(self.to_sdl())) }
+    }
+
+    /// Returns this format's packed component layout.
+    #[doc(alias = "SDL_PACKEDLAYOUT")]
+    pub fn layout(self) -> Option<PackedLayout> {
+        let layout = SDL_PIXELLAYOUT(self.to_sdl());
+        PackedLayout::from_sdl(layout)
     }
 }
 

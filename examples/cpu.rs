@@ -1,3 +1,5 @@
+//! Prints all information about the system's CPU that SDL can provide.
+
 use sandlot::cpu;
 
 fn main() {

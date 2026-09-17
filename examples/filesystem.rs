@@ -1,4 +1,4 @@
-//! Attempts to enumerate a directory specified by the user.
+//! Enumerates a directory specified by the user.
 
 use std::{
     ffi::{CStr, CString},

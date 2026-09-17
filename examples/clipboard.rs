@@ -1,3 +1,5 @@
+//! Shows the state of the system's clipboard.
+
 use std::ffi::CStr;
 
 use sandlot::{Result, init::Context, init::Video};

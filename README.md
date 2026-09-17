@@ -1,6 +1,6 @@
 # Sandlot
 
-An SDL (3.4) & SDL_ttf (3.2) Rust wrapper.
+An SDL (3.4) & SDL_ttf (3.2) Rust wrapper. Expect many breaking changes between each release.
 
 ## How much of a wrapper is it really?
 
