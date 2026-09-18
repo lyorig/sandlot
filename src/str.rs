@@ -38,6 +38,11 @@ use std::{
 /// for `&[u8]`, `&str`, and `&CStr`. However, many of these operations involve performing
 /// a `strlen` internally, and so it might be beneficial to first convert it to a type with
 /// a precalculated length such as `&str`, if you're going to be doing more length-related operations.
+///
+/// Another reason to convert to a reference type ASAP is allowing the compiler to optimize more.
+/// References have strict guarantees which the pointer contained within this struct doesn't,
+/// and it might be beneficial for rustc to see that "hey, this isn't just some random pointer which
+/// might alias with other data, it's an immutable string whose reads I can elide in various ways!"
 #[derive(Clone, Copy)]
 pub struct Str<'a> {
     ptr: NonNull<c_char>,

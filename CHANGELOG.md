@@ -9,8 +9,11 @@
   - `Error` setting and clearing
   - TTF "engine'd text objects" (see `ttf::Text` docs for specifics)
   - Subsystem `leak` constructor
-  - `PixelFormat::{bits,bytes}_per_pixel`
-  - Surface locking
+  - `PixelFormat::{bits,bytes}_per_pixel`, along with `{is,has}_*` query methods
+  - Surface locking & pixel access
+  - `Str` type
+    - Wraps a pointer to a nul-terminated UTF-8 string
+    - Provides infallible conversions to both `&str` and `&CStr`
 - API changes
   - `Context::init` is now fallible and now returns `sandlot::Result<Self>`, as it calls `SDL_Init(0)`
   - places which previously used `&Context` have migrated to `Ref<Context>`
@@ -19,13 +22,16 @@
   - TTF `Text` cannot be drawn by itself (needs engine'd text object)
   - TTF `RtStr` has been renamed to `TtfStr`
   - `EventIter` is tied to the `Events` subsystem
-  - several functions have been moved to subsystems due to lifetime safety:
+  - several functions have been moved to subsystems due to being dependent on them:
     - display getters
     - everything from `sandlot::clipboard` (which has been removed)
     - screen saver functions from `sandlot::window`
     - state fetching functions from `sandlot::keyboard`
+  - `gpu::RenderState` lifetime-bound to `Renderer`
+  - Uses of `&CStr` where UTF-8 was guaranteed have been migrated to `Str`
+    - `Str` can be constructed from a string literal via the `sandlot::s!` macro
 - Docs
-  - Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes
+  - Property getters (e.g. `TextureProperties`) now have `#[doc(alias = "SDL_PROP_...")]` attributes along with SDL docs
   - `Self` no longer used in links
 - Fixes
   - Moved struct methods which were unnecessarily implemented on the owned type

@@ -677,11 +677,11 @@ impl SurfaceHandle {
         }
     }
 
-    /// Returns whether the surface is RLE enabled.
+    /// Returns whether the surface is run-length encoded.
     ///
     /// See [`SurfaceHandle::set_rle`] for what this implies.
     #[doc(alias = "SDL_SurfaceHasRLE")]
-    pub fn has_rle(self) -> bool {
+    pub fn is_rle(self) -> bool {
         unsafe { SDL_SurfaceHasRLE(self.as_raw()) }
     }
 
