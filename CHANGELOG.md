@@ -1,6 +1,6 @@
 # What's new!
 
-## v0.1.4.1
+## v0.1.5
 
 - Fixes
   - `TryFrom<{&str, &CStr}> for Str` now correctly looks for the nul terminator
