@@ -1,5 +1,10 @@
 # What's new!
 
+## v0.1.4.1
+
+- Fixes
+  - `TryFrom<{&str, &CStr}> for Str` now correctly looks for the nul terminator
+
 ## v0.1.4
 
 - API additions
