@@ -5,7 +5,7 @@
 use sandlot::{
     Result,
     gpu::*,
-    init::{AppKind, Context, Video},
+    init::{Context, Video},
 };
 
 cfg_select! {
@@ -24,14 +24,7 @@ cfg_select! {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::builder()
-        .name(c"Sandlot GPU Compute")
-        .creator(c"lyorig")
-        .kind(AppKind::Application)
-        .version(c"v0.1.4")
-        .identifier(c"cz.lyorig.gpucompute")
-        .url(c"https://github.com/lyorig/sandlot")
-        .build()?;
+    let ctx = Context::init()?;
 
     let video = Video::init(ctx.as_ref())?;
 

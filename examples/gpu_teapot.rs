@@ -7,7 +7,7 @@ use sandlot::{
     color::{RgbaF32, RgbaU8},
     event::Event,
     gpu::*,
-    init::{AppKind, Context, Video},
+    init::{Context, Video},
     rect::Point,
     resource::Ref,
     window::Window,
@@ -199,14 +199,7 @@ fn pick_depth_format(device: Ref<Device>) -> TextureFormat {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::builder()
-        .name(c"Sandlot GPU Teapot")
-        .creator(c"lyorig")
-        .kind(AppKind::Game)
-        .version(c"v0.1.4")
-        .identifier(c"cz.lyorig.gputeapot")
-        .url(c"https://github.com/lyorig/sandlot")
-        .build()?;
+    let ctx = Context::init()?;
 
     let video = Video::leak(ctx.as_ref())?;
 

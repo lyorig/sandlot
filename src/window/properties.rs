@@ -1,5 +1,5 @@
 use std::{
-    ffi::{CStr, c_char, c_void},
+    ffi::{c_char, c_void},
     marker::PhantomData,
     ptr::NonNull,
 };
@@ -9,6 +9,7 @@ use sdl3_sys::video::*;
 use crate::{
     properties::Properties,
     resource::Ref,
+    str::Str,
     surface::{Surface, SurfaceHandle},
     window::Window,
 };
@@ -33,10 +34,10 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
         }
     }
 
-    fn opt_str(self, key: *const c_char) -> Option<&'wnd str> {
+    fn opt_str(self, key: *const c_char) -> Option<&'wnd Str> {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
 
-        (!s.is_null()).then(|| unsafe { str::from_utf8_unchecked(CStr::from_ptr(s).to_bytes()) })
+        (!s.is_null()).then(|| unsafe { Str::from_ptr(s) })
     }
 
     fn opt_number(self, key: *const c_char) -> Option<i64> {
@@ -144,7 +145,7 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
     }
 
     #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING")]
-    pub fn wayland_xdg_toplevel_export_handle(self) -> Option<&'wnd str> {
+    pub fn wayland_xdg_toplevel_export_handle(self) -> Option<&'wnd Str> {
         self.opt_str(SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING)
     }
 

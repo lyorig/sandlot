@@ -17,10 +17,10 @@ mod event;
 mod fs;
 mod init;
 mod log;
+mod str;
 mod string;
 mod texture;
 mod ttf;
-mod utf8cstr;
 
 /// Basic initialization stuff.
 #[test]

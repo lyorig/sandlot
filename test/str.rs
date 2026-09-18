@@ -1,12 +1,12 @@
 use std::ffi::CStr;
 
 use rustest::test;
-use sandlot::utf8cstr::Utf8CStr;
+use sandlot::str::Str;
 
 #[test]
-fn utf8cstr_from_cstr_exposes_all_views() {
+fn str_from_cstr_exposes_all_views() {
     let cstr = c"hello";
-    let value = unsafe { Utf8CStr::from_cstr(cstr) };
+    let value = unsafe { Str::from_cstr_unchecked(cstr) };
 
     assert_eq!(value.as_bytes(), b"hello");
     assert_eq!(value.as_bytes_with_nul(), b"hello\0");
@@ -15,8 +15,8 @@ fn utf8cstr_from_cstr_exposes_all_views() {
 }
 
 #[test]
-fn utf8cstr_supports_empty_strings() {
-    let value = unsafe { Utf8CStr::from_cstr(c"") };
+fn str_supports_empty_strings() {
+    let value = unsafe { Str::from_cstr_unchecked(c"") };
 
     assert!(value.as_bytes().is_empty());
     assert_eq!(value.as_bytes_with_nul(), b"\0");
@@ -25,11 +25,11 @@ fn utf8cstr_supports_empty_strings() {
 }
 
 #[test]
-fn utf8cstr_preserves_utf8_without_loss() {
+fn str_preserves_utf8_without_loss() {
     let text = "Sandlot — 日本語 🦀";
     let bytes = [text.as_bytes(), b"\0"].concat();
     let cstr = CStr::from_bytes_with_nul(&bytes).unwrap();
-    let value = unsafe { Utf8CStr::from_cstr(cstr) };
+    let value = unsafe { Str::from_cstr_unchecked(cstr) };
 
     assert_eq!(value.as_str(), text);
     assert_eq!(value.as_bytes(), text.as_bytes());
@@ -37,19 +37,19 @@ fn utf8cstr_preserves_utf8_without_loss() {
 }
 
 #[test]
-fn utf8cstr_from_ptr_matches_from_cstr() {
+fn str_from_ptr_matches_from_cstr() {
     let cstr = c"pointer input";
-    let from_cstr = unsafe { Utf8CStr::from_cstr(cstr) };
-    let from_ptr = unsafe { Utf8CStr::from_ptr(cstr.as_ptr()) };
+    let from_cstr = unsafe { Str::from_cstr_unchecked(cstr) };
+    let from_ptr = unsafe { Str::from_ptr(cstr.as_ptr()) };
 
     assert_eq!(from_ptr.as_bytes_with_nul(), from_cstr.as_bytes_with_nul());
     assert_eq!(from_ptr.as_str(), from_cstr.as_str());
 }
 
 #[test]
-fn utf8cstr_display_trait() {
+fn str_display_trait() {
     let text = c"Sandlot — 日本語 🦀";
-    let ucs = unsafe { Utf8CStr::from_cstr(text) };
+    let ucs = unsafe { Str::from_cstr_unchecked(text) };
     let disp = ucs.to_string();
 
     assert_eq!(&text.to_string_lossy(), &disp);

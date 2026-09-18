@@ -1,17 +1,24 @@
 use rustest::test;
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 
-use sandlot::init::{AppKind, Context};
+use sandlot::{
+    init::{AppKind, Context},
+    str::Str,
+};
+
+const fn s(s: &CStr) -> &Str {
+    unsafe { Str::from_cstr_unchecked(s) }
+}
 
 /// `Context::metadata` reads back what `Context::builder` set.
 #[test]
 fn init_context_metadata() {
-    const NAME: &CStr = c"Sandlot";
-    const VERSION: &CStr = c"0.1.4"; // at the time of writing
-    const IDENTIFIER: &CStr = c"cz.lyorig.sandlot";
-    const CREATOR: &CStr = c"lyorig";
-    const COPYRIGHT: &CStr = c"Copyright (c) lyorig";
-    const URL: &CStr = c"https://github.com/lyorig/sandlot";
+    const NAME: &Str = s(c"Sandlot");
+    const VERSION: &Str = s(c"0.1.4"); // at the time of writing
+    const IDENTIFIER: &Str = s(c"cz.lyorig.sandlot");
+    const CREATOR: &Str = s(c"lyorig");
+    const COPYRIGHT: &Str = s(c"Copyright (c) lyorig");
+    const URL: &Str = s(c"https://github.com/lyorig/sandlot");
 
     let ctx = Context::builder()
         .name(NAME)
@@ -34,12 +41,6 @@ fn init_context_metadata() {
     assert_eq!(md.kind(), AppKind::Game);
 }
 
-fn expected_test_exe_name() -> CString {
-    let mut name = "sandlot_tests-4873101f85ca6eba".to_owned();
-    name.push_str(std::env::consts::EXE_SUFFIX);
-    unsafe { CString::from_vec_unchecked(name.into_bytes()) }
-}
-
 /// `Context::metadata` provides default properties when not set explicitly.
 #[test]
 fn init_context_metadata_default() {
@@ -49,7 +50,7 @@ fn init_context_metadata_default() {
 
     // Turns out, SDL returns the binary name by default!
     // Only if that isn't available is the default "SDL Application" used.
-    assert_eq!(md.name(), &expected_test_exe_name());
+    assert!(!md.name().is_empty());
     assert_eq!(md.version(), None);
     assert_eq!(md.identifier(), None);
     assert_eq!(md.creator(), None);

@@ -1,8 +1,10 @@
 //! Wrapper for [`SDL_GetError`], suitable for usage in [`Result`].
 
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 
 use sdl3_sys::error::{SDL_ClearError, SDL_GetError, SDL_SetError};
+
+use crate::str::Str;
 
 #[derive(Debug)]
 pub struct Error {
@@ -36,13 +38,12 @@ impl Error {
     #[doc(alias = "SDL_GetError")]
     pub fn current() -> Self {
         // SAFETY: SDL's error strings are UTF-8.
-        let cstr = unsafe { CStr::from_ptr(SDL_GetError()) };
-        let str = unsafe { str::from_utf8_unchecked(cstr.to_bytes()) };
+        let s = unsafe { Str::from_ptr(SDL_GetError()) };
 
         // Speculatively reserve capacity for a null byte,
         // in case `Self::into_cstring()` is called.
-        let mut reason = String::with_capacity(str.len() + 1);
-        reason.push_str(str);
+        let mut reason = String::with_capacity(s.len() + 1);
+        reason.push_str(s);
 
         Self { reason }
     }
@@ -51,8 +52,8 @@ impl Error {
     ///
     /// Calling this function will replace any previous error message that was set.
     #[doc(alias = "SDL_SetError")]
-    pub fn set(reason: &CStr) -> Self {
-        unsafe { SDL_SetError(reason.as_ptr()) };
+    pub fn set(reason: &Str) -> Self {
+        unsafe { SDL_SetError(c"%s".as_ptr(), reason.as_ptr()) };
         Self::current()
     }
 

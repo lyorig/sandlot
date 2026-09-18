@@ -17,7 +17,7 @@ fn run() -> Result<()> {
         println!(
             "Display #{}: \"{}\", bounds {} (usable {}), content scale = {:.2}",
             i,
-            disp.name()?.to_string_lossy(),
+            disp.name()?,
             disp.bounds()?,
             disp.usable_bounds()?,
             disp.content_scale()?
@@ -53,7 +53,7 @@ fn run() -> Result<()> {
     println!(
         "Primary display has ID {}, and name \"{}\"",
         p.id().0,
-        p.name()?.to_string_lossy(),
+        p.name()?,
     );
 
     if let Some(o) = p.current_orientation() {

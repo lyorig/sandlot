@@ -25,11 +25,12 @@ use crate::{
     properties::PropertiesHandle,
     rect::{PointI32, RectI32},
     resource::Ref,
+    str::Str,
     util::{boolenum, impl_enum_transmute, mod_reexport, opt2res_map},
 };
 
 use sdl3_sys::video::*;
-use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit, num::NonZero, ptr::NonNull};
+use std::{marker::PhantomData, mem::MaybeUninit, num::NonZero, ptr::NonNull};
 
 mod_reexport!(properties);
 
@@ -102,12 +103,12 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     ///
     /// Although returned as a [`&CStr`](std::ffi::CStr), the returned string is guaranteed to be valid UTF-8.
     #[doc(alias = "SDL_GetDisplayName")]
-    pub fn name(&self) -> Result<&CStr> {
+    pub fn name(&self) -> Result<&Str> {
         let ptr = unsafe { SDL_GetDisplayName(self.id()) };
         if ptr.is_null() {
             Err(Error::current())
         } else {
-            Ok(unsafe { CStr::from_ptr(ptr) })
+            Ok(unsafe { Str::from_ptr(ptr) })
         }
     }
 

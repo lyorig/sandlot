@@ -10,6 +10,7 @@ use crate::{
     keyboard::KeyboardState,
     rect::{PointI32, RectI32},
     resource,
+    str::Str,
     string::String,
     util::to_result,
     window::{Window, WindowHandle, WindowId},
@@ -159,7 +160,7 @@ impl<'ctx> VideoHandle<'ctx> {
 
     /// Put UTF-8 text into the clipboard.
     #[doc(alias = "SDL_SetClipboardText")]
-    pub fn clipboard_set_text(self, text: &CStr) -> Result<()> {
+    pub fn clipboard_set_text(self, text: &Str) -> Result<()> {
         to_result(unsafe { SDL_SetClipboardText(text.as_ptr()) })
     }
 

@@ -6,7 +6,7 @@ use sandlot::{
     Result,
     color::{Rgba, RgbaF32},
     event::Event,
-    init::{AppKind, Context, Video},
+    init::{Context, Video},
     rect::{Point, PointF32, Rect},
     renderer::{Renderer, RendererProperties},
     window::Window,
@@ -36,12 +36,7 @@ fn vert(pos: PointF32, col: RgbaF32) -> SDL_Vertex {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::builder()
-        .name(c"Sandlot Video Example")
-        .url(c"https://github.com/lyorig/sandlot")
-        .identifier(c"cz.lyorig.SandlotVideoExample")
-        .kind(AppKind::Application)
-        .build()?;
+    let ctx = Context::init()?;
 
     let video = Video::leak(ctx.as_ref())?;
     let events = video.events();

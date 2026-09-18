@@ -1,5 +1,5 @@
 use std::{
-    ffi::{CStr, c_char, c_void},
+    ffi::{c_char, c_void},
     marker::PhantomData,
     ptr::NonNull,
 };
@@ -15,6 +15,7 @@ use crate::{
     properties::Properties,
     renderer::Renderer,
     resource::Ref,
+    str::Str,
     surface::{Surface, SurfaceHandle},
     window::{Window, WindowHandle},
 };
@@ -42,11 +43,11 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         }
     }
 
-    fn get_str(self, key: *const c_char) -> &'rnd str {
+    fn get_str(self, key: *const c_char) -> &'rnd Str {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
 
         // SAFETY: Only called for properties whose existence the SDL docs guarantee.
-        unsafe { str::from_utf8_unchecked(CStr::from_ptr(s).to_bytes()) }
+        unsafe { Str::from_ptr(s) }
     }
 
     fn opt_number(self, key: *const c_char) -> Option<i64> {
@@ -60,7 +61,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
 
     /// The name of the rendering driver.
     #[doc(alias = "SDL_PROP_RENDERER_NAME_STRING")]
-    pub fn name(self) -> &'rnd str {
+    pub fn name(self) -> &'rnd Str {
         self.get_str(SDL_PROP_RENDERER_NAME_STRING)
     }
 

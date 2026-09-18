@@ -14,7 +14,7 @@
 //! - [x] SDL_PushGPUFragmentUniformData
 //! - [x] SDL_PushGPUVertexUniformData
 
-use std::{ffi::CStr, marker::PhantomData, mem::MaybeUninit};
+use std::{marker::PhantomData, mem::MaybeUninit};
 
 use sdl3_sys::gpu::*;
 
@@ -24,6 +24,7 @@ use crate::{
     gpu::Cycle,
     pixels::FlipMode,
     resource::{Ref, resource_new},
+    str::Str,
     util::{opt2ptr_mut, to_result},
     window::Window,
 };
@@ -256,7 +257,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// `text` is the label to insert. On Direct3D 12, this requires
     /// `WinPixEventRuntime.dll` to be available in `PATH` or beside the executable.
     #[doc(alias = "SDL_InsertGPUDebugLabel")]
-    pub fn insert_debug_label(self, text: &CStr) {
+    pub fn insert_debug_label(self, text: &Str) {
         unsafe { SDL_InsertGPUDebugLabel(self.handle.as_ptr(), text.as_ptr()) }
     }
 
@@ -268,7 +269,7 @@ impl<'ctx, 'vid, 'dev> CommandBufferHandle<'ctx, 'vid, 'dev> {
     /// On some backends, groups recorded inside a pass are scoped to that native
     /// pass, so they should be popped in the same pass.
     #[doc(alias = "SDL_PushGPUDebugGroup")]
-    pub fn push_debug_group(self, name: &CStr) {
+    pub fn push_debug_group(self, name: &Str) {
         unsafe { SDL_PushGPUDebugGroup(self.handle.as_ptr(), name.as_ptr()) }
     }
 

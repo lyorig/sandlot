@@ -40,10 +40,7 @@ fn print_properties(props: SurfaceProperties) {
     sandlot::log!("Properties:");
     print_optional_property("SDR white point", props.sdr_white_point());
     print_optional_property("HDR headroom", props.hdr_headroom());
-    print_optional_property(
-        "Tone map operator",
-        props.tonemap_operator().map(|s| s.to_string_lossy()),
-    );
+    print_optional_property("Tone map operator", props.tonemap_operator());
     print_optional_property("hotspot_x", props.hotspot_x());
     print_optional_property("hotspot_y", props.hotspot_y());
     sandlot::log!("- Rotation: {}", props.rotation());
@@ -83,12 +80,11 @@ fn run() -> Result<()> {
         // 00 01 10 11 (red, green, blue, white)
         let mut value = 0b00011011;
 
-        px.chunks_exact_mut(surf.pitch() as usize)
-            .map(|row| &mut row[..len])
-            .for_each(|row| {
-                row.fill(value);
-                value = value.rotate_right(2);
-            });
+        // For conciseness, we fill the entire row (including padding).
+        px.chunks_exact_mut(surf.pitch() as usize).for_each(|row| {
+            row.fill(value);
+            value = value.rotate_right(2);
+        });
     });
 
     print_properties(surf.properties());

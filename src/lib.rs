@@ -29,12 +29,12 @@ pub mod properties;
 pub mod rect;
 pub mod renderer;
 pub mod resource;
+pub mod str;
 pub mod string;
 pub mod surface;
 pub mod texture;
 pub mod traits;
 pub mod ttf;
-pub mod utf8cstr;
 pub mod util;
 pub mod window;
 

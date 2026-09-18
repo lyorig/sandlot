@@ -7,8 +7,9 @@ use sandlot::{
     color::RgbaF32,
     event::Event,
     gpu::*,
-    init::{AppKind, Context, Video},
+    init::{Context, Video},
     rect::Point,
+    str::Str,
     window::Window,
 };
 
@@ -31,8 +32,8 @@ cfg_select! {
 }
 
 fn print_properties(props: DeviceProperties) {
-    fn f(o: Option<&str>) -> &str {
-        o.unwrap_or("N/A")
+    fn f(o: Option<&Str>) -> &str {
+        o.map(Str::as_str).unwrap_or("N/A")
     }
 
     sandlot::log!("Device name: {}", f(props.device_name()));
@@ -42,14 +43,7 @@ fn print_properties(props: DeviceProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::builder()
-        .name(c"Sandlot GPU Triangle")
-        .creator(c"lyorig")
-        .kind(AppKind::Game)
-        .version(c"v0.1.4")
-        .identifier(c"cz.lyorig.gpu3angle")
-        .url(c"https://github.com/lyorig/sandlot")
-        .build()?;
+    let ctx = Context::init()?;
 
     let video = Video::leak(ctx.as_ref())?;
     let events = video.events();

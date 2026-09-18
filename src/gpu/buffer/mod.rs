@@ -5,14 +5,18 @@
 //! - [x] SDL_SetGPUBufferName
 //! - [x] SDL_UploadToGPUBuffer
 
-use std::{ffi::CStr, marker::PhantomData};
+use std::marker::PhantomData;
 
 use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, properties::Properties, resource::Ref, resource::resource_new,
-    util::impl_enum_transmute, util::mod_reexport,
+    Result,
+    gpu::Cycle,
+    properties::Properties,
+    resource::{Ref, resource_new},
+    str::Str,
+    util::{impl_enum_transmute, mod_reexport},
 };
 
 use super::{copy_pass::CopyPass, device::Device, transfer_buffer::TransferBufferLocation};
@@ -286,7 +290,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// used by debugging tools. To name a buffer at creation time, prefer the
     /// [`BufferBuilder`] name property when constructing it.
     #[doc(alias = "SDL_SetGPUBufferName")]
-    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
+    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &Str) {
         unsafe {
             SDL_SetGPUBufferName(device.as_raw(), self.handle.as_ptr(), name.as_ptr());
         };

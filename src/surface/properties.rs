@@ -1,17 +1,21 @@
-use std::ffi::CStr;
+use std::marker::PhantomData;
 
 use sdl3_sys::surface::*;
 
-use crate::{properties::Properties, resource::Ref};
+use crate::{properties::Properties, resource::Ref, str::Str, surface::Surface};
 
 #[derive(Clone, Copy)]
 pub struct SurfaceProperties<'surf> {
     props: Ref<'surf, Properties>,
+    marker: PhantomData<Ref<'surf, Surface>>,
 }
 
 impl<'surf> SurfaceProperties<'surf> {
     pub(crate) fn new(props: Ref<'surf, Properties>) -> Self {
-        Self { props }
+        Self {
+            props,
+            marker: PhantomData,
+        }
     }
 
     /// (HDR10 and floating point formats only) Defines the value of 100%
@@ -56,13 +60,13 @@ impl<'surf> SurfaceProperties<'surf> {
     ///
     /// This defaults to "chrome".
     #[doc(alias = "SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING")]
-    pub fn tonemap_operator(self) -> Option<&'surf CStr> {
+    pub fn tonemap_operator(self) -> Option<&'surf Str> {
         let ptr = unsafe {
             self.props
                 .string(SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING, std::ptr::null())
         };
 
-        (!ptr.is_null()).then(|| unsafe { CStr::from_ptr(ptr) })
+        (!ptr.is_null()).then(|| unsafe { Str::from_ptr(ptr) })
     }
 
     /// (Cursor surfaces only) The hotspot pixel offset from the left edge of the image.

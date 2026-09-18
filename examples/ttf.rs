@@ -17,11 +17,7 @@ fn rt(s: &str) -> TtfStr<'_> {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::builder()
-        .creator(c"lyorig")
-        .identifier(c"cz.lyorig.sandlot-ttf")
-        .url(c"https://github.com/lyorig/sandlot")
-        .build()?;
+    let ctx = Context::init()?;
 
     let vid = Video::init(ctx.as_ref())?;
 

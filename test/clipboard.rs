@@ -1,6 +1,15 @@
-use sandlot::init::{Context, Video};
+use std::ffi::CStr;
+
+use sandlot::{
+    init::{Context, Video},
+    str::Str,
+};
 
 use rustest::{Result, test};
+
+pub fn s(c: &CStr) -> &Str {
+    unsafe { Str::from_cstr_unchecked(c) }
+}
 
 /// `set_text` succeeds after the video subsystem is initialized.
 #[test]
@@ -8,7 +17,7 @@ fn clipboard_set_text_succeeds_after_video_init() -> Result {
     let ctx = Context::init()?;
     let vid = Video::init(ctx.as_ref())?;
 
-    vid.clipboard_set_text(c"clipboard test payload")?;
+    vid.clipboard_set_text(s(c"clipboard test payload"))?;
 
     let roundtrip = vid.clipboard_text();
     assert_eq!(roundtrip.to_str(), "clipboard test payload");
@@ -22,7 +31,7 @@ fn clipboard_has_text_after_video_init() -> Result {
     let ctx = Context::init()?;
     let vid = Video::init(ctx.as_ref())?;
 
-    vid.clipboard_set_text(c"exists")?;
+    vid.clipboard_set_text(s(c"exists"))?;
     assert!(vid.clipboard_has_text());
 
     // Reading it back should match.
