@@ -5,7 +5,7 @@ use sandlot::{
     Result,
     color::{Rgb, Rgba},
     event::Event,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     pixels::PixelFormat,
     rect::Point,
     renderer::Renderer,
@@ -48,7 +48,14 @@ fn print_properties(props: SurfaceProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(s!("Sandlot Indexed Surface Demo"))
+        .version(s!("v0.1.4"))
+        .creator(s!("lyorig"))
+        .url(s!("https://github.com/lyorig/sandlot"))
+        .kind(AppKind::Application)
+        .build()?;
+
     let vid = Video::leak(ctx.as_ref())?;
 
     let wnd = Window::new(

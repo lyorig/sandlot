@@ -1,4 +1,4 @@
-//! Demonstrates key structs of the video subsystem, along with various drawing functions.
+//! Demonstrates various drawing functions of the [`Renderer`].
 
 #![windows_subsystem = "windows"]
 
@@ -6,9 +6,10 @@ use sandlot::{
     Result,
     color::{Rgba, RgbaF32},
     event::Event,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     rect::{Point, PointF32, Rect},
     renderer::{Renderer, RendererProperties},
+    s,
     window::Window,
 };
 use sdl3_sys::render::SDL_Vertex;
@@ -36,7 +37,14 @@ fn vert(pos: PointF32, col: RgbaF32) -> SDL_Vertex {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(s!("Sandlot 2D Rendering Demo"))
+        .version(s!("v0.1.4"))
+        .creator(s!("lyorig"))
+        .url(s!("https://github.com/lyorig/sandlot"))
+        .kind(AppKind::Application)
+        .build()?;
+
     let video = Video::leak(ctx.as_ref())?;
     let events = video.events();
 

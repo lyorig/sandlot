@@ -7,7 +7,7 @@ use sandlot::{
     color::RgbaF32,
     event::Event,
     gpu::*,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     rect::Point,
     s,
     str::Str,
@@ -44,7 +44,13 @@ fn print_properties(props: DeviceProperties) {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(s!("Sandlot GPU Colored Triangle Demo"))
+        .version(s!("v0.1.4"))
+        .creator(s!("lyorig"))
+        .url(s!("https://github.com/lyorig/sandlot"))
+        .kind(AppKind::Application)
+        .build()?;
 
     let video = Video::leak(ctx.as_ref())?;
     let events = video.events();

@@ -2,7 +2,7 @@ use sandlot::{
     Result,
     color::Rgba,
     event::Event,
-    init::{Context, Video},
+    init::{AppKind, Context, Video},
     pixels::PixelFormat,
     rect::{Point, Rect},
     renderer::Renderer,
@@ -18,7 +18,13 @@ fn rt(s: &str) -> TtfStr<'_> {
 }
 
 fn run() -> Result<()> {
-    let ctx = Context::init()?;
+    let ctx = Context::builder()
+        .name(s!("Sandlot Text Rendering Demo"))
+        .version(s!("v0.1.4"))
+        .creator(s!("lyorig"))
+        .url(s!("https://github.com/lyorig/sandlot"))
+        .kind(AppKind::Application)
+        .build()?;
 
     let vid = Video::init(ctx.as_ref())?;
 
