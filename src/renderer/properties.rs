@@ -176,71 +176,95 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         unsafe { self.inner.float(SDL_PROP_RENDERER_HDR_HEADROOM_FLOAT, 0.) }
     }
 
+    /// (Direct3D 9 only) Returns the `IDirect3DDevice9` associated with the
+    /// renderer.
     #[doc(alias = "SDL_PROP_RENDERER_D3D9_DEVICE_POINTER")]
     pub fn d3d9_device(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D9_DEVICE_POINTER)
     }
 
+    /// (Direct3D 11 only) Returns the `ID3D11Device` associated with the
+    /// renderer.
     #[doc(alias = "SDL_PROP_RENDERER_D3D11_DEVICE_POINTER")]
     pub fn d3d11_device(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D11_DEVICE_POINTER)
     }
 
+    /// (Direct3D 11 only) Returns the `IDXGISwapChain1` associated with the
+    /// renderer.
+    ///
+    /// This may change when the window is resized.
     #[doc(alias = "SDL_PROP_RENDERER_D3D11_SWAPCHAIN_POINTER")]
     pub fn d3d11_swapchain(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D11_SWAPCHAIN_POINTER)
     }
 
+    /// (Direct3D 12 only) Returns the `ID3D12Device` associated with the
+    /// renderer.
     #[doc(alias = "SDL_PROP_RENDERER_D3D12_DEVICE_POINTER")]
     pub fn d3d12_device(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_DEVICE_POINTER)
     }
 
+    /// (Direct3D 12 only) Returns the `IDXGISwapChain4` associated with the
+    /// renderer.
     #[doc(alias = "SDL_PROP_RENDERER_D3D12_SWAPCHAIN_POINTER")]
     pub fn d3d12_swapchain(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_SWAPCHAIN_POINTER)
     }
 
+    /// (Direct3D 12 only) Returns the `ID3D12CommandQueue` associated with
+    /// the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_D3D12_COMMAND_QUEUE_POINTER")]
     pub fn d3d12_command_queue(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_D3D12_COMMAND_QUEUE_POINTER)
     }
 
+    /// (Vulkan only) Returns the `VkInstance` associated with the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_INSTANCE_POINTER")]
     pub fn vulkan_instance(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_INSTANCE_POINTER)
     }
 
+    /// (Vulkan only) Returns the `VkSurfaceKHR` associated with the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_SURFACE_NUMBER")]
     pub fn vulkan_surface(self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_SURFACE_NUMBER)
     }
 
+    /// (Vulkan only) Returns the `VkPhysicalDevice` associated with the
+    /// renderer.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_PHYSICAL_DEVICE_POINTER")]
     pub fn vulkan_physical_device(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_PHYSICAL_DEVICE_POINTER)
     }
 
+    /// (Vulkan only) Returns the `VkDevice` associated with the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_DEVICE_POINTER")]
     pub fn vulkan_device(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_RENDERER_VULKAN_DEVICE_POINTER)
     }
 
+    /// (Vulkan only) Returns the queue family index used for rendering.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER")]
     pub fn vulkan_graphics_queue_family_index(self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_GRAPHICS_QUEUE_FAMILY_INDEX_NUMBER)
     }
 
+    /// (Vulkan only) Returns the queue family index used for presentation.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER")]
     pub fn vulkan_present_queue_family_index(self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_PRESENT_QUEUE_FAMILY_INDEX_NUMBER)
     }
 
+    /// (Vulkan only) Returns the number of swapchain images, or potential
+    /// frames in flight, used by the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER")]
     pub fn vulkan_swapchain_image_count(self) -> Option<i64> {
         self.opt_number(SDL_PROP_RENDERER_VULKAN_SWAPCHAIN_IMAGE_COUNT_NUMBER)
     }
 
+    /// (GPU only) Returns the [`Device`] associated with the renderer.
     #[doc(alias = "SDL_PROP_RENDERER_GPU_DEVICE_POINTER")]
     pub fn gpu_device(self) -> Option<Ref<'rnd, Device<'ctx, 'vid>>> {
         let p = unsafe {
