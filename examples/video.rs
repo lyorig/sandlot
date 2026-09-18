@@ -37,7 +37,6 @@ fn vert(pos: PointF32, col: RgbaF32) -> SDL_Vertex {
 
 fn run() -> Result<()> {
     let ctx = Context::init()?;
-
     let video = Video::leak(ctx.as_ref())?;
     let events = video.events();
 

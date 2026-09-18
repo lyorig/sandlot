@@ -6,6 +6,7 @@ use sandlot::{
     pixels::PixelFormat,
     rect::{Point, Rect},
     renderer::Renderer,
+    s,
     surface::Surface,
     texture::Texture,
     ttf::{self, *},
@@ -26,7 +27,7 @@ fn run() -> Result<()> {
 
     let wnd = Window::new(
         vid.as_ref(),
-        c"TTF Example",
+        s!("TTF Example"),
         Point::new(640, 480),
         WindowFlags::empty(),
     )?;

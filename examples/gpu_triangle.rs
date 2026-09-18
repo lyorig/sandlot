@@ -9,6 +9,7 @@ use sandlot::{
     gpu::*,
     init::{Context, Video},
     rect::Point,
+    s,
     str::Str,
     window::Window,
 };
@@ -32,8 +33,8 @@ cfg_select! {
 }
 
 fn print_properties(props: DeviceProperties) {
-    fn f(o: Option<&Str>) -> &str {
-        o.map(Str::as_str).unwrap_or("N/A")
+    fn f(o: Option<Str<'_>>) -> &'_ str {
+        o.map(Str::to_str).unwrap_or("N/A")
     }
 
     sandlot::log!("Device name: {}", f(props.device_name()));
@@ -67,9 +68,9 @@ fn run() -> Result<()> {
 
     device.claim_window(wnd.as_ref())?;
 
-    let sci_vs = ShaderCreateInfo::vertex(VS_CODE, c"vs_main", SHADER_FMT);
+    let sci_vs = ShaderCreateInfo::vertex(VS_CODE, s!("vs_main"), SHADER_FMT);
 
-    let sci_fs = ShaderCreateInfo::fragment(FS_CODE, c"fs_main", SHADER_FMT);
+    let sci_fs = ShaderCreateInfo::fragment(FS_CODE, s!("fs_main"), SHADER_FMT);
 
     let vs = Shader::new(device.as_ref(), &sci_vs)?;
     let fs = Shader::new(device.as_ref(), &sci_fs)?;

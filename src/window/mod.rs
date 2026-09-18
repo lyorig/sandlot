@@ -116,6 +116,7 @@ use crate::{
     rect::{PointI32, RectI32},
     renderer::{Renderer, RendererHandle},
     resource::{Ref, resource_new},
+    str::Str,
     surface::Surface,
     util::{c_ptr_to_str, impl_enum_transmute, mod_reexport, opt2ptr, to_result},
 };
@@ -131,7 +132,7 @@ use sdl3_sys::{
 };
 
 use std::{
-    ffi::{CStr, c_char},
+    ffi::c_char,
     mem::{MaybeUninit, transmute},
     num::NonZero,
     ptr::NonNull,
@@ -834,7 +835,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
 
     /// Set the title of a window, in UTF-8 encoding.
     #[doc(alias = "SDL_SetWindowTitle")]
-    pub fn set_title(self, title: &CStr) -> Result<()> {
+    pub fn set_title(self, title: Str) -> Result<()> {
         to_result(unsafe { SDL_SetWindowTitle(self.as_raw(), title.as_ptr()) })
     }
 
@@ -1381,7 +1382,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     #[doc(alias = "SDL_CreateWindow")]
     pub fn new(
         _vid: init::Ref<'vid, init::Video<'ctx>>,
-        title: &CStr,
+        title: Str,
         size: PointI32,
         flags: WindowFlags,
     ) -> Result<Self> {
@@ -1462,7 +1463,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// parameters and additional remarks.
     #[doc(alias = "SDL_CreateWindowAndRenderer")]
     pub fn with_renderer<'wnd>(
-        title: &CStr,
+        title: &Str,
         size: PointI32,
         flags: WindowFlags,
     ) -> Result<(Self, Renderer<'ctx, 'vid, 'wnd>)> {

@@ -10,6 +10,7 @@ use sandlot::{
     rect::Point,
     renderer::Renderer,
     resource::Ref,
+    s,
     surface::{Surface, SurfaceProperties},
     texture::Texture,
     window::{Window, WindowFlags},
@@ -52,7 +53,7 @@ fn run() -> Result<()> {
 
     let wnd = Window::new(
         vid,
-        c"Sandlot Palette Example",
+        s!("Sandlot Palette Example"),
         Point::new(640, 480),
         WindowFlags::empty(),
     )?;

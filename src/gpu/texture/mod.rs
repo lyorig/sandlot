@@ -5,14 +5,19 @@
 //! - [x] SDL_SetGPUTextureName
 //! - [x] SDL_UploadToGPUTexture
 
-use std::{ffi::CStr, marker::PhantomData};
+use std::marker::PhantomData;
 
 use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, gpu::Cycle, properties::Properties, rect::Point, resource::Ref, resource::resource_new,
-    util::impl_enum_transmute, util::mod_reexport,
+    Result,
+    gpu::Cycle,
+    properties::Properties,
+    rect::Point,
+    resource::{Ref, resource_new},
+    str::Str,
+    util::{impl_enum_transmute, mod_reexport},
 };
 
 use super::{
@@ -710,7 +715,7 @@ impl<'ctx, 'vid, 'dev> TextureHandle<'ctx, 'vid, 'dev> {
     /// used by debugging tools. To name a texture at creation time, prefer the
     /// texture-create name property when constructing it.
     #[doc(alias = "SDL_SetGPUTextureName")]
-    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &CStr) {
+    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: Str) {
         unsafe {
             SDL_SetGPUTextureName(device.as_raw(), self.as_raw(), name.as_ptr());
         }

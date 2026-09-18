@@ -1,4 +1,4 @@
-use std::{ffi::CStr, mem::MaybeUninit, ptr::NonNull};
+use std::{ffi::CStr, mem::MaybeUninit};
 
 use sdl3_sys::{clipboard::*, keyboard::*, keycode::SDL_Keymod, video::*};
 
@@ -121,15 +121,17 @@ impl<'ctx> VideoHandle<'ctx> {
     pub fn clipboard_data(self, mime_type: &CStr) -> Result<Box<[u8]>> {
         let mut len = MaybeUninit::<usize>::uninit();
         let ptr = unsafe { SDL_GetClipboardData(mime_type.as_ptr(), len.as_mut_ptr()) };
+
         // SAFETY: On success, SDL allocates `len` bytes.
         unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init() as _) }
     }
 
     /// Retrieve the list of mime types available in the clipboard.
     #[doc(alias = "SDL_GetClipboardMimeTypes")]
-    pub fn clipboard_mime_types(self) -> Result<Box<[NonNull<i8>]>> {
+    pub fn clipboard_mime_types(&self) -> Result<Box<[Str<'_>]>> {
         let mut len = MaybeUninit::<usize>::uninit();
         let ptr = unsafe { SDL_GetClipboardMimeTypes(len.as_mut_ptr()) };
+
         // SAFETY: On success, SDL allocates `len` mime type strings.
         unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init()) }
     }
@@ -160,7 +162,7 @@ impl<'ctx> VideoHandle<'ctx> {
 
     /// Put UTF-8 text into the clipboard.
     #[doc(alias = "SDL_SetClipboardText")]
-    pub fn clipboard_set_text(self, text: &Str) -> Result<()> {
+    pub fn clipboard_set_text(self, text: Str) -> Result<()> {
         to_result(unsafe { SDL_SetClipboardText(text.as_ptr()) })
     }
 

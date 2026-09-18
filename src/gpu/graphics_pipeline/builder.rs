@@ -1,9 +1,9 @@
-use crate::{Result, gpu::Device, properties::Properties, resource::Ref};
+use crate::{Result, gpu::Device, properties::Properties, resource::Ref, str::Str};
 
 use super::{GraphicsPipeline, GraphicsPipelineCreateInfo};
 
 use sdl3_sys::gpu::*;
-use std::ffi::{CStr, c_char};
+use std::ffi::c_char;
 
 const CREATE_PROPERTIES: [*const c_char; 1] = [SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING];
 
@@ -20,7 +20,7 @@ impl<'p> GraphicsPipelineBuilder<'p> {
 
     /// A name for the graphics pipeline, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING")]
-    pub fn name(self, value: &CStr) -> Self {
+    pub fn name(self, value: Str) -> Self {
         _ = unsafe {
             self.props.set_string(
                 SDL_PROP_GPU_GRAPHICSPIPELINE_CREATE_NAME_STRING,

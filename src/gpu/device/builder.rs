@@ -1,12 +1,8 @@
-use std::{
-    ffi::{CStr, c_char},
-    marker::PhantomData,
-    ptr,
-};
+use std::{ffi::c_char, marker::PhantomData, ptr};
 
 use sdl3_sys::gpu::*;
 
-use crate::{Result, gpu::Device, init, properties::Properties, resource::Ref};
+use crate::{Result, gpu::Device, init, properties::Properties, resource::Ref, str::Str};
 
 const CREATE_PROPERTIES: [*const c_char; 21] = [
     SDL_PROP_GPU_DEVICE_CREATE_DEBUGMODE_BOOLEAN,
@@ -67,7 +63,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
 
     /// The name of the GPU driver to use, if a specific one is desired.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING")]
-    pub fn name(self, value: &CStr) -> Self {
+    pub fn name(self, value: Str) -> Self {
         self.set_string(SDL_PROP_GPU_DEVICE_CREATE_NAME_STRING, value)
     }
 
@@ -160,7 +156,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
 
     /// The prefix to use for all D3D12 vertex semantics. Defaults to `"TEXCOORD"`.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_SEMANTIC_NAME_STRING")]
-    pub fn d3d12_semantic_name(self, value: &CStr) -> Self {
+    pub fn d3d12_semantic_name(self, value: Str) -> Self {
         self.set_string(SDL_PROP_GPU_DEVICE_CREATE_D3D12_SEMANTIC_NAME_STRING, value)
     }
 
@@ -179,7 +175,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
     /// The path to the D3D12 Agility SDK DLL, relative to the executable path
     /// of the app. Do not put the DLL in the same directory as the exe.
     #[doc(alias = "SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_PATH_STRING")]
-    pub fn d3d12_agility_sdk_path(self, value: &CStr) -> Self {
+    pub fn d3d12_agility_sdk_path(self, value: Str) -> Self {
         self.set_string(
             SDL_PROP_GPU_DEVICE_CREATE_D3D12_AGILITY_SDK_PATH_STRING,
             value,
@@ -260,7 +256,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
         self
     }
 
-    fn set_string(self, key: *const c_char, value: &CStr) -> Self {
+    fn set_string(self, key: *const c_char, value: Str) -> Self {
         _ = unsafe { self.inner.set_string(key, value.as_ptr()) };
         self
     }

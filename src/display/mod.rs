@@ -100,16 +100,10 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     }
 
     /// Get the name of a display.
-    ///
-    /// Although returned as a [`&CStr`](std::ffi::CStr), the returned string is guaranteed to be valid UTF-8.
     #[doc(alias = "SDL_GetDisplayName")]
-    pub fn name(&self) -> Result<&Str> {
+    pub fn name(&self) -> Result<Str<'_>> {
         let ptr = unsafe { SDL_GetDisplayName(self.id()) };
-        if ptr.is_null() {
-            Err(Error::current())
-        } else {
-            Ok(unsafe { Str::from_ptr(ptr) })
-        }
+        unsafe { Str::from_ptr(ptr) }.ok_or_else(Error::current)
     }
 
     /// Get the desktop area represented by a display.

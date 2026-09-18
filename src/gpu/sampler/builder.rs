@@ -1,8 +1,8 @@
-use std::ffi::{CStr, c_char};
+use std::ffi::c_char;
 
 use sdl3_sys::gpu::*;
 
-use crate::{Result, gpu::Device, properties::Properties, resource::Ref};
+use crate::{Result, gpu::Device, properties::Properties, resource::Ref, str::Str};
 
 use super::{Sampler, SamplerCreateInfo};
 
@@ -21,7 +21,7 @@ impl<'p> SamplerBuilder<'p> {
 
     /// A name for the sampler, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_SAMPLER_CREATE_NAME_STRING")]
-    pub fn name(self, value: &CStr) -> Self {
+    pub fn name(self, value: Str) -> Self {
         _ = unsafe {
             self.props
                 .set_string(SDL_PROP_GPU_SAMPLER_CREATE_NAME_STRING, value.as_ptr())

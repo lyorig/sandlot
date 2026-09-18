@@ -60,13 +60,13 @@ impl<'surf> SurfaceProperties<'surf> {
     ///
     /// This defaults to "chrome".
     #[doc(alias = "SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING")]
-    pub fn tonemap_operator(self) -> Option<&'surf Str> {
+    pub fn tonemap_operator(self) -> Option<Str<'surf>> {
         let ptr = unsafe {
             self.props
                 .string(SDL_PROP_SURFACE_TONEMAP_OPERATOR_STRING, std::ptr::null())
         };
 
-        (!ptr.is_null()).then(|| unsafe { Str::from_ptr(ptr) })
+        unsafe { Str::from_ptr(ptr) }
     }
 
     /// (Cursor surfaces only) The hotspot pixel offset from the left edge of the image.

@@ -2,7 +2,7 @@
 //! - [x] SDL_CreateGPUShader
 //! - [x] SDL_ReleaseGPUShader
 
-use std::{ffi::CStr, marker::PhantomData};
+use std::marker::PhantomData;
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
@@ -10,6 +10,7 @@ use crate::{
     Result,
     properties::Properties,
     resource::{Ref, resource_new},
+    str::Str,
     util::{impl_enum_transmute, mod_reexport},
 };
 
@@ -41,7 +42,7 @@ impl_enum_transmute!(SDL_GPUShaderStage, ShaderStage);
 pub struct ShaderCreateInfo<'bc, 'ep>(
     SDL_GPUShaderCreateInfo,
     PhantomData<&'bc [u8]>,
-    PhantomData<&'ep CStr>,
+    PhantomData<Str<'ep>>,
 );
 
 impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
@@ -77,7 +78,7 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
     /// configured separately.
     pub const fn new(
         code: &'bc [u8],
-        entrypoint: &'ep CStr,
+        entrypoint: Str<'ep>,
         fmt: ShaderFormat,
         stage: ShaderStage,
         num_samplers: u32,
@@ -100,12 +101,12 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
     }
 
     /// Create vertex-shader info with no resource bindings.
-    pub const fn vertex(code: &'bc [u8], entrypoint: &'ep CStr, fmt: ShaderFormat) -> Self {
+    pub const fn vertex(code: &'bc [u8], entrypoint: Str<'ep>, fmt: ShaderFormat) -> Self {
         Self::new(code, entrypoint, fmt, ShaderStage::Vertex, 0, (0, 0, 0))
     }
 
     /// Create fragment-shader info with no resource bindings.
-    pub const fn fragment(code: &'bc [u8], entrypoint: &'ep CStr, fmt: ShaderFormat) -> Self {
+    pub const fn fragment(code: &'bc [u8], entrypoint: Str<'ep>, fmt: ShaderFormat) -> Self {
         Self::new(code, entrypoint, fmt, ShaderStage::Fragment, 0, (0, 0, 0))
     }
 }

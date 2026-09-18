@@ -1,24 +1,20 @@
 use rustest::test;
-use std::ffi::CStr;
 
 use sandlot::{
     init::{AppKind, Context},
+    s,
     str::Str,
 };
-
-const fn s(s: &CStr) -> &Str {
-    unsafe { Str::from_cstr_unchecked(s) }
-}
 
 /// `Context::metadata` reads back what `Context::builder` set.
 #[test]
 fn init_context_metadata() {
-    const NAME: &Str = s(c"Sandlot");
-    const VERSION: &Str = s(c"0.1.4"); // at the time of writing
-    const IDENTIFIER: &Str = s(c"cz.lyorig.sandlot");
-    const CREATOR: &Str = s(c"lyorig");
-    const COPYRIGHT: &Str = s(c"Copyright (c) lyorig");
-    const URL: &Str = s(c"https://github.com/lyorig/sandlot");
+    const NAME: Str = s!("Sandlot");
+    const VERSION: Str = s!("0.1.4"); // at the time of writing
+    const IDENTIFIER: Str = s!("cz.lyorig.sandlot");
+    const CREATOR: Str = s!("lyorig");
+    const COPYRIGHT: Str = s!("Copyright (c) lyorig");
+    const URL: Str = s!("https://github.com/lyorig/sandlot");
 
     let ctx = Context::builder()
         .name(NAME)

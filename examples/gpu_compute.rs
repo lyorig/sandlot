@@ -6,6 +6,7 @@ use sandlot::{
     Result,
     gpu::*,
     init::{Context, Video},
+    s,
 };
 
 cfg_select! {
@@ -39,7 +40,7 @@ fn run() -> Result<()> {
 
     let pipeline_info = ComputePipelineCreateInfo::new(
         COMPUTE_CODE,
-        c"cs_main",
+        s!("cs_main"),
         SHADER_FMT,
         0,
         0,
@@ -48,7 +49,7 @@ fn run() -> Result<()> {
     );
 
     let pipeline = ComputePipeline::builder(props)
-        .name(c"Compute Pipeline")
+        .name(s!("Compute Pipeline"))
         .build_cleanup(device.as_ref(), pipeline_info)?;
 
     type Buf = BufferUsageFlags;
@@ -56,7 +57,7 @@ fn run() -> Result<()> {
         BufferCreateInfo::new(Buf::COMPUTE_STORAGE_READ | Buf::COMPUTE_STORAGE_WRITE, 4);
 
     let buffer = Buffer::builder(props)
-        .name(c"Compute Buffer")
+        .name(s!("Compute Buffer"))
         .build_cleanup(device.as_ref(), buffer_info)?;
 
     // Infallible.

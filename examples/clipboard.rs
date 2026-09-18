@@ -13,9 +13,8 @@ fn run() -> Result<()> {
     if vid.clipboard_has_data(DESIRED_MIME) {
         println!("Clipboard has MIME data");
         println!("-- begin MIME type enumeration --");
-        for ptr in vid.clipboard_mime_types()? {
-            let cs = unsafe { CStr::from_ptr(ptr.as_ptr()) };
-            println!("{}", cs.to_string_lossy());
+        for cs in vid.clipboard_mime_types()? {
+            println!("{cs}");
         }
         println!("-- end MIME type enumeration --");
 

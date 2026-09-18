@@ -18,8 +18,6 @@
 //! - [x] SDL_WindowSupportsGPUSwapchainComposition
 //! - [x] SDL_GetGPUShaderFormats
 
-use std::ffi::CStr;
-
 use sdl3_sys::gpu::*;
 
 use crate::{
@@ -29,6 +27,7 @@ use crate::{
     init,
     properties::{Properties, PropertiesHandle},
     resource::{Ref, resource_new},
+    str::Str,
     util::{impl_enum_transmute, mod_reexport, to_result},
     window::Window,
 };
@@ -211,14 +210,9 @@ impl<'ctx, 'vid> DeviceHandle<'ctx, 'vid> {
     ///
     /// Returns [`Err`] if SDL cannot retrieve the driver name.
     #[doc(alias = "SDL_GetGPUDeviceDriver")]
-    pub fn driver(self) -> Result<&'static str> {
-        let raw = unsafe { SDL_GetGPUDeviceDriver(self.handle.as_ptr()) };
-        if raw.is_null() {
-            Err(Error::current())
-        } else {
-            let cstr = unsafe { CStr::from_ptr(raw) };
-            Ok(unsafe { str::from_utf8_unchecked(cstr.to_bytes()) })
-        }
+    pub fn driver(self) -> Result<Str<'static>> {
+        let ptr = unsafe { SDL_GetGPUDeviceDriver(self.handle.as_ptr()) };
+        unsafe { Str::from_ptr(ptr) }.ok_or_else(Error::current)
     }
 
     /// Get the properties associated with this GPU device.

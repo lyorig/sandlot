@@ -28,22 +28,16 @@ impl<'ctx> ContextMetadata<'ctx> {
         }
     }
 
-    fn opt_str(self, key: *const c_char) -> Option<&'ctx Str> {
+    fn opt_str(self, key: *const c_char) -> Option<Str<'ctx>> {
         let meta = unsafe { SDL_GetAppMetadataProperty(key) };
-
-        if meta.is_null() {
-            None
-        } else {
-            let cs = unsafe { Str::from_ptr(meta) };
-            Some(cs)
-        }
+        unsafe { Str::from_ptr(meta) }
     }
 
     /// The human-readable name of the application.
     ///
     /// Defaults to the application binary's name, or "SDL Application" if that isn't available.
     #[doc(alias = "SDL_PROP_APP_METADATA_NAME_STRING")]
-    pub fn name(self) -> &'ctx Str {
+    pub fn name(self) -> Str<'ctx> {
         let opt = self.opt_str(SDL_PROP_APP_METADATA_NAME_STRING);
 
         // SAFETY: Only called for properties whose existence the SDL docs guarantee.
@@ -52,31 +46,31 @@ impl<'ctx> ContextMetadata<'ctx> {
 
     /// The version of the app that is running.
     #[doc(alias = "SDL_PROP_APP_METADATA_VERSION_STRING")]
-    pub fn version(self) -> Option<&'ctx Str> {
+    pub fn version(self) -> Option<Str<'ctx>> {
         self.opt_str(SDL_PROP_APP_METADATA_VERSION_STRING)
     }
 
     /// A unique string that identifies this app, in reverse-domain format.
     #[doc(alias = "SDL_PROP_APP_METADATA_IDENTIFIER_STRING")]
-    pub fn identifier(self) -> Option<&'ctx Str> {
+    pub fn identifier(self) -> Option<Str<'ctx>> {
         self.opt_str(SDL_PROP_APP_METADATA_IDENTIFIER_STRING)
     }
 
     /// The human-readable name of the creator/developer/maker of this app.
     #[doc(alias = "SDL_PROP_APP_METADATA_CREATOR_STRING")]
-    pub fn creator(self) -> Option<&'ctx Str> {
+    pub fn creator(self) -> Option<Str<'ctx>> {
         self.opt_str(SDL_PROP_APP_METADATA_CREATOR_STRING)
     }
 
     /// The human-readable copyright notice.
     #[doc(alias = "SDL_PROP_APP_METADATA_COPYRIGHT_STRING")]
-    pub fn copyright(self) -> Option<&'ctx Str> {
+    pub fn copyright(self) -> Option<Str<'ctx>> {
         self.opt_str(SDL_PROP_APP_METADATA_COPYRIGHT_STRING)
     }
 
     /// A URL to the app on the web.
     #[doc(alias = "SDL_PROP_APP_METADATA_URL_STRING")]
-    pub fn url(self) -> Option<&'ctx Str> {
+    pub fn url(self) -> Option<Str<'ctx>> {
         self.opt_str(SDL_PROP_APP_METADATA_URL_STRING)
     }
 

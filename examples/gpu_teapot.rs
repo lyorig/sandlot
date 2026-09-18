@@ -10,6 +10,7 @@ use sandlot::{
     init::{Context, Video},
     rect::Point,
     resource::Ref,
+    s,
     window::Window,
 };
 
@@ -213,7 +214,7 @@ fn run() -> Result<()> {
         .shaders_spirv(true)
         .build_cleanup(video)?;
 
-    sandlot::log!("Driver = {}", device.driver().unwrap_or("[unknown]"));
+    sandlot::log!("Driver = {}", device.driver().unwrap_or(s!("[unknown]")));
 
     let wnd = Window::builder(props)
         .title(c"sandlot Teapot Example")
@@ -234,7 +235,7 @@ fn run() -> Result<()> {
         device.as_ref(),
         &ShaderCreateInfo::new(
             VS_CODE,
-            c"vs_main",
+            s!("vs_main"),
             SHADER_FMT,
             ShaderStage::Vertex,
             0,
@@ -246,7 +247,7 @@ fn run() -> Result<()> {
 
     let fs = Shader::new(
         device.as_ref(),
-        &ShaderCreateInfo::fragment(FS_CODE, c"fs_main", SHADER_FMT),
+        &ShaderCreateInfo::fragment(FS_CODE, s!("fs_main"), SHADER_FMT),
     )?;
 
     // Interleaved [pos3, normal3], 24 bytes per vertex.
@@ -385,7 +386,7 @@ fn run() -> Result<()> {
         );
 
         Texture::builder(props)
-            .name(c"Teapot Texture")
+            .name(s!("Teapot Texture"))
             .build_cleanup(device.as_ref(), tci)?
     };
 

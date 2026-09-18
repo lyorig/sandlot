@@ -43,11 +43,11 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         }
     }
 
-    fn get_str(self, key: *const c_char) -> &'rnd Str {
+    fn get_str(self, key: *const c_char) -> Str<'rnd> {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
 
         // SAFETY: Only called for properties whose existence the SDL docs guarantee.
-        unsafe { Str::from_ptr(s) }
+        unsafe { Str::from_ptr_unchecked(s) }
     }
 
     fn opt_number(self, key: *const c_char) -> Option<i64> {
@@ -61,7 +61,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
 
     /// The name of the rendering driver.
     #[doc(alias = "SDL_PROP_RENDERER_NAME_STRING")]
-    pub fn name(self) -> &'rnd Str {
+    pub fn name(self) -> Str<'rnd> {
         self.get_str(SDL_PROP_RENDERER_NAME_STRING)
     }
 

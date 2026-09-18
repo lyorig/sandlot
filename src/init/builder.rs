@@ -18,8 +18,8 @@ impl AppKind {
     /// Try to parse an [`AppKind`] from the format expected by [`SDL_PROP_APP_METADATA_TYPE_STRING`].
     ///
     /// Returns [`None`] if the value is not recognized.
-    pub fn from_sdl(value: &Str) -> Option<Self> {
-        match value.as_bytes() {
+    pub fn from_sdl(value: Str) -> Option<Self> {
+        match value.to_bytes() {
             b"game" => Some(AppKind::Game),
             b"mediaplayer" => Some(AppKind::MediaPlayer),
             b"application" => Some(AppKind::Application),
@@ -28,14 +28,14 @@ impl AppKind {
     }
 
     /// Get a string representation of this app kind in the format expected by [`SDL_PROP_APP_METADATA_TYPE_STRING`].
-    pub const fn to_sdl(self) -> &'static Str {
+    pub const fn to_sdl(self) -> Str<'static> {
         let cs = match self {
             AppKind::Game => c"game",
             AppKind::MediaPlayer => c"mediaplayer",
             AppKind::Application => c"application",
         };
 
-        unsafe { Str::from_cstr_unchecked(cs) }
+        unsafe { Str::from_ptr_unchecked(cs.as_ptr()) }
     }
 }
 
@@ -54,7 +54,7 @@ impl ContextBuilder {
         Context::init()
     }
 
-    fn set(self, key: *const c_char, value: &Str) -> Self {
+    fn set(self, key: *const c_char, value: Str) -> Self {
         unsafe { SDL_SetAppMetadataProperty(key, value.as_ptr()) };
         self
     }
@@ -66,7 +66,7 @@ impl ContextBuilder {
     ///
     /// This defaults to the application's binary name, or "SDL Application" if that isn't available.
     #[doc(alias = "SDL_PROP_APP_METADATA_NAME_STRING")]
-    pub fn name(self, value: &Str) -> Self {
+    pub fn name(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_NAME_STRING, value)
     }
 
@@ -77,7 +77,7 @@ impl ContextBuilder {
     ///
     /// This has no default.
     #[doc(alias = "SDL_PROP_APP_METADATA_VERSION_STRING")]
-    pub fn version(self, value: &Str) -> Self {
+    pub fn version(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_VERSION_STRING, value)
     }
 
@@ -92,7 +92,7 @@ impl ContextBuilder {
     ///
     /// This has no default.
     #[doc(alias = "SDL_PROP_APP_METADATA_IDENTIFIER_STRING")]
-    pub fn identifier(self, value: &Str) -> Self {
+    pub fn identifier(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_IDENTIFIER_STRING, value)
     }
 
@@ -100,7 +100,7 @@ impl ContextBuilder {
     ///
     /// This has no default.
     #[doc(alias = "SDL_PROP_APP_METADATA_CREATOR_STRING")]
-    pub fn creator(self, value: &Str) -> Self {
+    pub fn creator(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_CREATOR_STRING, value)
     }
 
@@ -110,7 +110,7 @@ impl ContextBuilder {
     ///
     /// This has no default.
     #[doc(alias = "SDL_PROP_APP_METADATA_COPYRIGHT_STRING")]
-    pub fn copyright(self, value: &Str) -> Self {
+    pub fn copyright(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_COPYRIGHT_STRING, value)
     }
 
@@ -120,7 +120,7 @@ impl ContextBuilder {
     ///
     /// This has no default.
     #[doc(alias = "SDL_PROP_APP_METADATA_URL_STRING")]
-    pub fn url(self, value: &Str) -> Self {
+    pub fn url(self, value: Str) -> Self {
         self.set(SDL_PROP_APP_METADATA_URL_STRING, value)
     }
 

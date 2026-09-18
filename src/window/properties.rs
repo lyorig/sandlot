@@ -37,10 +37,10 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
         }
     }
 
-    fn opt_str(self, key: *const c_char) -> Option<&'wnd Str> {
+    fn opt_str(self, key: *const c_char) -> Option<Str<'wnd>> {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
 
-        (!s.is_null()).then(|| unsafe { Str::from_ptr(s) })
+        (!s.is_null()).then(|| unsafe { Str::from_ptr_unchecked(s) })
     }
 
     fn opt_number(self, key: *const c_char) -> Option<i64> {
@@ -191,7 +191,7 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
     /// [`None`] while the window is hidden and must be queried again each time
     /// the window is shown.
     #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING")]
-    pub fn wayland_xdg_toplevel_export_handle(self) -> Option<&'wnd Str> {
+    pub fn wayland_xdg_toplevel_export_handle(self) -> Option<Str<'wnd>> {
         self.opt_str(SDL_PROP_WINDOW_WAYLAND_XDG_TOPLEVEL_EXPORT_HANDLE_STRING)
     }
 

@@ -290,7 +290,7 @@ impl<'ctx, 'vid, 'dev> BufferHandle<'ctx, 'vid, 'dev> {
     /// used by debugging tools. To name a buffer at creation time, prefer the
     /// [`BufferBuilder`] name property when constructing it.
     #[doc(alias = "SDL_SetGPUBufferName")]
-    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: &Str) {
+    pub fn set_name(self, device: Ref<'dev, Device<'ctx, 'vid>>, name: Str) {
         unsafe {
             SDL_SetGPUBufferName(device.as_raw(), self.handle.as_ptr(), name.as_ptr());
         };

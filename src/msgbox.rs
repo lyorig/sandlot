@@ -15,11 +15,9 @@
 //! - [ ] SDL_ShowMessageBox
 //! - [x] SDL_ShowSimpleMessageBox
 
-use std::ffi::CStr;
-
 use sdl3_sys::messagebox::*;
 
-use crate::{Result, util::to_result};
+use crate::{Result, str::Str, util::to_result};
 
 /// Message box severity.
 ///
@@ -72,7 +70,7 @@ pub enum ButtonLayout {
 /// reasons. If this is a concern, check the return value from this
 /// function and fall back to writing to stderr if you can.
 #[doc(alias = "SDL_ShowSimpleMessageBox")]
-pub fn show(sev: Severity, bl: ButtonLayout, title: &CStr, message: &CStr) -> Result<()> {
+pub fn show(sev: Severity, bl: ButtonLayout, title: Str, message: Str) -> Result<()> {
     let flags = sev as u32 | bl as u32;
     to_result(unsafe {
         SDL_ShowSimpleMessageBox(

@@ -1,8 +1,8 @@
-use std::ffi::{CStr, c_char};
+use std::ffi::c_char;
 
 use sdl3_sys::gpu::*;
 
-use crate::{Result, gpu::Device, properties::Properties, resource::Ref};
+use crate::{Result, gpu::Device, properties::Properties, resource::Ref, str::Str};
 
 use super::{TransferBuffer, TransferBufferCreateInfo};
 
@@ -21,7 +21,7 @@ impl<'p> TransferBufferBuilder<'p> {
 
     /// A name for the transfer buffer, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_TRANSFERBUFFER_CREATE_NAME_STRING")]
-    pub fn name(self, value: &CStr) -> Self {
+    pub fn name(self, value: Str) -> Self {
         _ = unsafe {
             self.props.set_string(
                 SDL_PROP_GPU_TRANSFERBUFFER_CREATE_NAME_STRING,

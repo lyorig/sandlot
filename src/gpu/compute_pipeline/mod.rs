@@ -2,12 +2,16 @@
 //! - [x] SDL_CreateGPUComputePipeline
 //! - [x] SDL_ReleaseGPUComputePipeline
 
-use std::{ffi::CStr, marker::PhantomData};
+use std::marker::PhantomData;
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
-    Result, properties::Properties, resource::Ref, resource::resource_new, util::mod_reexport,
+    Result,
+    properties::Properties,
+    resource::{Ref, resource_new},
+    str::Str,
+    util::mod_reexport,
 };
 
 use super::{ShaderFormat, device::Device};
@@ -25,7 +29,7 @@ mod_reexport!(builder);
 pub struct ComputePipelineCreateInfo<'bc, 'ep>(
     SDL_GPUComputePipelineCreateInfo,
     PhantomData<&'bc [u8]>,
-    PhantomData<&'ep CStr>,
+    PhantomData<Str<'ep>>,
 );
 
 impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
@@ -61,7 +65,7 @@ impl<'bc, 'ep> ComputePipelineCreateInfo<'bc, 'ep> {
     ///   index 0 and has no gaps, with resources ordered as they are bound.
     pub const fn new(
         code: &'bc [u8],
-        entrypoint: &'ep CStr,
+        entrypoint: Str<'ep>,
         fmt: ShaderFormat,
         sampler_count: u32,
         uniform_buffer_count: u32,

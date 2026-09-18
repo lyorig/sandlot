@@ -77,7 +77,7 @@ pub fn platform() -> &'static str {
 ```rust
 /// Query whether there is data in the clipboard for the provided MIME type.
 #[doc(alias = "SDL_HasClipboardData")]
-pub fn has_data(mime_type: &CStr) -> bool {
+pub fn has_data(mime_type: &Str) -> bool {
     unsafe { SDL_HasClipboardData(mime_type.as_ptr()) }
 }
 ```

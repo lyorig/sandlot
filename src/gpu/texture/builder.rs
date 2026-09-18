@@ -1,8 +1,8 @@
-use std::ffi::{CStr, c_char};
+use std::ffi::c_char;
 
 use sdl3_sys::gpu::*;
 
-use crate::{Result, color::RgbaF32, gpu::*, properties::Properties, resource::Ref};
+use crate::{Result, color::RgbaF32, gpu::*, properties::Properties, resource::Ref, str::Str};
 
 const CREATE_PROPERTIES: [*const c_char; 7] = [
     SDL_PROP_GPU_TEXTURE_CREATE_D3D12_CLEAR_R_FLOAT,
@@ -80,7 +80,7 @@ impl<'p> TextureBuilder<'p> {
 
     /// A name for the texture, used for debugging.
     #[doc(alias = "SDL_PROP_GPU_TEXTURE_CREATE_NAME_STRING")]
-    pub fn name(self, value: &CStr) -> Self {
+    pub fn name(self, value: Str) -> Self {
         _ = unsafe {
             self.props
                 .set_string(SDL_PROP_GPU_TEXTURE_CREATE_NAME_STRING, value.as_ptr())

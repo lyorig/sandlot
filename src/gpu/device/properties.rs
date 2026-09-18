@@ -18,28 +18,28 @@ impl<'ctx, 'vid, 'dev> DeviceProperties<'ctx, 'vid, 'dev> {
         }
     }
 
-    fn get(self, key: *const c_char) -> Option<&'dev Str> {
+    fn get(self, key: *const c_char) -> Option<Str<'dev>> {
         let s = unsafe { self.inner.string(key, std::ptr::null()) };
-        (!s.is_null()).then(|| unsafe { Str::from_ptr(s) })
+        unsafe { Str::from_ptr(s) }
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_NAME_STRING")]
-    pub fn device_name(self) -> Option<&'dev Str> {
+    pub fn device_name(self) -> Option<Str<'dev>> {
         self.get(SDL_PROP_GPU_DEVICE_NAME_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING")]
-    pub fn driver_name(self) -> Option<&'dev Str> {
+    pub fn driver_name(self) -> Option<Str<'dev>> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_NAME_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING")]
-    pub fn driver_version(self) -> Option<&'dev Str> {
+    pub fn driver_version(self) -> Option<Str<'dev>> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_VERSION_STRING)
     }
 
     #[doc(alias = "SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING")]
-    pub fn driver_info(self) -> Option<&'dev Str> {
+    pub fn driver_info(self) -> Option<Str<'dev>> {
         self.get(SDL_PROP_GPU_DEVICE_DRIVER_INFO_STRING)
     }
 }
