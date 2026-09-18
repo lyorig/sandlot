@@ -52,3 +52,18 @@ fn str_display_trait() {
 
     assert_eq!(&text.to_string_lossy(), &disp);
 }
+
+#[test]
+fn str_try_from() {
+    assert!(Str::try_from(c"Test").is_ok());
+    assert!(Str::try_from(c"\x05\x99\xFF").is_err());
+    assert!(Str::try_from("No nul terminator :(").is_err());
+    assert!(Str::try_from("Nul terminator :D\0").is_ok());
+    assert!(Str::try_from("Bad nul \0terminator :(\0").is_err());
+
+    let bytes_good = b"Hello\0";
+    assert!(Str::try_from(bytes_good.as_slice()).is_ok());
+
+    let bytes_bad = b"Hello\0World\0";
+    assert!(Str::try_from(bytes_bad.as_slice()).is_err());
+}

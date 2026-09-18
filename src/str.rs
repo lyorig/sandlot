@@ -145,7 +145,7 @@ impl<'a> TryFrom<&'a [u8]> for Str<'a> {
         if value
             .iter()
             .position(|&b| b == 0)
-            .is_some_and(|p| p == value.len())
+            .is_some_and(|p| p == value.len() - 1)
         {
             Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
         } else {
@@ -162,7 +162,7 @@ impl<'a> TryFrom<&'a str> for Str<'a> {
         if value
             .bytes()
             .position(|b| b == b'\0')
-            .is_some_and(|p| p == value.len())
+            .is_some_and(|p| p == value.len() - 1)
         {
             Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
         } else {
