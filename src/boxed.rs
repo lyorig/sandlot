@@ -6,7 +6,7 @@
 
 use std::{
     borrow::Borrow,
-    fmt::{self, Debug, Display},
+    fmt,
     hash::{Hash, Hasher},
     iter::FusedIterator,
     ops::{Deref, DerefMut},
@@ -16,6 +16,9 @@ use std::{
 use sdl3_sys::stdinc::SDL_free;
 
 use crate::{Result, util::opt2res_map};
+
+#[expect(unused_imports)] // doc-only
+use sdl3_sys::stdinc::SDL_malloc;
 
 /// Mirror of [`std::boxed::Box`], with deallocation performed
 /// via [`SDL_free`] instead of the global allocator.
@@ -37,24 +40,22 @@ impl<T: ?Sized> Box<T> {
         ptr
     }
 
-    /// Reconstruct a [`Box`] from a pointer obtained via [`Box::into_raw`]
-    /// (or [`Box::into_raw_non_null`]).
+    /// Takes ownership of an SDL-allocated `T`.
     ///
     /// # Safety
-    /// `raw` must have been obtained from a [`Box`] of this module and must
-    /// not have been freed.
+    ///
+    /// `raw` must have been obtained via [`SDL_malloc`] and  not have been freed.
     pub(crate) unsafe fn from_raw(raw: *mut T) -> Self {
         // SAFETY: Per the contract, `raw` is a valid, aligned, non-null
         // pointer obtained from `into_raw`.
         unsafe { Self::from_raw_non_null(NonNull::new_unchecked(raw)) }
     }
 
-    /// Reconstruct a [`Box`] from a pointer obtained via [`Box::into_raw`]
-    /// (or [`Box::into_raw_non_null`]).
+    /// Takes ownership of an SDL-allocated `T`, which is known not to be null.
     ///
     /// # Safety
-    /// `raw` must have been obtained from a [`Box`] of this module and must
-    /// not have been freed.
+    ///
+    /// `raw` must have been obtained via [`SDL_malloc`] and not have been freed.
     pub(crate) unsafe fn from_raw_non_null(raw: NonNull<T>) -> Self {
         // SAFETY: Per the contract, `raw` is a valid, aligned
         // pointer obtained from `into_raw`.
@@ -70,12 +71,16 @@ impl<T: ?Sized> Box<T> {
         opt2res_map(NonNull::new(raw), |ptr| Self { ptr })
     }
 
-    pub fn as_ptr(&self) -> *const T {
+    pub const fn as_ptr(&self) -> *const T {
         self.ptr.as_ptr()
     }
 
-    pub fn as_mut_ptr(&mut self) -> *mut T {
+    pub const fn as_mut_ptr(&mut self) -> *mut T {
         self.ptr.as_ptr()
+    }
+
+    pub const fn as_nonnull(&self) -> NonNull<T> {
+        self.ptr
     }
 }
 
@@ -168,13 +173,13 @@ impl<T: ?Sized> fmt::Pointer for Box<T> {
     }
 }
 
-impl<T: Debug + ?Sized> Debug for Box<T> {
+impl<T: fmt::Debug + ?Sized> fmt::Debug for Box<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         T::fmt(self, f)
     }
 }
 
-impl<T: Display + ?Sized> Display for Box<T> {
+impl<T: fmt::Display + ?Sized> fmt::Display for Box<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         T::fmt(self, f)
     }

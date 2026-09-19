@@ -66,7 +66,7 @@ fn run() -> Result<()> {
         .build_cleanup(video)?;
 
     let wnd = Window::builder(props)
-        .title(c"sandlot GPU")
+        .title(s!("sandlot GPU"))
         .size(Point::new(720, 480))
         .build_cleanup(video)?;
 

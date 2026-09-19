@@ -223,7 +223,7 @@ fn run() -> Result<()> {
     sandlot::log!("Driver = {}", device.driver().unwrap_or(s!("[unknown]")));
 
     let wnd = Window::builder(props)
-        .title(c"sandlot Teapot Example")
+        .title(s!("sandlot Teapot Example"))
         .size(Point::new(1280, 720))
         .build_cleanup(video)?;
 

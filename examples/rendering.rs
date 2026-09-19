@@ -52,7 +52,7 @@ fn run() -> Result<()> {
 
     let wnd = Window::builder(props)
         .position(Point::new(Window::POS_CENTERED, Window::POS_CENTERED))
-        .title(c"sandlot Example")
+        .title(s!("sandlot Example"))
         .size(Point::new(640, 480))
         .build_cleanup(video)?;
 

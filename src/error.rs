@@ -1,15 +1,31 @@
 //! Wrapper for [`SDL_GetError`], suitable for usage in [`Result`].
 
-use std::ffi::{CStr, CString};
+use std::fmt::{Debug, Display};
 
-use sdl3_sys::error::{SDL_ClearError, SDL_GetError, SDL_SetError};
+use sdl3_sys::{
+    error::{SDL_ClearError, SDL_GetError, SDL_SetError},
+    stdinc::SDL_strdup,
+};
 
-#[derive(Debug)]
+use crate::{str::Str, string::String};
+
+/// Lightweight wrapper around [`SDL_GetError`].
+///
+/// This is a pointer-sized struct which owns a duplicate of the error message
+/// present at the time [`Error::current`] is called. No poin
 pub struct Error {
     reason: String,
 }
 
 impl Error {
+    /// # Sandlot-specific
+    ///
+    /// Duplicates the SDL error string and stores it in a [`Box`] so as to avoid
+    /// the message being silently overwritten by subsequent [`SDL_SetError`] calls
+    /// from inside SDL.
+    ///
+    /// # SDL documentation
+    ///
     /// Retrieve a message about the last error that occurred on the current
     /// thread.
     ///
@@ -35,12 +51,8 @@ impl Error {
     /// thread will not interfere with the current thread's operation.
     #[doc(alias = "SDL_GetError")]
     pub fn current() -> Self {
-        let s = unsafe { CStr::from_ptr(SDL_GetError()) };
-
-        // Speculatively reserve capacity for a null byte,
-        // in case `Self::into_cstring()` is called.
-        let mut reason = String::with_capacity(s.count_bytes() + 1);
-        reason.push_str(&s.to_string_lossy());
+        let dup = unsafe { SDL_strdup(SDL_GetError()) };
+        let reason = unsafe { String::from_raw(dup) };
 
         Self { reason }
     }
@@ -49,7 +61,7 @@ impl Error {
     ///
     /// Calling this function will replace any previous error message that was set.
     #[doc(alias = "SDL_SetError")]
-    pub fn set(reason: &CStr) -> Self {
+    pub fn set(reason: Str) -> Self {
         unsafe { SDL_SetError(c"%s".as_ptr(), reason.as_ptr()) };
         Self::current()
     }
@@ -60,25 +72,22 @@ impl Error {
         SDL_ClearError();
     }
 
-    pub fn as_str(&self) -> &str {
-        self.reason.as_str()
-    }
-
-    /// Consume the [`Error`], turning it into a [`CString`].
-    /// This is useful when interfacing with C APIs which
-    /// expect nul-terminated strings.
-    pub fn into_cstring(self) -> CString {
-        // SAFETY: The stored SDL string contains no nul bytes.
-        let mut vec = self.reason.into_bytes();
-        vec.push(b'\0');
-
-        unsafe { CString::from_vec_with_nul_unchecked(vec) }
+    pub fn as_str(&self) -> Str<'_> {
+        // SAFETY: Error messages coming from SDL are UTF-8,
+        // and `Error::set` also enforces UTF-8.
+        unsafe { Str::from_nonnull(self.reason.as_nonnull()) }
     }
 }
 
-impl std::fmt::Display for Error {
+impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.write_str(&self.reason)
+        Display::fmt(&self.as_str(), f)
+    }
+}
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        Debug::fmt(&self.reason, f)
     }
 }
 

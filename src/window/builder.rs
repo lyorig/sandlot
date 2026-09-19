@@ -1,11 +1,10 @@
-use std::{
-    ffi::{CStr, c_char},
-    marker::PhantomData,
-};
+use std::{ffi::c_char, marker::PhantomData};
 
 use sdl3_sys::video::*;
 
-use crate::{Result, init, properties::Properties, rect::PointI32, resource::Ref, window::Window};
+use crate::{
+    Result, init, properties::Properties, rect::PointI32, resource::Ref, str::Str, window::Window,
+};
 
 const CREATE_PROPERTIES: [*const c_char; 26] = [
     SDL_PROP_WINDOW_CREATE_ALWAYS_ON_TOP_BOOLEAN,
@@ -170,7 +169,7 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
 
     /// The title of the window, in UTF-8 encoding.
     #[doc(alias = "SDL_PROP_WINDOW_CREATE_TITLE_STRING")]
-    pub fn title(self, value: &CStr) -> Self {
+    pub fn title(self, value: Str) -> Self {
         _ = unsafe {
             self.inner
                 .set_string(SDL_PROP_WINDOW_CREATE_TITLE_STRING, value.as_ptr())

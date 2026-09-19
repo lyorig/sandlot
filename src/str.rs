@@ -5,7 +5,7 @@ use std::{
     ptr::NonNull,
 };
 
-/// Holds a pointer to a nul-terminated string which is guaranteed UTF-8.
+/// Holds a pointer to an immutable nul-terminated string which is guaranteed UTF-8.
 ///
 /// This enables passing pointers to and from SDL functions without having to
 /// store the length. At the same time, infallible conversion methods to

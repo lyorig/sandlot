@@ -2,12 +2,13 @@
 
 use std::{
     ffi::{CStr, c_char},
-    fmt::Display,
+    fmt::{Debug, Display},
+    ops::Deref,
 };
 
 use crate::{Result, boxed::Box};
 
-/// An SDL-allocated string.
+/// An SDL-allocated nul-terminated UTF-8 string.
 ///
 /// Unlike [`std::string::String`] which wraps a [`Vec<u8>`], [`String`] wraps a [`Box<c_char>`],
 /// as SDL always provides a null-terminated string pointer. This makes it borrow some [`CStr`]
@@ -19,29 +20,46 @@ pub struct String {
 
 impl String {
     /// # Safety
+    ///
     /// See the safety requirements of [`Box::from_raw`].
+    ///
+    /// TL;DR: `handle` points to an UTF-8 nul-terminated string allocated
+    /// with SDL's allocator, and it's okay to take ownership of it.
     pub(crate) unsafe fn from_raw(handle: *mut c_char) -> Self {
         let handle = unsafe { Box::from_raw(handle) };
         Self { handle }
     }
 
     /// # Safety
+    ///
     /// See the safety requirements of [`Box::from_raw_nullck`].
     pub(crate) unsafe fn from_raw_nullck(handle: *mut c_char) -> Result<Self> {
         unsafe { Box::from_raw_nullck(handle) }.map(|handle| Self { handle })
     }
 
     /// Convert this SDL string to a byte slice.
+    ///
     /// This involves calculating the length via [`String::count_bytes`].
     pub fn to_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.handle.as_ptr().cast(), self.count_bytes()) }
     }
 
-    /// Convert this SDL string to a string slice. This can be done,
-    /// since all strings originating from SDL are guaranteed UTF-8.
+    /// Convert this SDL string to a string slice.
+    ///
+    /// This can be done, since the data we point to is guaranteed UTF-8.
+    ///
     /// This involves calculating its length via [`String::count_bytes`].
     pub fn to_str(&self) -> &str {
         unsafe { str::from_utf8_unchecked(self.to_bytes()) }
+    }
+
+    /// Convert this SDL string to a C string slice.
+    ///
+    /// This can be done since the data we point to is guaranteed to be nul-terminated.
+    ///
+    /// This involves calculating its length via [`String::count_bytes`].
+    pub fn to_c_str(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.handle.as_ptr()) }
     }
 
     /// Analogous to [`CStr::count_bytes`].
@@ -50,7 +68,8 @@ impl String {
         cs.count_bytes()
     }
 
-    /// Transforms `self` into a boxed `str`.
+    /// Transforms `self` into a boxed [`str`].
+    ///
     /// This involves calculating the length via [`String::count_bytes`].
     pub fn into_boxed_str(self) -> Box<str> {
         let len = self.count_bytes();
@@ -62,10 +81,23 @@ impl String {
     }
 }
 
+impl Deref for String {
+    type Target = Box<c_char>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.handle
+    }
+}
+
 impl Display for String {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let str = self.to_str();
-        <str as Display>::fmt(str, f)
+        Display::fmt(self.to_str(), f)
+    }
+}
+
+impl Debug for String {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        Debug::fmt(self.to_str(), f)
     }
 }
 
