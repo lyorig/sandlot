@@ -6,6 +6,7 @@ use crate::{
     Result,
     boxed::Box,
     display::Display,
+    error::Error,
     init::{Events, subsystem_new},
     keyboard::KeyboardState,
     rect::{PointI32, RectI32},
@@ -52,7 +53,8 @@ impl<'ctx> VideoHandle<'ctx> {
 
         // SAFETY: On success, SDL allocates `count` window pointers.
         // `Ref<Window>` as the same size and alignment as `*mut SDL_Window`.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as usize) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), count.assume_init() as usize) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Get a window from a stored ID.
@@ -79,7 +81,8 @@ impl<'ctx> VideoHandle<'ctx> {
         let mut count = MaybeUninit::uninit();
         let ptr = unsafe { SDL_GetDisplays(count.as_mut_ptr()) };
 
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), count.assume_init() as _) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Return the primary display.
@@ -123,7 +126,8 @@ impl<'ctx> VideoHandle<'ctx> {
         let ptr = unsafe { SDL_GetClipboardData(mime_type.as_ptr(), len.as_mut_ptr()) };
 
         // SAFETY: On success, SDL allocates `len` bytes.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init() as _) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), len.assume_init() as _) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Retrieve the list of mime types available in the clipboard.
@@ -133,7 +137,8 @@ impl<'ctx> VideoHandle<'ctx> {
         let ptr = unsafe { SDL_GetClipboardMimeTypes(len.as_mut_ptr()) };
 
         // SAFETY: On success, SDL allocates `len` mime type strings.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), len.assume_init()) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), len.assume_init()) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Get UTF-8 text from the clipboard.
@@ -145,7 +150,7 @@ impl<'ctx> VideoHandle<'ctx> {
         let ptr = unsafe { SDL_GetClipboardText() };
 
         // SAFETY: `SDL_GetClipboardText()` always returns a valid string.
-        unsafe { String::from_raw(ptr) }
+        unsafe { String::from_ptr_unchecked(ptr) }
     }
 
     /// Query whether there is data in the clipboard for the provided mime type.

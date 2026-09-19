@@ -6,7 +6,7 @@ use std::{
     ops::Deref,
 };
 
-use crate::{Result, boxed::Box};
+use crate::{Result, boxed::Box, error::Error};
 
 /// An SDL-allocated nul-terminated UTF-8 string.
 ///
@@ -25,16 +25,18 @@ impl String {
     ///
     /// TL;DR: `handle` points to an UTF-8 nul-terminated string allocated
     /// with SDL's allocator, and it's okay to take ownership of it.
-    pub(crate) unsafe fn from_raw(handle: *mut c_char) -> Self {
-        let handle = unsafe { Box::from_raw(handle) };
+    pub(crate) unsafe fn from_ptr_unchecked(handle: *mut c_char) -> Self {
+        let handle = unsafe { Box::from_ptr_unchecked(handle) };
         Self { handle }
     }
 
     /// # Safety
     ///
     /// See the safety requirements of [`Box::from_raw_nullck`].
-    pub(crate) unsafe fn from_raw_nullck(handle: *mut c_char) -> Result<Self> {
-        unsafe { Box::from_raw_nullck(handle) }.map(|handle| Self { handle })
+    pub(crate) unsafe fn from_ptr(handle: *mut c_char) -> Result<Self> {
+        unsafe { Box::from_ptr(handle) }
+            .map(|handle| Self { handle })
+            .ok_or_else(Error::current)
     }
 
     /// Convert this SDL string to a byte slice.
@@ -73,11 +75,11 @@ impl String {
     /// This involves calculating the length via [`String::count_bytes`].
     pub fn into_boxed_str(self) -> Box<str> {
         let len = self.count_bytes();
-        let ptr = self.handle.into_raw_non_null().cast::<u8>();
+        let ptr = self.handle.into_non_null().cast::<u8>();
         let slice = unsafe { std::slice::from_raw_parts_mut(ptr.as_ptr(), len) };
         let slice_ptr = std::ptr::from_mut(slice);
 
-        unsafe { Box::from_raw(slice_ptr as *mut str) }
+        unsafe { Box::from_ptr_unchecked(slice_ptr as *mut str) }
     }
 }
 

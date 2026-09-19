@@ -39,7 +39,13 @@ use std::{
 use bitflags::bitflags;
 use sdl3_sys::filesystem::*;
 
-use crate::{Result, boxed::Box, string::String, util::impl_enum_transmute, util::to_result};
+use crate::{
+    Result,
+    boxed::Box,
+    error::Error,
+    string::String,
+    util::{impl_enum_transmute, to_result},
+};
 
 #[expect(unused_imports)]
 use crate::init::ContextHandle;
@@ -184,7 +190,7 @@ impl_enum_transmute!(SDL_EnumerationResult, EnumerationResult);
 pub fn pref_path(org: &CStr, app: &CStr) -> Result<String> {
     unsafe {
         let ptr = SDL_GetPrefPath(org.as_ptr(), app.as_ptr());
-        String::from_raw_nullck(ptr)
+        String::from_ptr(ptr)
     }
 }
 
@@ -346,7 +352,8 @@ pub fn glob_directory(
     };
 
     // SAFETY: On success, SDL allocates a single array of `count` string pointers.
-    unsafe { Box::from_raw_parts_nullck(ptr.cast(), count as usize) }
+    let bx = unsafe { Box::from_raw_parts(ptr.cast(), count as usize) };
+    bx.ok_or_else(Error::current)
 }
 
 /// Get the system's current working directory.
@@ -364,6 +371,6 @@ pub fn glob_directory(
 pub fn current_directory() -> Result<String> {
     unsafe {
         let ptr = SDL_GetCurrentDirectory();
-        String::from_raw_nullck(ptr)
+        String::from_ptr(ptr)
     }
 }

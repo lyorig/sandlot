@@ -52,7 +52,7 @@ impl Error {
     #[doc(alias = "SDL_GetError")]
     pub fn current() -> Self {
         let dup = unsafe { SDL_strdup(SDL_GetError()) };
-        let reason = unsafe { String::from_raw(dup) };
+        let reason = unsafe { String::from_ptr_unchecked(dup) };
 
         Self { reason }
     }
@@ -75,7 +75,7 @@ impl Error {
     pub fn as_str(&self) -> Str<'_> {
         // SAFETY: Error messages coming from SDL are UTF-8,
         // and `Error::set` also enforces UTF-8.
-        unsafe { Str::from_nonnull(self.reason.as_nonnull()) }
+        unsafe { Str::from_non_null(self.reason.as_non_null()) }
     }
 }
 

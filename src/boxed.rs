@@ -15,8 +15,6 @@ use std::{
 
 use sdl3_sys::stdinc::SDL_free;
 
-use crate::{Result, util::opt2res_map};
-
 #[expect(unused_imports)] // doc-only
 use sdl3_sys::stdinc::SDL_malloc;
 
@@ -29,12 +27,12 @@ pub struct Box<T: ?Sized> {
 impl<T: ?Sized> Box<T> {
     /// Consume the [`Box`], returning the underlying pointer without freeing
     /// the allocation.
-    pub(crate) fn into_raw(self) -> *mut T {
-        self.into_raw_non_null().as_ptr()
+    pub(crate) const fn into_ptr(self) -> *mut T {
+        self.into_non_null().as_ptr()
     }
 
-    /// Like [`Box::into_raw`], but preserves the non-null invariant.
-    pub(crate) fn into_raw_non_null(self) -> NonNull<T> {
+    /// Like [`Box::into_ptr`], but preserves the non-null invariant.
+    pub(crate) const fn into_non_null(self) -> NonNull<T> {
         let ptr = self.ptr;
         std::mem::forget(self);
         ptr
@@ -45,10 +43,8 @@ impl<T: ?Sized> Box<T> {
     /// # Safety
     ///
     /// `raw` must have been obtained via [`SDL_malloc`] and  not have been freed.
-    pub(crate) unsafe fn from_raw(raw: *mut T) -> Self {
-        // SAFETY: Per the contract, `raw` is a valid, aligned, non-null
-        // pointer obtained from `into_raw`.
-        unsafe { Self::from_raw_non_null(NonNull::new_unchecked(raw)) }
+    pub(crate) const unsafe fn from_ptr_unchecked(ptr: *mut T) -> Self {
+        unsafe { Self::from_non_null(NonNull::new_unchecked(ptr)) }
     }
 
     /// Takes ownership of an SDL-allocated `T`, which is known not to be null.
@@ -56,19 +52,18 @@ impl<T: ?Sized> Box<T> {
     /// # Safety
     ///
     /// `raw` must have been obtained via [`SDL_malloc`] and not have been freed.
-    pub(crate) unsafe fn from_raw_non_null(raw: NonNull<T>) -> Self {
-        // SAFETY: Per the contract, `raw` is a valid, aligned
-        // pointer obtained from `into_raw`.
-        Self { ptr: raw }
+    pub(crate) const unsafe fn from_non_null(ptr: NonNull<T>) -> Self {
+        Self { ptr }
     }
 
     /// Create a [`Box`] from an SDL allocation.
-    /// Returns the current error if `raw` is null.
+    /// Returns [`None`] if `ptr` is null.
     ///
     /// # Safety
-    /// `raw` must be allocated via SDL.
-    pub(crate) unsafe fn from_raw_nullck(raw: *mut T) -> Result<Self> {
-        opt2res_map(NonNull::new(raw), |ptr| Self { ptr })
+    /// `ptr` must be allocated by SDL.
+    pub(crate) unsafe fn from_ptr(ptr: *mut T) -> Option<Self> {
+        let nn = NonNull::new(ptr)?;
+        Some(unsafe { Self::from_non_null(nn) })
     }
 
     pub const fn as_ptr(&self) -> *const T {
@@ -79,7 +74,7 @@ impl<T: ?Sized> Box<T> {
         self.ptr.as_ptr()
     }
 
-    pub const fn as_nonnull(&self) -> NonNull<T> {
+    pub const fn as_non_null(&self) -> NonNull<T> {
         self.ptr
     }
 }
@@ -91,7 +86,7 @@ impl<T> Box<[T]> {
     /// `ptr` must be:
     /// - obtained from an SDL allocation
     /// - valid for `len` * `size_of::<T>()` bytes.
-    pub(crate) unsafe fn from_raw_parts(ptr: *mut T, len: usize) -> Self {
+    pub(crate) const unsafe fn from_raw_parts_unchecked(ptr: *mut T, len: usize) -> Self {
         unsafe {
             let ptr = NonNull::new_unchecked(ptr);
             Self::from_raw_parts_non_null(ptr, len)
@@ -104,7 +99,7 @@ impl<T> Box<[T]> {
     /// `ptr` must be:
     /// - obtained from an SDL allocation
     /// - valid for `len` * `size_of::<T>()` bytes.
-    pub(crate) unsafe fn from_raw_parts_non_null(ptr: NonNull<T>, len: usize) -> Self {
+    pub(crate) const unsafe fn from_raw_parts_non_null(ptr: NonNull<T>, len: usize) -> Self {
         let slice = NonNull::slice_from_raw_parts(ptr, len);
         Self { ptr: slice }
     }
@@ -115,10 +110,9 @@ impl<T> Box<[T]> {
     /// # Safety
     /// `ptr` must have been obtained from an SDL allocation and must be valid
     /// for `len` * `size_of::<T>()` bytes.
-    pub(crate) unsafe fn from_raw_parts_nullck(ptr: *mut T, len: usize) -> Result<Self> {
-        opt2res_map(NonNull::new(ptr), |nn| unsafe {
-            Self::from_raw_parts_non_null(nn, len)
-        })
+    pub(crate) unsafe fn from_raw_parts(ptr: *mut T, len: usize) -> Option<Self> {
+        let nn = NonNull::new(ptr)?;
+        Some(unsafe { Self::from_raw_parts_non_null(nn, len) })
     }
 }
 

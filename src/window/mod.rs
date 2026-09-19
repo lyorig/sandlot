@@ -588,7 +588,8 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
         let ptr = unsafe { SDL_GetWindowICCProfile(self.as_raw(), size.as_mut_ptr()) };
 
         // SAFETY: On success, SDL allocates `size` bytes.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), size.assume_init()) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), size.assume_init()) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Get the aspect ratio of a window's client area.

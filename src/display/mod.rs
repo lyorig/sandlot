@@ -206,7 +206,8 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
         let ptr = unsafe { SDL_GetFullscreenDisplayModes(self.id(), count.as_mut_ptr()) };
 
         // SAFETY: On success, SDL allocates `count` display modes.
-        unsafe { Box::from_raw_parts_nullck(ptr.cast(), count.assume_init() as _) }
+        let bx = unsafe { Box::from_raw_parts(ptr.cast(), count.assume_init() as _) };
+        bx.ok_or_else(Error::current)
     }
 
     /// Get the content scale of a display.

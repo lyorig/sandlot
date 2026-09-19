@@ -81,7 +81,7 @@ impl<'a> Str<'a> {
     /// it to something sensible.
     pub const unsafe fn from_ptr_unchecked(ptr: *const c_char) -> Self {
         let ptr = unsafe { NonNull::new(ptr.cast_mut()).unwrap_unchecked() };
-        unsafe { Self::from_nonnull(ptr) }
+        unsafe { Self::from_non_null(ptr) }
     }
 
     /// Analogous to [`CStr::from_ptr`], but with an extra UTF-8 requirement.
@@ -94,14 +94,14 @@ impl<'a> Str<'a> {
     ///
     /// The lifetime is inferred; functions building on this one should tie
     /// it to something sensible.
-    pub const unsafe fn from_nonnull(ptr: NonNull<c_char>) -> Self {
+    pub const unsafe fn from_non_null(ptr: NonNull<c_char>) -> Self {
         Self {
             ptr,
             marker: PhantomData,
         }
     }
 
-    pub const fn as_nonnull(self) -> NonNull<c_char> {
+    pub const fn as_non_null(self) -> NonNull<c_char> {
         self.ptr
     }
 
@@ -109,16 +109,16 @@ impl<'a> Str<'a> {
         self.ptr.as_ptr()
     }
 
-    pub const fn to_cstr(self) -> &'a CStr {
+    pub const fn to_c_str(self) -> &'a CStr {
         unsafe { CStr::from_ptr(self.as_ptr()) }
     }
 
     pub const fn to_bytes(self) -> &'a [u8] {
-        self.to_cstr().to_bytes()
+        self.to_c_str().to_bytes()
     }
 
     pub fn to_bytes_with_nul(self) -> &'a [u8] {
-        self.to_cstr().to_bytes_with_nul()
+        self.to_c_str().to_bytes_with_nul()
     }
 
     pub const fn to_str(self) -> &'a str {
@@ -127,7 +127,7 @@ impl<'a> Str<'a> {
 
     /// Analogous to [`CStr::count_bytes`].
     pub const fn count_bytes(self) -> usize {
-        self.to_cstr().count_bytes()
+        self.to_c_str().count_bytes()
     }
 
     pub const fn is_empty(self) -> bool {
