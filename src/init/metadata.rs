@@ -28,11 +28,6 @@ impl<'ctx> ContextMetadata<'ctx> {
         }
     }
 
-    fn opt_str(self, key: *const c_char) -> Option<Str<'ctx>> {
-        let meta = unsafe { SDL_GetAppMetadataProperty(key) };
-        unsafe { Str::from_ptr(meta) }
-    }
-
     /// The human-readable name of the application.
     ///
     /// Defaults to the application binary's name, or "SDL Application" if that isn't available.
@@ -85,5 +80,10 @@ impl<'ctx> ContextMetadata<'ctx> {
             // SAFETY: SDL guarantees this property to be a valid `AppKind`.
             AppKind::from_sdl(cs.unwrap_unchecked()).unwrap_unchecked()
         }
+    }
+
+    fn opt_str(self, key: *const c_char) -> Option<Str<'ctx>> {
+        let meta = unsafe { SDL_GetAppMetadataProperty(key) };
+        unsafe { Str::from_ptr(meta) }
     }
 }

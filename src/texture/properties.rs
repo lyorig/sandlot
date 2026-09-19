@@ -42,15 +42,6 @@ impl<'ctx, 'vid, 'wnd, 'rnd, 'tex> TextureProperties<'ctx, 'vid, 'wnd, 'rnd, 'te
         }
     }
 
-    fn opt_number(self, key: *const c_char) -> Option<i64> {
-        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
-    }
-
-    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
-        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
-        NonNull::new(p)
-    }
-
     /// Returns the [`Colorspace`] describing the texture's colorspace.
     #[doc(alias = "SDL_PROP_TEXTURE_COLORSPACE_NUMBER")]
     pub fn colorspace(self) -> Colorspace {
@@ -156,5 +147,14 @@ impl<'ctx, 'vid, 'wnd, 'rnd, 'tex> TextureProperties<'ctx, 'vid, 'wnd, 'rnd, 'te
                 let handle = gpu::TextureHandle::from_ptr(ptr.as_ptr().cast()).unwrap_unchecked();
                 Ref::from_handle(handle)
             })
+    }
+
+    fn opt_number(self, key: *const c_char) -> Option<i64> {
+        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
+    }
+
+    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
+        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
+        NonNull::new(p)
     }
 }

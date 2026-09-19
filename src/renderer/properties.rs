@@ -43,22 +43,6 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         }
     }
 
-    fn get_str(self, key: *const c_char) -> Str<'rnd> {
-        let s = unsafe { self.inner.string(key, std::ptr::null()) };
-
-        // SAFETY: Only called for properties whose existence the SDL docs guarantee.
-        unsafe { Str::from_ptr_unchecked(s) }
-    }
-
-    fn opt_number(self, key: *const c_char) -> Option<i64> {
-        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
-    }
-
-    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
-        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
-        NonNull::new(p)
-    }
-
     /// The name of the rendering driver.
     #[doc(alias = "SDL_PROP_RENDERER_NAME_STRING")]
     pub fn name(self) -> Str<'rnd> {
@@ -273,5 +257,21 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
         };
 
         DeviceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
+    }
+
+    fn get_str(self, key: *const c_char) -> Str<'rnd> {
+        let s = unsafe { self.inner.string(key, std::ptr::null()) };
+
+        // SAFETY: Only called for properties whose existence the SDL docs guarantee.
+        unsafe { Str::from_ptr_unchecked(s) }
+    }
+
+    fn opt_number(self, key: *const c_char) -> Option<i64> {
+        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
+    }
+
+    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
+        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
+        NonNull::new(p)
     }
 }

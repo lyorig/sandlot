@@ -37,21 +37,6 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
         }
     }
 
-    fn opt_str(self, key: *const c_char) -> Option<Str<'wnd>> {
-        let s = unsafe { self.inner.string(key, std::ptr::null()) };
-
-        (!s.is_null()).then(|| unsafe { Str::from_ptr_unchecked(s) })
-    }
-
-    fn opt_number(self, key: *const c_char) -> Option<i64> {
-        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
-    }
-
-    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
-        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
-        NonNull::new(p)
-    }
-
     /// Returns the surface associated with a shaped window.
     #[doc(alias = "SDL_PROP_WINDOW_SHAPE_POINTER")]
     pub fn shape(self) -> Option<Ref<'wnd, Surface>> {
@@ -213,5 +198,20 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_PROP_WINDOW_WAYLAND_XDG_POSITIONER_POINTER")]
     pub fn wayland_xdg_positioner(self) -> Option<NonNull<c_void>> {
         self.opt_ptr(SDL_PROP_WINDOW_WAYLAND_XDG_POSITIONER_POINTER)
+    }
+
+    fn opt_str(self, key: *const c_char) -> Option<Str<'wnd>> {
+        let s = unsafe { self.inner.string(key, std::ptr::null()) };
+
+        (!s.is_null()).then(|| unsafe { Str::from_ptr_unchecked(s) })
+    }
+
+    fn opt_number(self, key: *const c_char) -> Option<i64> {
+        unsafe { self.inner.has(key).then(|| self.inner.number(key, 0)) }
+    }
+
+    fn opt_ptr(self, key: *const c_char) -> Option<NonNull<c_void>> {
+        let p = unsafe { self.inner.pointer(key, std::ptr::null_mut()) };
+        NonNull::new(p)
     }
 }
