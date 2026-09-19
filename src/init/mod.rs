@@ -257,11 +257,11 @@ impl Context {
     ///
     /// The caller must only use the returned handle within the lifetime of the backing resource.
     pub unsafe fn as_handle(&self) -> ContextHandle {
-        unsafe { Subsystem::as_handle(self) }
+        self.handle
     }
 
     pub fn as_ref(&self) -> Ref<'_, Self> {
-        Subsystem::as_ref(self)
+        unsafe { Ref::from_handle(self.handle) }
     }
 }
 
@@ -275,10 +275,6 @@ impl Deref for Context {
 
 impl Subsystem for Context {
     type Handle = ContextHandle;
-
-    unsafe fn as_handle(&self) -> Self::Handle {
-        self.handle
-    }
 }
 
 impl Drop for Context {
@@ -291,21 +287,6 @@ impl Drop for Context {
 
 pub trait Subsystem: Sized {
     type Handle: Copy;
-
-    /// Obtain a raw handle to this resource.
-    ///
-    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
-    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
-    /// that the API relies on.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only use the returned handle within the lifetime of the backing resource.
-    unsafe fn as_handle(&self) -> Self::Handle;
-
-    fn as_ref(&self) -> Ref<'_, Self> {
-        unsafe { Ref::from_handle(self.as_handle()) }
-    }
 }
 
 pub struct Ref<'sub, T: Subsystem> {
@@ -414,11 +395,11 @@ macro_rules! subsystem_new {
                 ///
                 /// The caller must only use the returned handle within the lifetime of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$name Handle>]<'ctx> {
-                    unsafe { $crate::init::Subsystem::as_handle(self) }
+                    self.handle
                 }
 
                 pub fn as_ref(&self) -> $crate::init::Ref<'_, $name<'_>> {
-                    unsafe { $crate::init::Ref::from_handle(self.as_handle()) }
+                    unsafe { $crate::init::Ref::from_handle(self.handle) }
                 }
 
                 /// Get whether this subsystem is currently initialized.
@@ -431,10 +412,6 @@ macro_rules! subsystem_new {
 
             impl<'ctx> $crate::init::Subsystem for $name<'ctx> {
                 type Handle = [<$name Handle>]<'ctx>;
-
-                unsafe fn as_handle(&self) -> Self::Handle {
-                    self.handle
-                }
             }
 
             impl<'ctx> ::std::ops::Deref for $name<'ctx> {

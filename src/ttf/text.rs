@@ -47,7 +47,7 @@ use crate::{
     error::Error,
     properties::{Properties, PropertiesHandle},
     rect::{PointF32, PointI32, RectI32},
-    resource::{Handle, Ref, Resource, resource_new},
+    resource::{Ref, resource_new},
     surface::Surface,
     ttf::{Font, FontHandle, GpuEngine, RendererEngine, SurfaceEngine, TtfStr},
     util::{impl_enum_transmute, opt2res, to_result},
@@ -531,13 +531,9 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     ///
     /// This function may cause the internal text representation to be rebuilt.
     #[doc(alias = "TTF_SetTextEngine")]
-    fn set_engine<H, R>(self, engine: Ref<R>)
-    where
-        H: Handle<Raw = *mut TTF_TextEngine>,
-        R: Resource<Handle = H>,
-    {
+    fn set_engine(self, engine: NonNull<TTF_TextEngine>) {
         // NOTE: Infallible, since the only error condition is an invalid engine object.
-        unsafe { TTF_SetTextEngine(self.as_raw(), engine.as_raw()) };
+        unsafe { TTF_SetTextEngine(self.as_raw(), engine.as_ptr()) };
     }
 
     /// # Safety
@@ -636,7 +632,7 @@ impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'wnd, 'rnd>
         text: Text<'ttf, 'font>,
         eng: Ref<'eng, RendererEngine<'ctx, 'vid, 'wnd, 'rnd>>,
     ) -> Self {
-        text.set_engine(eng);
+        text.set_engine(eng.as_inner());
 
         Self {
             text,
@@ -685,7 +681,7 @@ pub struct SurfaceText<'ttf, 'font, 'eng> {
 
 impl<'ttf, 'font, 'eng> SurfaceText<'ttf, 'font, 'eng> {
     pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, SurfaceEngine>) -> Self {
-        text.set_engine(eng);
+        text.set_engine(eng.as_inner());
 
         Self {
             text,
@@ -727,7 +723,7 @@ pub struct GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
 
 impl<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> GpuText<'ttf, 'font, 'eng, 'ctx, 'vid, 'dev> {
     pub fn new(text: Text<'ttf, 'font>, eng: Ref<'eng, GpuEngine<'ctx, 'vid, 'dev>>) -> Self {
-        text.set_engine(eng);
+        text.set_engine(eng.as_inner());
 
         Self {
             text,

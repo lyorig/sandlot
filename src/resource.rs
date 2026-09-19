@@ -25,16 +25,6 @@ pub trait Handle: Copy {
 
     /// The actual type contained within the handle, i.e. `NonZero<SDL_Surface>`.
     type Inner: Copy;
-
-    /// Get this type's "raw" representation,
-    /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
-    /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
-    fn as_raw(self) -> Self::Raw;
-
-    /// Get this type's "inner" representation,
-    /// i.e. `NonNull<SDL_Surface>` for [`Surface`](crate::surface::Surface),
-    /// or `NonZero<u32>` for [`Properties`](crate::properties::Properties).
-    fn as_inner(self) -> Self::Inner;
 }
 
 /// An owning handle to a resource.
@@ -42,27 +32,6 @@ pub trait Handle: Copy {
 ///
 pub trait Resource: Sized {
     type Handle: Handle;
-
-    /// Obtain a raw handle to this resource.
-    ///
-    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
-    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
-    /// that the API relies on.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only use the returned handle within the lifetime of the backing resource.
-    unsafe fn as_handle(&self) -> Self::Handle;
-
-    /// Create a new reference tied to this object.
-    fn as_ref(&self) -> Ref<'_, Self> {
-        unsafe { Ref::from_handle(self.as_handle()) }
-    }
-
-    /// Create a new mutable reference tied to this object.
-    fn as_mut(&mut self) -> RefMut<'_, Self> {
-        unsafe { RefMut::from_handle(self.as_handle()) }
-    }
 }
 
 pub struct Ref<'a, T: Resource> {
@@ -221,14 +190,14 @@ macro_rules! resource_new {
                 /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
                 /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
                 pub fn as_raw(self) -> *mut $sdl {
-                    $crate::resource::Handle::as_raw(self)
+                    self.handle.as_ptr()
                 }
 
                 /// Get this type's "inner" representation,
                 /// i.e. `NonNull<SDL_Surface>` for [`Surface`](crate::surface::Surface),
                 /// or `NonZero<u32>` for [`Properties`](crate::properties::Properties).
                 pub fn as_inner(self) -> ::std::ptr::NonNull<$sdl> {
-                    $crate::resource::Handle::as_inner(self)
+                    self.handle
                 }
             }
 
@@ -265,7 +234,7 @@ macro_rules! resource_new {
                 ///
                 /// The caller must only use the returned handle within the lifetime of the backing resource.
                 pub unsafe fn as_handle(&self) -> [<$owned Handle>]<$($lt),*> {
-                    unsafe { $crate::resource::Resource::as_handle(self) }
+                    self.inner
                 }
             }
 
@@ -286,22 +255,10 @@ macro_rules! resource_new {
             impl<$($lt),*> $crate::resource::Handle for [<$owned Handle>]<$($lt),*> {
                 type Raw = *mut $sdl;
                 type Inner = ::std::ptr::NonNull<$sdl>;
-
-                fn as_raw(self) -> Self::Raw {
-                    self.handle.as_ptr()
-                }
-
-                fn as_inner(self) -> Self::Inner {
-                    self.handle
-                }
             }
 
             impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
                 type Handle = [<$owned Handle>]<$($lt),*>;
-
-                unsafe fn as_handle(&self) -> Self::Handle {
-                    self.inner
-                }
             }
         }
     };
