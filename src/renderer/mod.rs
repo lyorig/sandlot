@@ -264,10 +264,13 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         }
     }
 
-    /// Read pixels from the entire current rendering target.
+    /// Read pixels from the current rendering target.
     ///
-    /// Returns a new surface containing pixels inside the desired area
-    /// clipped to the current viewport.
+    /// Returns a new surface containing pixels inside the desired area clipped to the current viewport.
+    ///
+    /// # Parameters
+    ///
+    /// - `area`: the area to read, or [`None`] for the entire rendering target
     ///
     /// Note that this returns the actual pixels on the screen, so if you are
     /// using logical presentation you should use
@@ -363,9 +366,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Copy a portion of the texture to the current rendering target at
     /// subpixel precision.
     ///
-    /// `src` selects the source rectangle, or the entire texture if [`None`].
-    /// `dst` selects the destination rectangle, or the entire rendering
-    /// target if [`None`].
+    /// # Parameters
+    ///
+    /// - `tex`: the texture to draw
+    /// - `src`: the source rectangle, or [`None`] for the entire texture
+    /// - `dst`: the destination rectangle, or [`None`] for the entire rendering target
     #[doc(alias = "SDL_RenderTexture")]
     pub fn draw(
         self,
@@ -386,16 +391,13 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Copy a portion of the source texture to the current rendering target,
     /// with affine transform, at subpixel precision.
     ///
-    /// `src` selects the source rectangle, or the entire texture if [`None`].
+    /// # Parameters
     ///
-    /// `origin` indicates where the top-left corner of `src` should be mapped
-    /// to, or the rendering target's origin if [`None`].
-    ///
-    /// `right` indicates where the top-right corner of `src` should be mapped
-    /// to, or the rendering target's top-right corner if [`None`].
-    ///
-    /// `down` indicates where the bottom-left corner of `src` should be
-    /// mapped to, or the rendering target's bottom-left corner if [`None`].
+    /// - `tex`: the texture to draw
+    /// - `src`: which part of the texture to draw, or [`None`] for the entire texture
+    /// - `origin`: where the top-left corner of `src` should be mapped to, or [`None`] for the rendering target's origin
+    /// - `right`: where the top-right corner of `src` should be mapped to, or [`None`] for the rendering target's top-right corner
+    /// - `down`: where the bottom-left corner of `src` should be mapped to, or [`None`] for the rendering target's bottom-left corner
     #[doc(alias = "SDL_RenderTextureAffine")]
     pub fn draw_affine(
         self,
@@ -420,18 +422,17 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Tile a portion of the texture to the current rendering target at
     /// subpixel precision.
     ///
-    /// `src` selects the source rectangle, or the entire texture if [`None`].
-    /// `dst` selects the destination rectangle, or the entire rendering
-    /// target if [`None`].
+    /// # Parameters
+    ///
+    /// - `src`: the source rectangle, or [`None`] for the entire texture
+    /// - `scale`: the scale used to transform `src` into the destination rectangle
+    /// - `dst`: the destination rectangle, or [`None`] for the entire rendering target
     ///
     /// # Remarks
     ///
     /// The pixels in `src` will be repeated as many times as needed to
-    /// completely fill `dst`.
-    ///
-    /// `scale` is the scale used to transform `src` into the destination
-    /// rectangle, e.g. a 32x32 texture with a scale of 2 would fill 64x64
-    /// tiles.
+    /// completely fill `dst`. For example, a 32x32 texture with a scale of 2
+    /// would fill 64x64 tiles.
     #[doc(alias = "SDL_RenderTextureTiled")]
     pub fn draw_tiled(
         self,
@@ -454,16 +455,15 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Perform a scaled copy using the 9-grid algorithm to the current
     /// rendering target at subpixel precision.
     ///
-    /// `src` selects the rectangle to be used for the 9-grid, or the entire
-    /// texture if [`None`]. `dst` selects the destination rectangle, or the
-    /// entire rendering target if [`None`].
+    /// # Parameters
     ///
-    /// The tuple elements are, in order: the width, in pixels, of the left
-    /// corners in `src`; the width of the right corners; the height of the
-    /// top corners; the height of the bottom corners.
-    ///
-    /// `scale` is the scale used to transform the corners of `src` into the
-    /// corners of `dst`, or `0.0` for an unscaled copy.
+    /// - `src`: the rectangle to be used for the 9-grid, or [`None`] for the entire texture
+    /// - `width_left`: the width, in pixels, of the left corners in `src`
+    /// - `width_right`: the width, in pixels, of the right corners in `src`
+    /// - `width_top`: the height, in pixels, of the top corners in `src`
+    /// - `width_bottom`: the height, in pixels, of the bottom corners in `src`
+    /// - `scale`: the scale used to transform the corners of `src` into the corners of `dst`, or `0.0` for an unscaled copy
+    /// - `dst`: the destination rectangle, or [`None`] for the entire rendering target
     ///
     /// # Remarks
     ///
@@ -499,7 +499,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Render a list of triangles, optionally using a texture and indices into the vertex array.
     ///
-    /// `vertices`' length must be a multiple of 3.
+    /// # Parameters
+    ///
+    /// - `vertices`: the vertices to render; its length must be a multiple of 3
+    /// - `indices`: the indices into `vertices`, or [`None`] to render vertices in order
+    /// - `tex`: the texture to use, or [`None`]
     ///
     /// Color and alpha modulation is done per vertex (the alpha/color mod of `tex` are ignored).
     #[doc(alias = "SDL_RenderGeometry")]
@@ -528,6 +532,13 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Render a list of triangles, optionally using a texture and indices into the vertex array, with a temporary color.
     ///
+    /// # Parameters
+    ///
+    /// - `vertices`: the vertices to render; its length must be a multiple of 3
+    /// - `indices`: the indices into `vertices`, or [`None`] to render vertices in order
+    /// - `tex`: the texture to use, or [`None`]
+    /// - `col`: the temporary drawing color
+    ///
     /// Color and alpha modulation is done per vertex (the alpha/color mod of `tex` are ignored).
     ///
     /// The previous drawing color is restored afterwards.
@@ -548,7 +559,10 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a line on the current rendering target at subpixel precision.
     ///
-    /// The arguments are the coordinates of the start and end points.
+    /// # Parameters
+    ///
+    /// - `start`: the coordinates of the start point
+    /// - `end`: the coordinates of the end point
     #[doc(alias = "SDL_RenderLine")]
     pub fn draw_line(self, start: PointF32, end: PointF32) -> Result<()> {
         to_result(unsafe { SDL_RenderLine(self.handle.as_ptr(), start.x, start.y, end.x, end.y) })
@@ -556,6 +570,12 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a line on the current rendering target at subpixel precision,
     /// temporarily using `col` as the drawing color.
+    ///
+    /// # Parameters
+    ///
+    /// - `start`: the coordinates of the start point
+    /// - `end`: the coordinates of the end point
+    /// - `col`: the temporary drawing color
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderLine")]
@@ -570,8 +590,9 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw a series of connected lines on the current rendering target at
     /// subpixel precision.
     ///
-    /// `lines` contains the points along the lines; `lines.len() - 1` lines
-    /// are drawn.
+    /// # Parameters
+    ///
+    /// - `lines`: the points along the lines; `lines.len() - 1` lines are drawn
     #[doc(alias = "SDL_RenderLines")]
     pub fn draw_lines(self, lines: &[PointF32]) -> Result<()> {
         to_result(unsafe {
@@ -585,6 +606,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a series of connected lines on the current rendering target at
     /// subpixel precision, temporarily using `col` as the drawing color.
+    ///
+    /// # Parameters
+    ///
+    /// - `lines`: the points along the lines; `lines.len() - 1` lines are drawn
+    /// - `col`: the temporary drawing color
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderLines")]
@@ -604,6 +630,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a point on the current rendering target at subpixel precision,
     /// temporarily using `col` as the drawing color.
+    ///
+    /// # Parameters
+    ///
+    /// - `pos`: the coordinates of the point
+    /// - `col`: the temporary drawing color
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderPoint")]
@@ -631,6 +662,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw multiple points on the current rendering target at subpixel
     /// precision, temporarily using `col` as the drawing color.
     ///
+    /// # Parameters
+    ///
+    /// - `points`: the points to draw
+    /// - `col`: the temporary drawing color
+    ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderPoints")]
     pub fn draw_points_with(self, points: &[PointF32], col: RgbaF32) -> Result<()> {
@@ -650,6 +686,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Draw a rectangle on the current rendering target at subpixel
     /// precision, temporarily using `col` as the drawing color.
+    ///
+    /// # Parameters
+    ///
+    /// - `rect`: the rectangle to draw, or [`None`] for the entire rendering target
+    /// - `col`: the temporary drawing color
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRect")]
@@ -677,6 +718,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Draw some number of rectangles on the current rendering target at
     /// subpixel precision, temporarily using `col` as the drawing color.
     ///
+    /// # Parameters
+    ///
+    /// - `rects`: the rectangles to draw
+    /// - `col`: the temporary drawing color
+    ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderRects")]
     pub fn draw_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
@@ -696,6 +742,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Fill a rectangle on the current rendering target with `col` at
     /// subpixel precision.
+    ///
+    /// # Parameters
+    ///
+    /// - `rect`: the rectangle to fill, or [`None`] for the entire rendering target
+    /// - `col`: the temporary drawing color
     ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRect")]
@@ -723,6 +774,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// Fill some number of rectangles on the current rendering target with
     /// `col` at subpixel precision.
     ///
+    /// # Parameters
+    ///
+    /// - `rects`: the rectangles to fill
+    /// - `col`: the temporary drawing color
+    ///
     /// The previous drawing color is restored afterwards.
     #[doc(alias = "SDL_RenderFillRects")]
     pub fn fill_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
@@ -735,9 +791,12 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Set a texture as the current rendering target.
     ///
+    /// # Parameters
+    ///
+    /// - `tgt`: the texture to use as the rendering target, or [`None`] to render to the window
+    ///
     /// The targeted texture must be created with the
-    /// [`TextureAccess::Target`](crate::texture::TextureAccess::Target) flag;
-    /// [`None`] renders to the window instead of a texture.
+    /// [`TextureAccess::Target`](crate::texture::TextureAccess::Target) flag.
     ///
     /// For use with [`RendererHandle::xchg_target`]. Otherwise, prefer using
     /// [`RendererHandle::set_target`] or [`RendererHandle::reset_target`].
@@ -752,12 +811,8 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// render target. Get and set functions for these states apply to the
     /// current render target set by this function, and those states persist
     /// on each target when the current render target changes.
-    ///
-    /// # Safety
-    /// If the parameter is `Some(tex)`, ensure `tex` lives for as long as it's
-    /// used as the target texture.
     #[doc(alias = "SDL_SetRenderTarget")]
-    pub fn set_target_opt(self, tgt: Option<Ref<Texture>>) -> Result<()> {
+    pub fn set_target_opt(&self, tgt: Option<Ref<Texture<'ctx, 'vid, 'wnd, '_>>>) -> Result<()> {
         to_result(unsafe {
             SDL_SetRenderTarget(
                 self.handle.as_ptr(),
@@ -768,10 +823,14 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Set a texture as the current rendering target.
     ///
+    /// # Parameters
+    ///
+    /// - `tgt`: the texture to use as the rendering target
+    ///
     /// The targeted texture must be created with the [`TextureAccess::Target`](crate::texture::TextureAccess::Target)
     /// flag. See [`RendererHandle::set_target_opt`] for more details.
     #[doc(alias = "SDL_SetRenderTarget")]
-    pub fn set_target(self, tgt: Ref<Texture>) -> Result<()> {
+    pub fn set_target(&self, tgt: Ref<Texture<'ctx, 'vid, 'wnd, '_>>) -> Result<()> {
         self.set_target_opt(Some(tgt))
     }
 
@@ -800,18 +859,19 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
 
     /// Toggle VSync of the given renderer.
     ///
-    /// `val` can be `1` to synchronize present with every vertical refresh,
-    /// `2` to synchronize present with every second vertical refresh, etc.,
-    /// [`Renderer::VSYNC_ADAPTIVE`] for late swap tearing (adaptive vsync),
-    /// or [`Renderer::VSYNC_DISABLED`] to disable.
+    /// # Parameters
+    ///
+    /// - `val`: one of:
+    ///     - an integer N to synchronize [`RendererHandle::present`] with every N-th vertical refresh
+    ///     - [`Renderer::VSYNC_ADAPTIVE`] for late swap tearing (adaptive VSync)
+    ///     - [`Renderer::VSYNC_DISABLED`] to disable
     ///
     /// Not every value is supported by every driver, so you should check
     /// the return value to see whether the requested setting is supported.
     ///
     /// # Remarks
     ///
-    /// When a renderer is created, vsync defaults to
-    /// [`Renderer::VSYNC_DISABLED`].
+    /// When a renderer is created, vsync defaults to [`Renderer::VSYNC_DISABLED`].
     #[doc(alias = "SDL_SetRenderVSync")]
     pub fn set_vsync(self, val: i32) -> bool {
         unsafe { SDL_SetRenderVSync(self.handle.as_ptr(), val) }
@@ -878,7 +938,9 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// This function sets custom GPU render state for subsequent draw calls.
     /// This allows using custom shaders with the GPU renderer.
     ///
-    /// Pass [`None`] to clear the custom render state and revert to the default.
+    /// # Parameters
+    ///
+    /// - `rs`: the custom GPU render state, or [`None`] to clear it and revert to the default.
     #[doc(alias = "SDL_SetGPURenderState")]
     pub fn set_render_state(self, rs: Option<Ref<RenderState>>) -> Result<()> {
         to_result(unsafe {
