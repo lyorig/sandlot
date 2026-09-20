@@ -9,10 +9,10 @@ use sdl3_sys::{
 
 use crate::{str::Str, string::String};
 
-/// Lightweight wrapper around [`SDL_GetError`].
+/// Lightweight wrapper around the string returned by SDL in case of errors.
 ///
 /// This is a pointer-sized struct which owns a duplicate of the error message
-/// present at the time [`Error::current`] is called. No poin
+/// present at the time [`Error::current`] is called.
 pub struct Error {
     reason: String,
 }

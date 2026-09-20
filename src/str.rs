@@ -1,14 +1,19 @@
 use std::{
-    ffi::{CStr, c_char},
+    ffi::{CStr, FromBytesWithNulError, c_char},
     fmt::{Debug, Display},
     marker::PhantomData,
     ptr::NonNull,
+    str::Utf8Error,
 };
+
+use sdl3_sys::stdinc::SDL_strdup;
+
+use crate::string::String;
 
 /// Holds a pointer to an immutable nul-terminated string which is guaranteed UTF-8.
 ///
 /// This enables passing pointers to and from SDL functions without having to
-/// store the length. At the same time, infallible conversion methods to
+/// calculate/store the length. In addition, infallible conversion methods to
 /// [`str`] and [`CStr`] exist, owing to the aforementioned guarantees.
 ///
 /// This struct is meant to be bound to some object with lifetime `'a`.
@@ -63,10 +68,10 @@ impl<'a> Str<'a> {
     /// The lifetime is inferred; functions building on this one should tie
     /// it to something sensible.
     pub const unsafe fn from_ptr(ptr: *const c_char) -> Option<Self> {
-        if ptr.is_null() {
-            None
-        } else {
-            Some(unsafe { Self::from_ptr_unchecked(ptr) })
+        // `Option::map` isn't const, so match instead.
+        match NonNull::new(ptr.cast_mut()) {
+            Some(nn) => Some(unsafe { Self::from_non_null(nn) }),
+            None => None,
         }
     }
 
@@ -109,25 +114,35 @@ impl<'a> Str<'a> {
         self.ptr.as_ptr()
     }
 
-    pub const fn to_c_str(self) -> &'a CStr {
+    /// Convert to a [`CStr`].
+    ///
+    /// For the time being, this involves a length calculation,
+    /// although Rust plans to make [`CStr`] only store the pointer,
+    /// and perform the length calculation on demand. As such, it's
+    /// using the `as_*` naming in advance.
+    pub const fn as_c_str(self) -> &'a CStr {
+        // SAFETY: We're pointing to a nul-terminated string.
         unsafe { CStr::from_ptr(self.as_ptr()) }
     }
 
     pub const fn to_bytes(self) -> &'a [u8] {
-        self.to_c_str().to_bytes()
+        self.as_c_str().to_bytes()
     }
 
     pub fn to_bytes_with_nul(self) -> &'a [u8] {
-        self.to_c_str().to_bytes_with_nul()
+        self.as_c_str().to_bytes_with_nul()
     }
 
+    /// Convert to a [`CStr`].
+    ///
+    /// This involves a length calculation.
     pub const fn to_str(self) -> &'a str {
         unsafe { str::from_utf8_unchecked(self.to_bytes()) }
     }
 
     /// Analogous to [`CStr::count_bytes`].
     pub const fn count_bytes(self) -> usize {
-        self.to_c_str().count_bytes()
+        self.as_c_str().count_bytes()
     }
 
     pub const fn is_empty(self) -> bool {
@@ -135,27 +150,46 @@ impl<'a> Str<'a> {
         // SAFETY: `ptr` is guaranteed to not be null and be readable for at least a single byte.
         (unsafe { self.ptr.read() }) == 0
     }
+
+    /// Create an owned Sandlot [`String`] from this [`Str`].
+    ///
+    /// This is a hack to work around [`ToOwned`] not being implementable
+    /// for this type.
+    pub fn to_owned(self) -> String {
+        let dup = unsafe { SDL_strdup(self.as_ptr()) };
+
+        // SAFETY: `SDL_strdup` can only fail in an OOM scenario.
+        // If that happens, you've got bigger fish to fry.
+        unsafe { String::from_ptr_unchecked(dup) }
+    }
+}
+
+/// An enumeration of things that can go wrong when trying to convert
+/// a slice of bytes to a nul-terminated UTF-8 [`Str`].
+pub enum FromUtf8BytesWithNulError {
+    /// [`str::from_utf8`] failed.
+    Utf8Error(Utf8Error),
+    /// [`CStr::from_bytes_with_nul`] failed.
+    FromBytesWithNulError(FromBytesWithNulError),
 }
 
 impl<'a> TryFrom<&'a [u8]> for Str<'a> {
-    type Error = ();
+    type Error = FromUtf8BytesWithNulError;
 
     /// Requires `value` to represent UTF-8 data and contain exactly one nul byte at the end.
     fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
-        if value
-            .iter()
-            .position(|&b| b == 0)
-            .is_some_and(|p| p == value.len() - 1)
-        {
-            Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
+        if let Err(e) = str::from_utf8(value) {
+            Err(FromUtf8BytesWithNulError::Utf8Error(e))
+        } else if let Err(e) = CStr::from_bytes_with_nul(value) {
+            Err(FromUtf8BytesWithNulError::FromBytesWithNulError(e))
         } else {
-            Err(())
+            Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
         }
     }
 }
 
 impl<'a> TryFrom<&'a str> for Str<'a> {
-    type Error = ();
+    type Error = FromBytesWithNulError;
 
     /// Requires `value` to contain exactly one nul byte at the end.
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
@@ -166,20 +200,18 @@ impl<'a> TryFrom<&'a str> for Str<'a> {
         {
             Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
         } else {
-            Err(())
+            Err(FromBytesWithNulError::NotNulTerminated)
         }
     }
 }
 
 impl<'a> TryFrom<&'a CStr> for Str<'a> {
-    type Error = ();
+    type Error = Utf8Error;
 
     /// Requires `value` to be UTF-8.
     fn try_from(value: &'a CStr) -> Result<Self, Self::Error> {
-        match str::from_utf8(value.to_bytes()) {
-            Ok(_) => Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) }),
-            Err(_) => Err(()),
-        }
+        str::from_utf8(value.to_bytes())
+            .map(|s| unsafe { Self::from_ptr_unchecked(s.as_ptr().cast()) })
     }
 }
 
@@ -190,12 +222,6 @@ impl PartialEq for Str<'_> {
 }
 
 impl Eq for Str<'_> {}
-
-impl PartialEq<&[u8]> for Str<'_> {
-    fn eq(&self, other: &&[u8]) -> bool {
-        PartialEq::eq(self.to_bytes(), *other)
-    }
-}
 
 impl PartialEq<&str> for Str<'_> {
     fn eq(&self, other: &&str) -> bool {

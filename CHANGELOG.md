@@ -2,6 +2,8 @@
 
 ## v0.1.5
 
+- Improvements
+  - `Error` went from 24 to 8 bytes
 - Fixes
   - `TryFrom<{&str, &CStr}> for Str` now correctly looks for the nul terminator
 

@@ -30,7 +30,7 @@ fn str_preserves_utf8_without_loss() {
     let value = Str::try_from(cstr).unwrap();
 
     assert_eq!(value, text);
-    assert_eq!(value, text.to_bytes());
+    assert_eq!(value.to_bytes(), text.to_bytes());
     assert_eq!(value.to_bytes(), text.to_bytes());
 }
 
