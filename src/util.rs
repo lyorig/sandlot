@@ -106,6 +106,7 @@ of [`" $sdl "`]."]
             /// Returns [`None`] if `value` is the "invalid" sentinel value
             /// (e.g. [`SDL_PixelFormat::UNKNOWN`](sdl3_sys::pixels::SDL_PixelFormat::UNKNOWN)).
             pub fn from_sdl(value: $sdl) -> Option<Self> {
+                // Can't be made const because of this comparison :(
                 if value == $sdl::$invalid {
                     None
                 } else {

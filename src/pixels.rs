@@ -608,11 +608,18 @@ impl PixelFormat {
         }
     }
 
+    /// Returns the amount of bytes required to represent a pixel of this format.
+    ///
+    /// Formats which occupy less than one byte (e.g. [`PixelFormat::Index1Lsb`])
+    /// will return zero.
     #[doc(alias = "SDL_BYTESPERPIXEL")]
     pub const fn bytes_per_pixel(self) -> u8 {
         SDL_BYTESPERPIXEL(self.to_sdl())
     }
 
+    /// Returns the amount of bits required to represent a pixel of this format.
+    ///
+    /// This is more "precise" than [`PixelFormat::bytes_per_pixel`].
     #[doc(alias = "SDL_BITSPERPIXEL")]
     pub const fn bits_per_pixel(self) -> u8 {
         SDL_BITSPERPIXEL(self.to_sdl())
@@ -660,8 +667,9 @@ impl PixelFormat {
         SDL_ISPIXELFORMAT_PACKED(self.to_sdl())
     }
 
-    /// Returns the kind of this pixel format. See the [`PixelKind`] enum
-    /// for all possible kinds.
+    /// Returns the kind of this pixel format.
+    ///
+    /// See the [`PixelKind`] enum for all possible kinds.
     #[doc(alias = "SDL_PIXELTYPE")]
     pub const fn kind(self) -> PixelKind {
         unsafe { PixelKind::from_sdl_unchecked(SDL_PIXELTYPE(self.to_sdl())) }

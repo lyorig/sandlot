@@ -21,7 +21,7 @@ pub struct String {
 impl String {
     /// # Safety
     ///
-    /// See the safety requirements of [`Box::from_raw`].
+    /// See the safety requirements of [`Box::from_ptr_unchecked`]
     ///
     /// TL;DR: `handle` points to an UTF-8 nul-terminated string allocated
     /// with SDL's allocator, and it's okay to take ownership of it.
@@ -32,7 +32,7 @@ impl String {
 
     /// # Safety
     ///
-    /// See the safety requirements of [`Box::from_raw_nullck`].
+    /// See the safety requirements of [`Box::from_ptr`].
     pub(crate) unsafe fn from_ptr(handle: *mut c_char) -> Result<Self> {
         unsafe { Box::from_ptr(handle) }
             .map(|handle| Self { handle })
