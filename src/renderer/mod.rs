@@ -91,6 +91,26 @@ use crate::{
 mod_reexport!(builder);
 mod_reexport!(properties);
 
+#[derive(Clone, Copy)]
+pub struct Vertex(SDL_Vertex);
+
+impl Vertex {
+    pub const fn new(pos: PointF32, color: RgbaF32) -> Self {
+        Self::with_norm(pos, color, PointF32::ZERO)
+    }
+
+    /// Like [`Vertex::new`], but also takes normalized texture coordinates.
+    pub const fn with_norm(pos: PointF32, color: RgbaF32, tex_coord: PointF32) -> Self {
+        let vert = SDL_Vertex {
+            position: pos.to_sdl(),
+            color: color.to_sdl(),
+            tex_coord: tex_coord.to_sdl(),
+        };
+
+        Self(vert)
+    }
+}
+
 resource_new! {
     /// Represents rendering state.
     pub struct Renderer<'ctx, 'vid, 'wnd> : SDL_Renderer {
@@ -509,7 +529,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_RenderGeometry")]
     pub fn draw_geometry(
         self,
-        vertices: &[SDL_Vertex],
+        vertices: &[Vertex],
         indices: Option<&[i32]>,
         tex: Option<Ref<Texture>>,
     ) -> Result<()> {
@@ -522,7 +542,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
             SDL_RenderGeometry(
                 self.as_raw(),
                 tex,
-                vertices.as_ptr(),
+                vertices.as_ptr().cast(),
                 vertices.len() as i32,
                 indices,
                 indices_len,
@@ -545,7 +565,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_RenderGeometry")]
     pub fn draw_geometry_with(
         self,
-        vertices: &[SDL_Vertex],
+        vertices: &[Vertex],
         indices: Option<&[i32]>,
         tex: Option<Ref<Texture>>,
         col: RgbaF32,

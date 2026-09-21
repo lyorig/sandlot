@@ -8,11 +8,10 @@ use sandlot::{
     event::Event,
     init::{AppKind, Context, Video},
     rect::{Point, PointF32, Rect},
-    renderer::{Renderer, RendererProperties},
+    renderer::{Renderer, RendererProperties, Vertex},
     s,
     window::Window,
 };
-use sdl3_sys::render::SDL_Vertex;
 
 fn print_properties(props: RendererProperties) {
     sandlot::log!("Renderer name: \"{}\"", props.name());
@@ -26,14 +25,6 @@ fn print_properties(props: RendererProperties) {
         .texture_formats()
         .iter()
         .for_each(|f| sandlot::log!("- {f}"));
-}
-
-fn vert(pos: PointF32, col: RgbaF32) -> SDL_Vertex {
-    SDL_Vertex {
-        position: pos.to_sdl(),
-        color: col.into(),
-        tex_coord: PointF32::new(0.0, 0.0).to_sdl(),
-    }
 }
 
 fn run() -> Result<()> {
@@ -80,13 +71,13 @@ fn run() -> Result<()> {
         Rect::xywh(150., 150., 30., 30.),
     ])?;
 
-    let verts = [
-        vert(PointF32::new(640., 300.), RgbaF32::RED),
-        vert(PointF32::new(400., 480.), RgbaF32::GREEN),
-        vert(PointF32::new(640., 480.), RgbaF32::BLUE),
+    const VERTS: [Vertex; 3] = [
+        Vertex::new(PointF32::new(640., 300.), RgbaF32::RED),
+        Vertex::new(PointF32::new(400., 480.), RgbaF32::GREEN),
+        Vertex::new(PointF32::new(640., 480.), RgbaF32::BLUE),
     ];
 
-    rnd.draw_geometry(&verts, None, None)?;
+    rnd.draw_geometry(&VERTS, None, None)?;
 
     rnd.present()?;
 
