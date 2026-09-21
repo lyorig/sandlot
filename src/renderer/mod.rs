@@ -1021,18 +1021,24 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
 
     /// Create a 2D GPU rendering context.
     ///
+    /// # Parameters
+    ///
+    /// - `device`: the GPU device to use, or [`None`] to create a new device
+    /// - `wnd`: the window where rendering is displayed, or [`None`] to create an offscreen renderer
+    ///
     /// # Remarks
     ///
-    /// The GPU device to use is passed in as a parameter.
-    ///
-    /// The window to use is passed in as a parameter. If this were [`None`],
-    /// the renderer would become an offscreen renderer; in that case, you
-    /// should call [`RendererHandle::set_target`] to setup rendering to a
-    /// texture, and then call [`RendererHandle::present`] normally to
+    /// When using an offscreen renderer, you should call [`RendererHandle::set_target`]
+    /// to setup rendering to a texture, and then call [`RendererHandle::present`] normally to
     /// complete drawing a frame.
     #[doc(alias = "SDL_CreateGPURenderer")]
-    pub fn new_gpu(device: Ref<Device>, wnd: Ref<Window>) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateGPURenderer(device.as_raw(), wnd.as_raw()) })
+    pub fn new_gpu(device: Option<Ref<Device>>, wnd: Option<Ref<Window>>) -> Result<Self> {
+        Self::from_ptr(unsafe {
+            SDL_CreateGPURenderer(
+                device.map(|d| d.as_raw()).unwrap_or_default(),
+                wnd.map(|w| w.as_raw()).unwrap_or_default(),
+            )
+        })
     }
 
     /// Get the number of 2D rendering drivers available for the current

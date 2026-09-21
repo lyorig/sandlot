@@ -77,7 +77,7 @@
 
 mod_reexport!(engine);
 mod_reexport!(font);
-mod_reexport!(rt_str);
+mod_reexport!(str);
 mod_reexport!(text);
 
 use std::ops::Deref;

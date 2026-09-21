@@ -1,7 +1,6 @@
 use std::{
     ffi::{CStr, FromBytesWithNulError, c_char},
-    fmt::{Debug, Display},
-    marker::PhantomData,
+    fmt::{self, Debug, Display},
     ptr::NonNull,
     str::Utf8Error,
 };
@@ -10,13 +9,12 @@ use sdl3_sys::stdinc::SDL_strdup;
 
 use crate::string::String;
 
-/// Holds a pointer to an immutable nul-terminated string which is guaranteed UTF-8.
+/// Refers to an immutable nul-terminated string in UTF-8 format.
 ///
 /// This enables passing pointers to and from SDL functions without having to
 /// calculate/store the length. In addition, infallible conversion methods to
-/// [`str`] and [`CStr`] exist, owing to the aforementioned guarantees.
-///
-/// This struct is meant to be bound to some object with lifetime `'a`.
+/// [`str`] and [`CStr`] exist, owing to the aforementioned guarantees. Create
+/// a new [`Str`] from a string literal using the [`s!`](crate::s) macro.
 ///
 /// # When to use this
 ///
@@ -43,15 +41,9 @@ use crate::string::String;
 /// for `&[u8]`, `&str`, and `&CStr`. However, many of these operations involve performing
 /// a `strlen` internally, and so it might be beneficial to first convert it to a type with
 /// a precalculated length such as `&str`, if you're going to be doing more length-related operations.
-///
-/// Another reason to convert to a reference type ASAP is allowing the compiler to optimize more.
-/// References have strict guarantees which the pointer contained within this struct doesn't,
-/// and it might be beneficial for rustc to see that "hey, this isn't just some random pointer which
-/// might alias with other data, it's an immutable string whose reads I can elide in various ways!"
 #[derive(Clone, Copy)]
 pub struct Str<'a> {
-    ptr: NonNull<c_char>,
-    marker: PhantomData<&'a ()>,
+    first_byte: &'a c_char,
 }
 
 impl<'a> Str<'a> {
@@ -101,17 +93,16 @@ impl<'a> Str<'a> {
     /// it to something sensible.
     pub const unsafe fn from_non_null(ptr: NonNull<c_char>) -> Self {
         Self {
-            ptr,
-            marker: PhantomData,
+            first_byte: unsafe { ptr.cast().as_ref() },
         }
     }
 
     pub const fn as_non_null(self) -> NonNull<c_char> {
-        self.ptr
+        NonNull::from_ref(self.first_byte)
     }
 
     pub const fn as_ptr(self) -> *const c_char {
-        self.ptr.as_ptr()
+        std::ptr::from_ref(self.first_byte)
     }
 
     /// Convert to a [`CStr`].
@@ -147,8 +138,7 @@ impl<'a> Str<'a> {
 
     pub const fn is_empty(self) -> bool {
         // First byte is the nul terminator? Then the string is empty.
-        // SAFETY: `ptr` is guaranteed to not be null and be readable for at least a single byte.
-        (unsafe { self.ptr.read() }) == 0
+        *self.first_byte == 0
     }
 
     /// Create an owned Sandlot [`String`] from this [`Str`].
@@ -166,6 +156,7 @@ impl<'a> Str<'a> {
 
 /// An enumeration of things that can go wrong when trying to convert
 /// a slice of bytes to a nul-terminated UTF-8 [`Str`].
+#[derive(Clone, Copy)]
 pub enum FromUtf8BytesWithNulError {
     /// [`str::from_utf8`] failed.
     Utf8Error(Utf8Error),
@@ -173,10 +164,33 @@ pub enum FromUtf8BytesWithNulError {
     FromBytesWithNulError(FromBytesWithNulError),
 }
 
+impl Display for FromUtf8BytesWithNulError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Utf8Error(u) => Display::fmt(u, f),
+            Self::FromBytesWithNulError(n) => Display::fmt(n, f),
+        }
+    }
+}
+
+impl Debug for FromUtf8BytesWithNulError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Utf8Error(u) => Debug::fmt(u, f),
+            Self::FromBytesWithNulError(n) => Debug::fmt(n, f),
+        }
+    }
+}
+
+impl std::error::Error for FromUtf8BytesWithNulError {}
+
 impl<'a> TryFrom<&'a [u8]> for Str<'a> {
     type Error = FromUtf8BytesWithNulError;
 
     /// Requires `value` to represent UTF-8 data and contain exactly one nul byte at the end.
+    ///
+    /// The UTF-8 check is performed first, then the nul check. If both pass, [`Ok`] is returned
+    /// with a [`Str`] pointing to the bytes of `value`.
     fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
         if let Err(e) = str::from_utf8(value) {
             Err(FromUtf8BytesWithNulError::Utf8Error(e))
@@ -223,6 +237,9 @@ impl PartialEq for Str<'_> {
 
 impl Eq for Str<'_> {}
 
+// Intentionally not comparable with `&[u8]`, since we don't know whether
+// your slice also has the nul byte.
+
 impl PartialEq<&str> for Str<'_> {
     fn eq(&self, other: &&str) -> bool {
         PartialEq::eq(self.to_str(), *other)
@@ -236,23 +253,25 @@ impl PartialEq<&CStr> for Str<'_> {
 }
 
 impl Display for Str<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Display::fmt(self.to_str(), f)
     }
 }
 
 impl Debug for Str<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         Debug::fmt(self.to_str(), f)
     }
 }
 
-/// Used in the [`s!`](crate::s!) macro to validate the passed string literal.
-pub const fn has_nul_byte(s: &str) -> bool {
-    let bytes = s.as_bytes();
+/// Returns whether a byte slice has any nul bytes apart from the end.
+///
+/// Only intended for use in the [`s!`](crate::s!) macro.
+#[doc(hidden)]
+pub const fn has_interior_nul(bytes: &[u8]) -> bool {
     let mut i = 0;
 
-    while i < bytes.len() {
+    while i < bytes.len() - 1 {
         if bytes[i] == b'\0' {
             return true;
         }
@@ -275,9 +294,9 @@ pub const fn has_nul_byte(s: &str) -> bool {
 #[macro_export]
 macro_rules! s {
     ($s:literal) => {{
-        const _: () = ::core::assert!(!$crate::str::has_nul_byte($s));
-        unsafe {
-            $crate::str::Str::<'static>::from_ptr_unchecked(concat!($s, "\0").as_ptr().cast())
-        }
+        const LIT: &str = ::core::concat!($s, "\0");
+        const _: () = ::core::assert!(!$crate::str::has_interior_nul(LIT.as_bytes()));
+
+        unsafe { $crate::str::Str::from_ptr_unchecked(LIT.as_ptr().cast()) }
     }};
 }
