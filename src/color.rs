@@ -1,4 +1,7 @@
-use std::{mem::MaybeUninit, ptr};
+use std::{
+    mem::{self, MaybeUninit},
+    ptr,
+};
 
 use sdl3_sys::pixels::*;
 
@@ -263,6 +266,24 @@ impl RgbaU8 {
             )
         }
     }
+
+    pub const fn from_sdl(sdl: SDL_Color) -> Self {
+        unsafe { mem::transmute(sdl) }
+    }
+
+    pub const fn to_sdl(self) -> SDL_Color {
+        unsafe { mem::transmute(self) }
+    }
+}
+
+impl RgbaF32 {
+    pub const fn from_sdl(sdl: SDL_FColor) -> Self {
+        unsafe { mem::transmute(sdl) }
+    }
+
+    pub const fn to_sdl(self) -> SDL_FColor {
+        unsafe { mem::transmute(self) }
+    }
 }
 
 impl<T: OpacityBounds> From<Rgb<T>> for Rgba<T> {
@@ -273,24 +294,24 @@ impl<T: OpacityBounds> From<Rgb<T>> for Rgba<T> {
 
 impl From<RgbaU8> for SDL_Color {
     fn from(value: RgbaU8) -> Self {
-        unsafe { std::mem::transmute(value) }
+        value.to_sdl()
     }
 }
 
 impl From<SDL_Color> for RgbaU8 {
     fn from(value: SDL_Color) -> Self {
-        unsafe { std::mem::transmute(value) }
+        Self::from_sdl(value)
     }
 }
 
 impl From<RgbaF32> for SDL_FColor {
     fn from(value: RgbaF32) -> Self {
-        unsafe { std::mem::transmute(value) }
+        value.to_sdl()
     }
 }
 
 impl From<SDL_FColor> for RgbaF32 {
     fn from(value: SDL_FColor) -> Self {
-        unsafe { std::mem::transmute(value) }
+        Self::from_sdl(value)
     }
 }
