@@ -28,8 +28,6 @@ pub trait Handle: Copy {
 }
 
 /// An owning handle to a resource.
-///
-///
 pub trait Resource: Sized {
     type Handle: Handle;
 }
@@ -179,9 +177,9 @@ macro_rules! resource_new {
 
             $(#[$doc])*
             impl<$($lt),*> [<$owned Handle>]<$($lt),*> {
-                pub(crate) fn from_ptr(handle: *mut $sdl) -> Option<Self> {
-                    ::std::ptr::NonNull::new(handle).map(|handle| Self {
-                        handle,
+                pub(crate) fn from_ptr(ptr: *mut $sdl) -> Option<Self> {
+                    ::std::ptr::NonNull::new(ptr).map(|nn| Self {
+                        handle: nn,
                         marker: ::std::marker::PhantomData,
                     })
                 }

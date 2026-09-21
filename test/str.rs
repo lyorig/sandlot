@@ -1,7 +1,14 @@
-use std::ffi::CStr;
+use std::{
+    assert_matches,
+    ffi::{CStr, FromBytesWithNulError},
+    str::Utf8Error,
+};
 
 use rustest::test;
-use sandlot::{s, str::Str};
+use sandlot::{
+    s,
+    str::{FromUtf8BytesWithNulError, Str},
+};
 
 #[test]
 fn str_from_cstr_exposes_all_views() {
@@ -55,15 +62,24 @@ fn str_display_trait() {
 
 #[test]
 fn str_try_from() {
-    assert!(Str::try_from(c"Test").is_ok());
-    assert!(Str::try_from(c"\x05\x99\xFF").is_err());
-    assert!(Str::try_from("No nul terminator :(").is_err());
-    assert!(Str::try_from("Nul terminator :D\0").is_ok());
-    assert!(Str::try_from("Bad nul \0terminator :(\0").is_err());
+    assert_matches!(Str::try_from(c"Test"), Ok(_));
+    assert_matches!(Str::try_from(c"\x05\x99\xFF"), Err(Utf8Error { .. }));
+    assert_matches!(
+        Str::try_from("No nul terminator :("),
+        Err(FromBytesWithNulError::NotNulTerminated)
+    );
+    assert_matches!(Str::try_from("Nul terminator :D\0"), Ok(_));
+    assert_matches!(
+        Str::try_from("Bad nul \0terminator :(\0"),
+        Err(FromBytesWithNulError::InteriorNul { .. })
+    );
 
     let bytes_good = b"Hello\0";
-    assert!(Str::try_from(bytes_good.as_slice()).is_ok());
+    assert_matches!(Str::try_from(bytes_good.as_slice()), Ok(_));
 
     let bytes_bad = b"Hello\0World\0";
-    assert!(Str::try_from(bytes_bad.as_slice()).is_err());
+    assert_matches!(
+        Str::try_from(bytes_bad.as_slice()),
+        Err(FromUtf8BytesWithNulError::FromBytesWithNulError(_))
+    );
 }

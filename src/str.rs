@@ -207,15 +207,10 @@ impl<'a> TryFrom<&'a str> for Str<'a> {
 
     /// Requires `value` to contain exactly one nul byte at the end.
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
-        if value
-            .bytes()
-            .position(|b| b == b'\0')
-            .is_some_and(|p| p == value.len() - 1)
-        {
-            Ok(unsafe { Self::from_ptr_unchecked(value.as_ptr().cast()) })
-        } else {
-            Err(FromBytesWithNulError::NotNulTerminated)
-        }
+        CStr::from_bytes_with_nul(value.as_bytes()).map(|_| unsafe {
+            // SAFETY: `value` is not empty, thus its pointer won't be null.
+            Self::from_ptr_unchecked(value.as_ptr().cast())
+        })
     }
 }
 

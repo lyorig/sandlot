@@ -39,28 +39,31 @@ impl String {
             .ok_or_else(Error::current)
     }
 
-    /// Convert this SDL string to a byte slice.
+    /// Convert this string to a byte slice.
     ///
     /// This involves calculating the length via [`String::count_bytes`].
     pub fn to_bytes(&self) -> &[u8] {
         unsafe { core::slice::from_raw_parts(self.handle.as_ptr().cast(), self.count_bytes()) }
     }
 
-    /// Convert this SDL string to a string slice.
+    /// Convert this string to a string slice.
     ///
-    /// This can be done, since the data we point to is guaranteed UTF-8.
+    /// This can be done since the data we point to is guaranteed UTF-8.
     ///
     /// This involves calculating its length via [`String::count_bytes`].
     pub fn to_str(&self) -> &str {
         unsafe { str::from_utf8_unchecked(self.to_bytes()) }
     }
 
-    /// Convert this SDL string to a C string slice.
+    /// Convert this string to a C string slice.
     ///
     /// This can be done since the data we point to is guaranteed to be nul-terminated.
     ///
-    /// This involves calculating its length via [`String::count_bytes`].
-    pub fn to_c_str(&self) -> &CStr {
+    /// For the time being, this involves a length calculation,
+    /// although Rust plans to make [`CStr`] only store the pointer,
+    /// and perform the length calculation on demand. As such, it's
+    /// using the `as_*` naming in advance.
+    pub fn as_c_str(&self) -> &CStr {
         unsafe { CStr::from_ptr(self.handle.as_ptr()) }
     }
 
