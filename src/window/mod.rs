@@ -1326,9 +1326,24 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
 
 impl<'ctx, 'vid> Window<'ctx, 'vid> {
     /// Used to indicate that the window position should be centered.
+    ///
+    /// This always uses the primary display.
     pub const POS_CENTERED: i32 = SDL_WINDOWPOS_CENTERED;
-    /// Used to indicate that the window position is undefined.
+
+    /// Used to indicate that the window position should be centered.
+    ///
+    /// This always uses the primary display.
+    pub const POINT_CENTERED: PointI32 = PointI32::new(Self::POS_CENTERED, Self::POS_CENTERED);
+
+    /// Used to indicate that you don’t care what the window position/display is.
+    ///
+    /// This always uses the primary display.
     pub const POS_UNDEFINED: i32 = SDL_WINDOWPOS_UNDEFINED;
+
+    /// Used to indicate that you don’t care what the window position/display is.
+    ///
+    /// This always uses the primary display.
+    pub const POINT_UNDEFINED: PointI32 = PointI32::new(Self::POS_UNDEFINED, Self::POS_UNDEFINED);
 
     /// Configure a [`Window`] via a property group.
     pub fn builder(props: Ref<Properties>) -> WindowBuilder {

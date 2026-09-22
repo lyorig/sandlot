@@ -17,10 +17,10 @@ use crate::{
     window::{Window, WindowHandle, WindowId},
 };
 
-#[expect(unused_imports)]
+#[expect(unused_imports)] // doc-only
 use crate::{event::Event, init::EventsHandle};
 
-#[expect(unused_imports)]
+#[expect(unused_imports)] // doc-only
 use sdl3_sys::events::SDL_WindowEvent;
 
 subsystem_new!(

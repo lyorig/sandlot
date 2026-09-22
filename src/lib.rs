@@ -13,6 +13,7 @@ use crate::util::{c_ptr_to_str, to_result};
 
 pub mod boxed;
 
+pub mod audio;
 pub mod color;
 pub mod cpu;
 pub mod display;

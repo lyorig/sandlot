@@ -113,6 +113,7 @@ use sdl3_sys::clipboard::{
     SDL_GetPrimarySelectionText, SDL_SetClipboardData, SDL_SetPrimarySelectionText,
 };
 
+mod_reexport!(audio);
 mod_reexport!(builder);
 mod_reexport!(metadata);
 mod_reexport!(video);
