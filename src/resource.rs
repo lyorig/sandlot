@@ -162,6 +162,8 @@ macro_rules! resource_new {
     (
         $(#[$doc:meta])*
         pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
+            raw: $raw:ty,
+            inner: $inner:ty,
             marker: PhantomData<($($t:ty),*)>,
         }
     ) => {
@@ -170,15 +172,15 @@ macro_rules! resource_new {
             #[derive(Clone, Copy)]
             #[doc(alias = "" $sdl "")]
             pub struct [<$owned Handle>]<$($lt),*> {
-                handle: ::std::ptr::NonNull<$sdl>,
+                handle: $inner,
                 marker: ::std::marker::PhantomData<$crate::resource::expand_parens!($($t),*)>
             }
 
 
             $(#[$doc])*
             impl<$($lt),*> [<$owned Handle>]<$($lt),*> {
-                pub(crate) fn from_ptr(ptr: *mut $sdl) -> Option<Self> {
-                    ::std::ptr::NonNull::new(ptr).map(|nn| Self {
+                pub(crate) fn from_raw(raw: $raw) -> Option<Self> {
+                    <$inner>::new(raw).map(|nn| Self {
                         handle: nn,
                         marker: ::std::marker::PhantomData,
                     })
@@ -187,14 +189,14 @@ macro_rules! resource_new {
                 /// Get this type's "raw" representation,
                 /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
                 /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
-                pub fn as_raw(self) -> *mut $sdl {
+                pub fn as_raw(self) -> $raw {
                     self.handle.as_ptr()
                 }
 
                 /// Get this type's "inner" representation,
                 /// i.e. `NonNull<SDL_Surface>` for [`Surface`](crate::surface::Surface),
                 /// or `NonZero<u32>` for [`Properties`](crate::properties::Properties).
-                pub fn as_inner(self) -> ::std::ptr::NonNull<$sdl> {
+                pub fn as_inner(self) -> $inner {
                     self.handle
                 }
             }
@@ -206,8 +208,8 @@ macro_rules! resource_new {
             }
 
             impl<$($lt),*> $owned<$($lt),*> {
-                pub(crate) fn from_ptr(handle: *mut $sdl) -> $crate::Result<Self> {
-                    match ::std::ptr::NonNull::new(handle) {
+                pub(crate) fn from_raw(handle: *mut $sdl) -> $crate::Result<Self> {
+                    match <$inner>::new(handle) {
                         Some(handle) => Ok(Self {
                             inner: [<$owned Handle>] {
                                 handle,
@@ -251,8 +253,8 @@ macro_rules! resource_new {
             }
 
             impl<$($lt),*> $crate::resource::Handle for [<$owned Handle>]<$($lt),*> {
-                type Raw = *mut $sdl;
-                type Inner = ::std::ptr::NonNull<$sdl>;
+                type Raw = $raw;
+                type Inner = $inner;
             }
 
             impl<$($lt),*> $crate::resource::Resource for $owned<$($lt),*> {
@@ -264,6 +266,8 @@ macro_rules! resource_new {
     (
         $(#[$doc:meta])*
         pub struct $owned:ident<$($lt:lifetime),*> : $sdl:ty {
+            raw: $raw:ty,
+            inner: $inner:ty,
             marker: PhantomData<($($t:ty),*)>,
         }
 
@@ -273,6 +277,8 @@ macro_rules! resource_new {
         $crate::resource::resource_new! {
             $(#[$doc])*
             pub struct $owned<$($lt),*> : $sdl {
+                raw: $raw,
+                inner: $inner,
                 marker: PhantomData<($($t),*)>,
             }
         }

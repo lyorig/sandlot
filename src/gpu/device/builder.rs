@@ -231,7 +231,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
         self,
         _vid: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Device<'ctx, 'vid>> {
-        Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) })
+        Device::from_raw(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) })
     }
 
     /// Build the device, and cleanup all properties.
@@ -241,7 +241,7 @@ impl<'p, 'vo> DeviceBuilder<'p, 'vo> {
         self,
         _vid: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Device<'ctx, 'vid>> {
-        let res = Device::from_ptr(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) });
+        let res = Device::from_raw(unsafe { SDL_CreateGPUDeviceWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res
     }

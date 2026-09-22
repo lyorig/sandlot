@@ -14,7 +14,7 @@
 //! - [x] SDL_PushGPUFragmentUniformData
 //! - [x] SDL_PushGPUVertexUniformData
 
-use std::{marker::PhantomData, mem::MaybeUninit};
+use std::{marker::PhantomData, mem::MaybeUninit, ptr::NonNull};
 
 use sdl3_sys::gpu::*;
 
@@ -42,7 +42,7 @@ use super::{
 fn swapchain_texture<'a, 'ctx, 'vid, 'dev>(
     ptr: *mut SDL_GPUTexture,
 ) -> Option<Ref<'a, Texture<'ctx, 'vid, 'dev>>> {
-    TextureHandle::from_ptr(ptr).map(|handle| unsafe { Ref::from_handle(handle) })
+    TextureHandle::from_raw(ptr).map(|handle| unsafe { Ref::from_handle(handle) })
 }
 
 /// Parameters for a texture blit command.
@@ -93,6 +93,8 @@ resource_new! {
     /// An opaque handle representing a command buffer.
     /// Most state is managed via command buffers, and is local to each one.
     pub struct CommandBuffer<'ctx, 'vid, 'dev> : SDL_GPUCommandBuffer {
+        raw: *mut SDL_GPUCommandBuffer,
+        inner: NonNull<SDL_GPUCommandBuffer>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -108,7 +110,7 @@ impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     #[doc(alias = "SDL_AcquireGPUCommandBuffer")]
     pub fn new(device: Ref<'dev, Device<'ctx, 'vid>>) -> Result<Self> {
         let handle = unsafe { SDL_AcquireGPUCommandBuffer(device.as_raw()) };
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Creates a new [`CommandBuffer`], performs some operations on it, then submits it.
@@ -162,7 +164,7 @@ impl<'ctx, 'vid, 'dev> CommandBuffer<'ctx, 'vid, 'dev> {
     #[doc(alias = "SDL_SubmitGPUCommandBufferAndAcquireFence")]
     pub fn submit_fence(self) -> Result<Fence<'ctx, 'vid, 'dev>> {
         let fence = unsafe { SDL_SubmitGPUCommandBufferAndAcquireFence(self.handle.as_ptr()) };
-        Fence::from_ptr(fence)
+        Fence::from_raw(fence)
     }
 
     /// Cancel this command buffer without executing its enqueued commands.

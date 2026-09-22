@@ -69,7 +69,7 @@
 //! - [ ] SDL_SetRenderViewport
 //! - [x] SDL_SetRenderVSync
 
-use std::{ffi::CStr, mem::MaybeUninit};
+use std::{ffi::CStr, mem::MaybeUninit, ptr::NonNull};
 
 use sdl3_sys::render::*;
 
@@ -114,6 +114,8 @@ impl Vertex {
 resource_new! {
     /// Represents rendering state.
     pub struct Renderer<'ctx, 'vid, 'wnd> : SDL_Renderer {
+        raw: *mut SDL_Renderer,
+        inner: NonNull<SDL_Renderer>,
         marker: PhantomData<(Ref<'wnd, Window<'ctx, 'vid>>)>,
     }
 
@@ -160,7 +162,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     pub fn window(self) -> Ref<'wnd, Window<'ctx, 'vid>> {
         unsafe {
             let ptr = SDL_GetRenderWindow(self.handle.as_ptr());
-            let handle = WindowHandle::from_ptr(ptr).unwrap_unchecked();
+            let handle = WindowHandle::from_raw(ptr).unwrap_unchecked();
 
             Ref::from_handle(handle)
         }
@@ -177,7 +179,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// of the backing texture.
     #[doc(alias = "SDL_GetRenderTarget")]
     pub unsafe fn target<'a>(&self) -> Option<Ref<'a, Texture<'ctx, 'vid, 'wnd, '_>>> {
-        TextureHandle::from_ptr(unsafe { SDL_GetRenderTarget(self.handle.as_ptr()) })
+        TextureHandle::from_raw(unsafe { SDL_GetRenderTarget(self.handle.as_ptr()) })
             .map(|h| unsafe { Ref::from_handle(h) })
     }
 
@@ -304,7 +306,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     /// after rendering and before [`RendererHandle::present`].
     #[doc(alias = "SDL_RenderReadPixels")]
     pub fn read_target(self, area: Option<&RectI32>) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             SDL_RenderReadPixels(self.handle.as_ptr(), opt2ptr(area).cast())
         })
     }
@@ -1034,7 +1036,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// size and scaling options.
     #[doc(alias = "SDL_CreateRenderer")]
     pub fn new(wnd: Ref<Window>, name: Option<&CStr>) -> Result<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_raw(unsafe {
             SDL_CreateRenderer(wnd.as_raw(), name.map_or(std::ptr::null(), CStr::as_ptr))
         })
     }
@@ -1053,7 +1055,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     /// complete drawing a frame.
     #[doc(alias = "SDL_CreateGPURenderer")]
     pub fn new_gpu(device: Option<Ref<Device>>, wnd: Option<Ref<Window>>) -> Result<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_raw(unsafe {
             SDL_CreateGPURenderer(
                 device.map(|d| d.as_raw()).unwrap_or_default(),
                 wnd.map(|w| w.as_raw()).unwrap_or_default(),

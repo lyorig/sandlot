@@ -249,7 +249,7 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
         self,
         _video: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Window<'ctx, 'vid>> {
-        Window::from_ptr(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) })
+        Window::from_raw(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) })
     }
 
     /// Build the window, and cleanup all properties.
@@ -259,7 +259,7 @@ impl<'p, 'parent, 'parent_ctx, 'parent_vid> WindowBuilder<'p, 'parent, 'parent_c
         self,
         _video: init::Ref<'vid, init::Video<'ctx>>,
     ) -> Result<Window<'ctx, 'vid>> {
-        let res = Window::from_ptr(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) });
+        let res = Window::from_raw(unsafe { SDL_CreateWindowWithProperties(self.inner.id()) });
         Self::clear_from(self.inner);
         res
     }

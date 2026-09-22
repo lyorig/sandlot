@@ -2,6 +2,8 @@
 //! - [x] SDL_QueryGPUFence
 //! - [x] SDL_ReleaseGPUFence
 
+use std::ptr::NonNull;
+
 use sdl3_sys::gpu::*;
 
 use crate::{resource::Ref, resource::resource_new};
@@ -11,6 +13,8 @@ use super::device::Device;
 resource_new! {
     /// An opaque handle representing a fence.
     pub struct Fence<'ctx, 'vid, 'dev> : SDL_GPUFence {
+        raw: *mut SDL_GPUFence,
+        inner: NonNull<SDL_GPUFence>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }

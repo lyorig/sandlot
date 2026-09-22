@@ -207,6 +207,8 @@ resource_new! {
     /// Audio streams are the core of the SDL3 audio interface. You create one or more of them,
     /// bind them to an opened audio device, and feed data to them (or for recording, consume data from them).
     pub struct AudioStream<> : SDL_AudioStream {
+        raw: *mut SDL_AudioStream,
+        inner: NonNull<SDL_AudioStream>,
         marker: PhantomData<()>,
     }
 
@@ -224,7 +226,7 @@ resource_new! {
 impl AudioStream {
     // #[doc(alias = "SDL_OpenAudioDeviceStream")]
     // pub fn open() -> Result<Self> {
-    //     Self::from_ptr(SDL_OpenAudioDeviceStream())
+    //     Self::from_raw(SDL_OpenAudioDeviceStream())
     // }
 }
 

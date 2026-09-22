@@ -2,7 +2,7 @@
 //! - [x] SDL_CreateGPUShader
 //! - [x] SDL_ReleaseGPUShader
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
@@ -114,6 +114,8 @@ impl<'bc, 'ep> ShaderCreateInfo<'bc, 'ep> {
 resource_new! {
     /// An opaque handle representing a compiled shader object.
     pub struct Shader<'ctx, 'vid, 'dev> : SDL_GPUShader {
+        raw: *mut SDL_GPUShader,
+        inner: NonNull<SDL_GPUShader>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -139,7 +141,7 @@ impl<'ctx, 'vid, 'dev> Shader<'ctx, 'vid, 'dev> {
     ) -> Result<Self> {
         let handle = unsafe { SDL_CreateGPUShader(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Release a shader as soon as it is safe to do so.

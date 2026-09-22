@@ -2,7 +2,7 @@
 //! - [x] SDL_CreateGPUComputePipeline
 //! - [x] SDL_ReleaseGPUComputePipeline
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
@@ -102,6 +102,8 @@ resource_new! {
     /// An opaque handle representing a compute pipeline.
     /// Used during compute passes.
     pub struct ComputePipeline<'ctx, 'vid, 'dev> : SDL_GPUComputePipeline {
+        raw: *mut SDL_GPUComputePipeline,
+        inner: NonNull<SDL_GPUComputePipeline>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -128,7 +130,7 @@ impl<'ctx, 'vid, 'dev> ComputePipeline<'ctx, 'vid, 'dev> {
         let handle =
             unsafe { SDL_CreateGPUComputePipeline(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Release a compute pipeline as soon as it is safe to do so.

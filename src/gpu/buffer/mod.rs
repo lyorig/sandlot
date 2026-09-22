@@ -5,7 +5,7 @@
 //! - [x] SDL_SetGPUBufferName
 //! - [x] SDL_UploadToGPUBuffer
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
@@ -196,6 +196,8 @@ resource_new! {
    /// Represents a GPU buffer.
    /// Used for vertices, indices, indirect draw commands, and general compute data.
    pub struct Buffer<'ctx, 'vid, 'dev> : SDL_GPUBuffer {
+       raw: *mut SDL_GPUBuffer,
+       inner: NonNull<SDL_GPUBuffer>,
        marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
    }
 }
@@ -221,7 +223,7 @@ impl<'ctx, 'vid, 'dev> Buffer<'ctx, 'vid, 'dev> {
     ) -> Result<Self> {
         let handle = unsafe { SDL_CreateGPUBuffer(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Release a buffer as soon as it is safe to do so.

@@ -3,7 +3,7 @@
 //! - [x] SDL_CreateGPUGraphicsPipeline
 //! - [x] SDL_ReleaseGPUGraphicsPipeline
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
@@ -120,6 +120,8 @@ resource_new! {
     /// An opaque handle representing a graphics pipeline.
     /// Used during render passes.
     pub struct GraphicsPipeline<'ctx, 'vid, 'dev> : SDL_GPUGraphicsPipeline {
+        raw: *mut SDL_GPUGraphicsPipeline,
+        inner: NonNull<SDL_GPUGraphicsPipeline>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -145,7 +147,7 @@ impl<'ctx, 'vid, 'dev> GraphicsPipeline<'ctx, 'vid, 'dev> {
         let handle =
             unsafe { SDL_CreateGPUGraphicsPipeline(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Convenience function that creates a [`GraphicsPipeline`],

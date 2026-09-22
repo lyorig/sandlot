@@ -18,7 +18,7 @@
 //! - [x] SDL_SetGPUStencilReference
 //! - [x] SDL_SetGPUViewport
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use sdl3_sys::gpu::*;
 
@@ -298,6 +298,8 @@ resource_new! {
     /// An opaque handle representing a render pass.
     /// Transient; invalid once the pass ends.
     pub struct RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPURenderPass {
+        raw: *mut SDL_GPURenderPass,
+        inner: NonNull<SDL_GPURenderPass>,
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
 
@@ -335,7 +337,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> RenderPass<'ctx, 'vid, 'dev, 'cmdbuf> {
             )
         };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Convenience function that creates a [`RenderPass`], does some work on it,

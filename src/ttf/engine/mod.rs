@@ -10,6 +10,8 @@
 //! - [x] TTF_GetGPUTextEngineWinding
 //! - [x] TTF_SetGPUTextEngineWinding
 
+use std::ptr::NonNull;
+
 use sdl3_ttf_sys::ttf::*;
 
 use crate::{
@@ -39,6 +41,8 @@ impl_enum_transmute!(TTF_GPUTextEngineWinding, Winding, INVALID);
 resource_new!(
     /// A text engine that draws text objects with the SDL GPU API.
     pub struct GpuEngine<'ctx, 'vid, 'dev> : TTF_TextEngine {
+        raw: *mut TTF_TextEngine,
+        inner: NonNull<TTF_TextEngine>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 
@@ -55,7 +59,7 @@ impl<'ctx, 'vid, 'dev> GpuEngine<'ctx, 'vid, 'dev> {
     /// `dev` is the GPU device to use for creating textures and drawing text.
     #[doc(alias = "TTF_CreateGPUTextEngine")]
     pub fn new(dev: Ref<'dev, Device<'ctx, 'vid>>) -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_CreateGPUTextEngine(dev.as_raw()) })
+        Self::from_raw(unsafe { TTF_CreateGPUTextEngine(dev.as_raw()) })
     }
 
     /// Bind the builder to an existing property group.
@@ -88,6 +92,8 @@ impl<'ctx, 'vid, 'dev> GpuEngineHandle<'ctx, 'vid, 'dev> {
 resource_new!(
     /// A text engine that draws text objects to a [`Surface`](crate::surface::Surface).
     pub struct SurfaceEngine<> : TTF_TextEngine {
+        raw: *mut TTF_TextEngine,
+        inner: NonNull<TTF_TextEngine>,
         marker: PhantomData<()>,
     }
 
@@ -102,13 +108,15 @@ impl SurfaceEngine {
     /// Create a text engine for drawing text on SDL surfaces.
     #[doc(alias = "TTF_CreateSurfaceTextEngine")]
     pub fn new() -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_CreateSurfaceTextEngine() })
+        Self::from_raw(unsafe { TTF_CreateSurfaceTextEngine() })
     }
 }
 
 resource_new!(
     /// A text engine that draws text objects with an SDL 2D renderer.
     pub struct RendererEngine<'ctx, 'vid, 'wnd, 'rnd> : TTF_TextEngine {
+        raw: *mut TTF_TextEngine,
+        inner: NonNull<TTF_TextEngine>,
         marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 
@@ -125,7 +133,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererEngine<'ctx, 'vid, 'wnd, 'rnd> {
     /// `rnd` is the renderer to use for creating textures and drawing text.
     #[doc(alias = "TTF_CreateRendererTextEngine")]
     pub fn new(rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>) -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_CreateRendererTextEngine(rnd.as_raw()) })
+        Self::from_raw(unsafe { TTF_CreateRendererTextEngine(rnd.as_raw()) })
     }
 
     /// Bind the builder to an existing property group.

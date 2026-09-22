@@ -2,6 +2,8 @@
 //! - [x] SDL_CreateGPUSampler
 //! - [x] SDL_ReleaseGPUSampler
 
+use std::ptr::NonNull;
+
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
 
 use crate::{
@@ -149,6 +151,8 @@ impl SamplerCreateInfo {
 resource_new! {
     /// An opaque handle representing a sampler.
     pub struct Sampler<'ctx, 'vid, 'dev> : SDL_GPUSampler {
+        raw: *mut SDL_GPUSampler,
+        inner: NonNull<SDL_GPUSampler>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -173,7 +177,7 @@ impl<'ctx, 'vid, 'dev> Sampler<'ctx, 'vid, 'dev> {
     ) -> Result<Self> {
         let handle = unsafe { SDL_CreateGPUSampler(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Release a sampler as soon as it is safe to do so.

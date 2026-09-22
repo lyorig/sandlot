@@ -3,7 +3,7 @@
 //! - [x] SDL_DestroyGPURenderState
 //! - [x] SDL_SetGPURenderStateFragmentUniforms
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use sdl3_sys::{properties::SDL_PropertiesID, render::*};
 
@@ -81,6 +81,8 @@ impl<'frag, 'sbin, 'sbin_t, 'sbin_s, 'stex, 'stex_t, 'sbuf, 'sbuf_b, 'ctx, 'vid,
 resource_new! {
     /// A custom GPU render state.
     pub struct RenderState<'ctx, 'vid, 'wnd, 'rnd> : SDL_GPURenderState {
+        raw: *mut SDL_GPURenderState,
+        inner: NonNull<SDL_GPURenderState>,
         marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 
@@ -121,6 +123,6 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RenderState<'ctx, 'vid, 'wnd, 'rnd> {
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
         ci: &RenderStateCreateInfo,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateGPURenderState(rnd.as_raw(), &raw const ci.0) })
+        Self::from_raw(unsafe { SDL_CreateGPURenderState(rnd.as_raw(), &raw const ci.0) })
     }
 }

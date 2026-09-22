@@ -4,6 +4,8 @@
 //! - [x] SDL_CopyGPUTextureToTexture
 //! - [x] SDL_EndGPUCopyPass
 
+use std::ptr::NonNull;
+
 use sdl3_sys::gpu::*;
 
 use crate::{Result, gpu::Cycle, resource::Ref, resource::resource_new};
@@ -14,6 +16,8 @@ resource_new! {
     /// An opaque handle representing a copy pass.
     /// Transient; invalid once the pass ends.
     pub struct CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUCopyPass {
+        raw: *mut SDL_GPUCopyPass,
+        inner: NonNull<SDL_GPUCopyPass>,
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
 
@@ -32,7 +36,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> CopyPass<'ctx, 'vid, 'dev, 'cmdbuf> {
     #[doc(alias = "SDL_BeginGPUCopyPass")]
     pub fn new(cmdbuf: Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>) -> Result<Self> {
         let handle = unsafe { SDL_BeginGPUCopyPass(cmdbuf.as_raw()) };
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Convenience function that creates a [`CopyPass`], does some work on it,

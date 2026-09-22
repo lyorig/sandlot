@@ -18,6 +18,8 @@
 //! - [x] SDL_WindowSupportsGPUSwapchainComposition
 //! - [x] SDL_GetGPUShaderFormats
 
+use std::ptr::NonNull;
+
 use sdl3_sys::gpu::*;
 
 use crate::{
@@ -88,6 +90,8 @@ impl_enum_transmute!(SDL_GPUSwapchainComposition, SwapchainComposition);
 resource_new! {
     /// An opaque handle representing the SDL_GPU context.
     pub struct Device<'ctx, 'vid> : SDL_GPUDevice {
+        raw: *mut SDL_GPUDevice,
+        inner: NonNull<SDL_GPUDevice>,
         marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
 
@@ -111,7 +115,7 @@ impl<'ctx, 'vid> Device<'ctx, 'vid> {
     ) -> Result<Self> {
         let fmts = SDL_GPUShaderFormat::new(formats.bits());
         let handle = unsafe { SDL_CreateGPUDevice(fmts, debug.into(), std::ptr::null()) };
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Build a [`Device`] with additional parameters not available in [`Device::new`].

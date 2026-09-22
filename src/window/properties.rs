@@ -45,7 +45,7 @@ impl<'ctx, 'vid, 'wnd> WindowProperties<'ctx, 'vid, 'wnd> {
                 .pointer(SDL_PROP_WINDOW_SHAPE_POINTER, std::ptr::null_mut())
         };
 
-        SurfaceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
+        SurfaceHandle::from_raw(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
     /// Returns whether the window has HDR headroom above the SDR white point.

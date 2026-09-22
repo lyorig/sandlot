@@ -144,7 +144,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd, 'tex> TextureProperties<'ctx, 'vid, 'wnd, 'rnd, 'te
     pub unsafe fn gpu_texture<'dev>(self) -> Option<Ref<'tex, gpu::Texture<'ctx, 'vid, 'dev>>> {
         self.opt_ptr(SDL_PROP_TEXTURE_GPU_TEXTURE_POINTER)
             .map(|ptr| unsafe {
-                let handle = gpu::TextureHandle::from_ptr(ptr.as_ptr().cast()).unwrap_unchecked();
+                let handle = gpu::TextureHandle::from_raw(ptr.as_ptr().cast()).unwrap_unchecked();
                 Ref::from_handle(handle)
             })
     }

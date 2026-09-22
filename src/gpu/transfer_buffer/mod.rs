@@ -86,6 +86,8 @@ resource_new! {
     /// An opaque handle representing a transfer buffer.
     /// Used for transferring data to and from the GPU.
     pub struct TransferBuffer<> : SDL_GPUTransferBuffer {
+        raw: *mut SDL_GPUTransferBuffer,
+        inner: NonNull<SDL_GPUTransferBuffer>,
         marker: PhantomData<()>,
     }
 }
@@ -112,7 +114,7 @@ impl TransferBuffer {
     pub fn new(device: Ref<Device>, create_info: &TransferBufferCreateInfo) -> Result<Self> {
         let handle =
             unsafe { SDL_CreateGPUTransferBuffer(device.as_raw(), &raw const create_info.0) };
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Creates a new [`TransferBuffer`], maps it, calls `write` with the mapped data, then unmaps.

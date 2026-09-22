@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::{ffi::CStr, ptr::NonNull};
 
 use sdl3_ttf_sys::ttf::*;
 
@@ -15,6 +15,9 @@ use crate::{
 resource_new! {
     /// A font loaded from a TTF file.
     pub struct Font<'ttf> : TTF_Font {
+        raw: *mut TTF_Font,
+        inner: NonNull<TTF_Font>,
+
         marker: PhantomData<(init::Ref<'ttf, Context>)>,
     }
 
@@ -51,7 +54,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Blended")]
     pub fn render_glyph_blended(self, ch: char, color: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderGlyph_Blended(self.handle.as_ptr(), ch.into(), color.into())
         })
     }
@@ -73,7 +76,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_glyph_blended`].
     #[doc(alias = "TTF_RenderGlyph_LCD")]
     pub fn render_glyph_lcd(self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderGlyph_LCD(self.handle.as_ptr(), ch.into(), fg.into(), bg.into())
         })
     }
@@ -96,7 +99,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Shaded")]
     pub fn render_glyph_shaded(self, ch: char, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderGlyph_Shaded(self.handle.as_ptr(), ch.into(), fg.into(), bg.into())
         })
     }
@@ -118,7 +121,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_glyph_lcd`].
     #[doc(alias = "TTF_RenderGlyph_Solid")]
     pub fn render_glyph_solid(self, ch: char, color: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderGlyph_Solid(self.handle.as_ptr(), ch.into(), color.into())
         })
     }
@@ -143,7 +146,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Blended")]
     pub fn render_text_blended(self, text: TtfStr, color: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Blended(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -173,7 +176,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_blended`].
     #[doc(alias = "TTF_RenderText_LCD")]
     pub fn render_text_lcd(self, text: TtfStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_LCD(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -205,7 +208,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Shaded")]
     pub fn render_text_shaded(self, text: TtfStr, fg: RgbaU8, bg: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Shaded(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -237,7 +240,7 @@ impl<'ttf> FontHandle<'ttf> {
     /// [`FontHandle::render_text_lcd`].
     #[doc(alias = "TTF_RenderText_Solid")]
     pub fn render_text_solid(self, text: TtfStr, color: RgbaU8) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Solid(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -270,7 +273,7 @@ impl<'ttf> FontHandle<'ttf> {
         color: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Blended_Wrapped(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -306,7 +309,7 @@ impl<'ttf> FontHandle<'ttf> {
         bg: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_LCD_Wrapped(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -344,7 +347,7 @@ impl<'ttf> FontHandle<'ttf> {
         bg: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Shaded_Wrapped(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -381,7 +384,7 @@ impl<'ttf> FontHandle<'ttf> {
         color: RgbaU8,
         wrap_length: i32,
     ) -> Result<Surface> {
-        Surface::from_ptr(unsafe {
+        Surface::from_raw(unsafe {
             TTF_RenderText_Solid_Wrapped(
                 self.handle.as_ptr(),
                 text.as_ptr(),
@@ -440,7 +443,7 @@ impl<'ttf> FontHandle<'ttf> {
     #[doc(alias = "TTF_CopyFont")]
     fn clone(self) -> Font<'ttf> {
         let ptr = unsafe { TTF_CopyFont(self.handle.as_ptr()) };
-        let inner = FontHandle::from_ptr(ptr).expect("A valid font should be copyable");
+        let inner = FontHandle::from_raw(ptr).expect("A valid font should be copyable");
 
         Font { inner }
     }
@@ -468,6 +471,6 @@ impl<'ttf> Font<'ttf> {
     /// happen otherwise.
     #[doc(alias = "TTF_OpenFont")]
     pub unsafe fn open_unchecked(file: &CStr, point_size: f32) -> Result<Self> {
-        Self::from_ptr(unsafe { TTF_OpenFont(file.as_ptr(), point_size) })
+        Self::from_raw(unsafe { TTF_OpenFont(file.as_ptr(), point_size) })
     }
 }

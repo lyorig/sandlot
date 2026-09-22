@@ -60,7 +60,7 @@
 //! - [x] SDL_WriteSurfacePixel
 //! - [x] SDL_WriteSurfacePixelFloat
 
-use std::{ffi::CStr, mem::MaybeUninit};
+use std::{ffi::CStr, mem::MaybeUninit, ptr::NonNull};
 
 use crate::{
     Result,
@@ -97,6 +97,8 @@ resource_new! {
     ///
     /// When a surface holds MJPG format data, pixels points at the compressed JPEG image and pitch is the length of that data.
     pub struct Surface<> : SDL_Surface {
+        raw: *mut SDL_Surface,
+        inner: NonNull<SDL_Surface>,
         marker: PhantomData<()>,
     }
 
@@ -208,7 +210,7 @@ impl SurfaceHandle {
     /// the desired size.
     #[doc(alias = "SDL_ScaleSurface")]
     pub fn scale(self, size: PointI32, sm: ScaleMode) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_ScaleSurface(self.as_raw(), size.x, size.y, sm.to_sdl()) })
+        Surface::from_raw(unsafe { SDL_ScaleSurface(self.as_raw(), size.x, size.y, sm.to_sdl()) })
     }
 
     /// Map an RGB triple to an opaque pixel value for a surface.
@@ -265,7 +267,7 @@ impl SurfaceHandle {
     /// have a reference to them as well.
     #[doc(alias = "SDL_DuplicateSurface")]
     pub fn try_clone(self) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_DuplicateSurface(self.as_raw()) })
+        Surface::from_raw(unsafe { SDL_DuplicateSurface(self.as_raw()) })
     }
 
     /// Perform a stretched pixel copy from this surface to another.
@@ -484,7 +486,7 @@ impl SurfaceHandle {
     /// that is not the case.
     #[doc(alias = "SDL_CreateSurfacePalette")]
     pub fn create_palette(&self) -> Result<Ref<'_, Palette>> {
-        PaletteHandle::from_ptr(unsafe { SDL_CreateSurfacePalette(self.as_raw()) })
+        PaletteHandle::from_raw(unsafe { SDL_CreateSurfacePalette(self.as_raw()) })
             .map(|h| unsafe { Ref::from_handle(h) })
             .ok_or_else(Error::current)
     }
@@ -494,7 +496,7 @@ impl SurfaceHandle {
     /// Returns [`None`] if there is no palette used.
     #[doc(alias = "SDL_GetSurfacePalette")]
     pub fn palette(&self) -> Option<Ref<'_, Palette>> {
-        PaletteHandle::from_ptr(unsafe { SDL_GetSurfacePalette(self.as_raw()) })
+        PaletteHandle::from_raw(unsafe { SDL_GetSurfacePalette(self.as_raw()) })
             .map(|h| unsafe { Ref::from_handle(h) })
     }
 
@@ -844,12 +846,12 @@ impl Surface {
     /// The pixels of the new surface are initialized to zero.
     #[doc(alias = "SDL_CreateSurface")]
     pub fn new(size: PointI32, format: PixelFormat) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateSurface(size.x, size.y, format.to_sdl()) })
+        Self::from_raw(unsafe { SDL_CreateSurface(size.x, size.y, format.to_sdl()) })
     }
 
     /// Load a BMP image from a file.
     #[doc(alias = "SDL_LoadBMP")]
     pub fn from_bmp(path: &CStr) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_LoadBMP(path.as_ptr()) })
+        Self::from_raw(unsafe { SDL_LoadBMP(path.as_ptr()) })
     }
 }

@@ -38,7 +38,7 @@ impl<'ctx> VideoHandle<'ctx> {
     /// The caller must only use the returned handle before its respective window is destroyed.
     #[doc(alias = "SDL_GetGrabbedWindow")]
     pub unsafe fn grabbed_window(&self) -> Option<WindowHandle<'ctx, '_>> {
-        WindowHandle::from_ptr(unsafe { SDL_GetGrabbedWindow() })
+        WindowHandle::from_raw(unsafe { SDL_GetGrabbedWindow() })
     }
 
     /// Get a list of valid windows.
@@ -72,7 +72,7 @@ impl<'ctx> VideoHandle<'ctx> {
     #[doc(alias = "SDL_GetWindowFromID")]
     pub unsafe fn window_from_id(&self, id: WindowId) -> Option<WindowHandle<'ctx, '_>> {
         let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
-        WindowHandle::from_ptr(ptr)
+        WindowHandle::from_raw(ptr)
     }
 
     /// Get a list of currently connected displays.

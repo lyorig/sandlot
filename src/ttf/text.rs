@@ -75,6 +75,8 @@ resource_new! {
     /// with a given engine. With this design, a single [`Text`] can be moved between different special
     /// text objects and prevent bugs at next to no overhead.
    pub struct Text<'ttf, 'font> : TTF_Text {
+       raw: *mut TTF_Text,
+       inner: NonNull<TTF_Text>,
        marker: PhantomData<(Ref<'font, Font<'ttf>>)>,
    }
 
@@ -377,7 +379,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     #[doc(alias = "TTF_GetTextFont")]
     pub fn font(self) -> Result<Ref<'font, Font<'ttf>>> {
         let font = unsafe { TTF_GetTextFont(self.as_raw()) };
-        let handle = FontHandle::from_ptr(font).ok_or_else(Error::current)?;
+        let handle = FontHandle::from_raw(font).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
     }
 
@@ -607,7 +609,7 @@ impl<'ttf, 'font> Text<'ttf, 'font> {
     /// Create a text object from UTF-8 text.
     #[doc(alias = "TTF_CreateText")]
     pub fn new(font: Ref<'font, Font<'ttf>>, text: TtfStr) -> Result<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_raw(unsafe {
             TTF_CreateText(
                 std::ptr::null_mut(),
                 font.as_raw(),

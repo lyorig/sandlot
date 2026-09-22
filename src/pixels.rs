@@ -94,7 +94,10 @@
 //! - [x] SDL_BlendOperation
 //! - [x] SDL_ComposeCustomBlendMode
 
-use std::mem::{self, MaybeUninit};
+use std::{
+    mem::{self, MaybeUninit},
+    ptr::NonNull,
+};
 
 use sdl3_sys::{
     blendmode::*,
@@ -694,6 +697,8 @@ resource_new! {
     ///
     /// Palettes are ref-counted, so think of this as internally containing an [`Rc`](std::rc::Rc).
     pub struct Palette<> : SDL_Palette {
+        raw: *mut SDL_Palette,
+        inner: NonNull<SDL_Palette>,
         marker: PhantomData<()>,
     }
 
@@ -709,7 +714,7 @@ impl Palette {
     /// Returns [`Err`] if there is not enough memory available.
     #[doc(alias = "SDL_CreatePalette")]
     pub fn new(num_colors: i32) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreatePalette(num_colors) })
+        Self::from_raw(unsafe { SDL_CreatePalette(num_colors) })
     }
 }
 

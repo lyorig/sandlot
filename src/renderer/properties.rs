@@ -57,7 +57,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
                 .pointer(SDL_PROP_RENDERER_WINDOW_POINTER, std::ptr::null_mut())
         };
 
-        WindowHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
+        WindowHandle::from_raw(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
     /// The window where rendering is displayed, if this is a surface renderer without a window.
@@ -68,7 +68,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
                 .pointer(SDL_PROP_RENDERER_SURFACE_POINTER, std::ptr::null_mut())
         };
 
-        SurfaceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
+        SurfaceHandle::from_raw(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
     /// The current VSync setting.
@@ -256,7 +256,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> RendererProperties<'ctx, 'vid, 'wnd, 'rnd> {
                 .pointer(SDL_PROP_RENDERER_GPU_DEVICE_POINTER, std::ptr::null_mut())
         };
 
-        DeviceHandle::from_ptr(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
+        DeviceHandle::from_raw(p.cast()).map(|h| unsafe { Ref::from_handle(h) })
     }
 
     fn get_str(self, key: *const c_char) -> Str<'rnd> {

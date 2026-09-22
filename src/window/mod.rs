@@ -284,6 +284,8 @@ impl WindowId {
 resource_new! {
     /// Represents an OS window.
     pub struct Window<'ctx, 'vid> : SDL_Window {
+        raw: *mut SDL_Window,
+        inner: NonNull<SDL_Window>,
         marker: PhantomData<(init::Ref<'vid, init::Video<'ctx>>)>,
     }
 
@@ -480,7 +482,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRenderer")]
     pub fn renderer(&self) -> Option<RendererHandle<'ctx, 'vid, '_>> {
-        RendererHandle::from_ptr(unsafe { SDL_GetRenderer(self.as_raw()) })
+        RendererHandle::from_raw(unsafe { SDL_GetRenderer(self.as_raw()) })
     }
 
     /// Get the display associated with a window.
@@ -497,7 +499,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// Returns [`None`] if the window has no parent.
     #[doc(alias = "SDL_GetWindowParent")]
     pub fn parent(self) -> Option<WindowHandle<'ctx, 'vid>> {
-        WindowHandle::from_ptr(unsafe { SDL_GetWindowParent(self.as_raw()) })
+        WindowHandle::from_raw(unsafe { SDL_GetWindowParent(self.as_raw()) })
     }
 
     /// Get the pixel density of a window.
@@ -704,7 +706,7 @@ impl<'ctx, 'vid> WindowHandle<'ctx, 'vid> {
     /// This function is affected by `SDL_HINT_FRAMEBUFFER_ACCELERATION`.
     #[doc(alias = "SDL_GetWindowSurface")]
     pub fn surface(self) -> Result<Surface> {
-        Surface::from_ptr(unsafe { SDL_GetWindowSurface(self.as_raw()) })
+        Surface::from_raw(unsafe { SDL_GetWindowSurface(self.as_raw()) })
     }
 
     /// Get VSync for the window surface.
@@ -1402,7 +1404,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
         size: PointI32,
         flags: WindowFlags,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateWindow(title.as_ptr(), size.x, size.y, flags.into()) })
+        Self::from_raw(unsafe { SDL_CreateWindow(title.as_ptr(), size.x, size.y, flags.into()) })
     }
 
     /// Create a child popup window of the specified parent window.
@@ -1460,7 +1462,7 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
         size: PointI32,
         flags: WindowFlags,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_raw(unsafe {
             SDL_CreatePopupWindow(
                 parent.as_raw(),
                 offset.x,
@@ -1498,8 +1500,8 @@ impl<'ctx, 'vid> Window<'ctx, 'vid> {
                 // SAFETY: The above function succeeds only when both
                 // the window and renderer are initialized.
                 let init = ret.assume_init();
-                let wnd = Self::from_ptr(init.0).unwrap_unchecked();
-                let rnd = Renderer::from_ptr(init.1).unwrap_unchecked();
+                let wnd = Self::from_raw(init.0).unwrap_unchecked();
+                let rnd = Renderer::from_raw(init.1).unwrap_unchecked();
 
                 Ok((wnd, rnd))
             } else {

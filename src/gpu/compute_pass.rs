@@ -8,6 +8,8 @@
 //! - [x] SDL_DispatchGPUComputeIndirect
 //! - [x] SDL_EndGPUComputePass
 
+use std::ptr::NonNull;
+
 use sdl3_sys::gpu::*;
 
 use crate::{Result, resource::Ref, resource::resource_new};
@@ -55,6 +57,8 @@ resource_new! {
     /// An opaque handle representing a compute pass.
     /// Transient and invalid once the pass ends.
     pub struct ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> : SDL_GPUComputePass {
+        raw: *mut SDL_GPUComputePass,
+        inner: NonNull<SDL_GPUComputePass>,
         marker: PhantomData<(Ref<'cmdbuf, CommandBuffer<'ctx, 'vid, 'dev>>)>,
     }
 
@@ -94,7 +98,7 @@ impl<'ctx, 'vid, 'dev, 'cmdbuf> ComputePass<'ctx, 'vid, 'dev, 'cmdbuf> {
             )
         };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Convenience function that creates a [`ComputePass`], does some work on it,

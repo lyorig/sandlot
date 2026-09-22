@@ -29,7 +29,7 @@
 //! - [ ] SDL_UpdateYUVTexture
 //! - [x] SDL_GetRendererFromTexture
 
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, ptr::NonNull};
 
 use sdl3_sys::{render::*, surface::SDL_ScaleMode};
 
@@ -69,6 +69,8 @@ impl_enum_transmute!(SDL_TextureAccess, TextureAccess);
 resource_new! {
     /// An efficient driver-specific representation of pixel data.
     pub struct Texture<'ctx, 'vid, 'wnd, 'rnd> : SDL_Texture {
+        raw: *mut SDL_Texture,
+        inner: NonNull<SDL_Texture>,
         marker: PhantomData<(Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>)>,
     }
 
@@ -107,7 +109,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     /// Returns [`None`] on failure.
     #[doc(alias = "SDL_GetRendererFromTexture")]
     pub fn renderer(self) -> Option<Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>> {
-        RendererHandle::from_ptr(unsafe { SDL_GetRendererFromTexture(self.handle.as_ptr()) })
+        RendererHandle::from_raw(unsafe { SDL_GetRendererFromTexture(self.handle.as_ptr()) })
             .map(|handle| unsafe { Ref::from_handle(handle) })
     }
 
@@ -350,7 +352,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> Texture<'ctx, 'vid, 'wnd, 'rnd> {
         access: TextureAccess,
         size: PointI32,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe {
+        Self::from_raw(unsafe {
             SDL_CreateTexture(rnd.as_raw(), fmt.to_sdl(), access.into(), size.x, size.y)
         })
     }
@@ -373,6 +375,6 @@ impl<'ctx, 'vid, 'wnd, 'rnd> Texture<'ctx, 'vid, 'wnd, 'rnd> {
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
         surf: Ref<Surface>,
     ) -> Result<Self> {
-        Self::from_ptr(unsafe { SDL_CreateTextureFromSurface(rnd.as_raw(), surf.as_raw()) })
+        Self::from_raw(unsafe { SDL_CreateTextureFromSurface(rnd.as_raw(), surf.as_raw()) })
     }
 }

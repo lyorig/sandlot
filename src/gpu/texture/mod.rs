@@ -5,7 +5,7 @@
 //! - [x] SDL_SetGPUTextureName
 //! - [x] SDL_UploadToGPUTexture
 
-use std::marker::PhantomData;
+use std::{marker::PhantomData, ptr::NonNull};
 
 use bitflags::bitflags;
 use sdl3_sys::{gpu::*, properties::SDL_PropertiesID};
@@ -619,6 +619,8 @@ impl<'t, 'ctx, 'vid, 'dev> BlitRegion<'t, 'ctx, 'vid, 'dev> {
 resource_new! {
     /// An opaque handle representing a texture.
     pub struct Texture<'ctx, 'vid, 'dev> : SDL_GPUTexture {
+        raw: *mut SDL_GPUTexture,
+        inner: NonNull<SDL_GPUTexture>,
         marker: PhantomData<(Ref<'dev, Device<'ctx, 'vid>>)>,
     }
 }
@@ -645,7 +647,7 @@ impl<'ctx, 'vid, 'dev> Texture<'ctx, 'vid, 'dev> {
     ) -> Result<Self> {
         let handle = unsafe { SDL_CreateGPUTexture(device.as_raw(), &raw const create_info.0) };
 
-        Self::from_ptr(handle)
+        Self::from_raw(handle)
     }
 
     /// Release a texture as soon as it is safe to do so.

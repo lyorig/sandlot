@@ -56,7 +56,7 @@ impl<'p> GpuEngineBuilder<'p> {
         dev: Ref<'dev, Device<'ctx, 'vid>>,
     ) -> Result<GpuEngine<'ctx, 'vid, 'dev>> {
         self.device(dev);
-        GpuEngine::from_ptr(unsafe { TTF_CreateGPUTextEngineWithProperties(self.inner.id()) })
+        GpuEngine::from_raw(unsafe { TTF_CreateGPUTextEngineWithProperties(self.inner.id()) })
     }
 
     /// Build the GPU text engine, and clean up its creation properties.
@@ -123,7 +123,7 @@ impl<'p> RendererEngineBuilder<'p> {
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
     ) -> Result<RendererEngine<'ctx, 'vid, 'wnd, 'rnd>> {
         self.renderer(rnd);
-        RendererEngine::from_ptr(unsafe {
+        RendererEngine::from_raw(unsafe {
             TTF_CreateRendererTextEngineWithProperties(self.inner.id())
         })
     }
