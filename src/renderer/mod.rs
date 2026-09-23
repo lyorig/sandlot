@@ -69,7 +69,11 @@
 //! - [ ] SDL_SetRenderViewport
 //! - [x] SDL_SetRenderVSync
 
-use std::{ffi::CStr, mem::MaybeUninit, ptr::NonNull};
+use std::{
+    ffi::CStr,
+    mem::MaybeUninit,
+    ptr::{self, NonNull},
+};
 
 use sdl3_sys::render::*;
 
@@ -83,7 +87,7 @@ use crate::{
     resource::{Ref, resource_new},
     surface::Surface,
     texture::{Texture, TextureHandle},
-    traits,
+    traits::{self, BlendMode as _},
     util::{c_ptr_to_str, mod_reexport, opt2ptr, to_result},
     window::{Window, WindowHandle},
 };
@@ -150,7 +154,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     pub fn properties(&self) -> RendererProperties<'ctx, 'vid, 'wnd, '_> {
         unsafe {
             let id = SDL_GetRendererProperties(self.handle.as_ptr());
-            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+            let handle = PropertiesHandle::from_raw(id).unwrap_unchecked();
             let r = Ref::from_handle(handle);
 
             RendererProperties::new(r)
@@ -536,9 +540,9 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         tex: Option<Ref<Texture>>,
     ) -> Result<()> {
         let (indices, indices_len) =
-            indices.map_or((std::ptr::null(), 0), |i| (i.as_ptr(), i.len() as i32));
+            indices.map_or((ptr::null(), 0), |i| (i.as_ptr(), i.len() as i32));
 
-        let tex = tex.map_or(std::ptr::null_mut(), |t| t.as_raw());
+        let tex = tex.map_or(ptr::null_mut(), |t| t.as_raw());
 
         to_result(unsafe {
             SDL_RenderGeometry(
@@ -552,33 +556,6 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         })
     }
 
-    /// Render a list of triangles, optionally using a texture and indices into the vertex array, with a temporary color.
-    ///
-    /// # Parameters
-    ///
-    /// - `vertices`: the vertices to render; its length must be a multiple of 3
-    /// - `indices`: the indices into `vertices`, or [`None`] to render vertices in order
-    /// - `tex`: the texture to use, or [`None`]
-    /// - `col`: the temporary drawing color
-    ///
-    /// Color and alpha modulation is done per vertex (the alpha/color mod of `tex` are ignored).
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderGeometry")]
-    pub fn draw_geometry_with(
-        self,
-        vertices: &[Vertex],
-        indices: Option<&[i32]>,
-        tex: Option<Ref<Texture>>,
-        col: RgbaF32,
-    ) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_geometry(vertices, indices, tex);
-        self.set_draw_color_f32(old);
-
-        ret
-    }
-
     /// Draw a line on the current rendering target at subpixel precision.
     ///
     /// # Parameters
@@ -588,25 +565,6 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_RenderLine")]
     pub fn draw_line(self, start: PointF32, end: PointF32) -> Result<()> {
         to_result(unsafe { SDL_RenderLine(self.handle.as_ptr(), start.x, start.y, end.x, end.y) })
-    }
-
-    /// Draw a line on the current rendering target at subpixel precision,
-    /// temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `start`: the coordinates of the start point
-    /// - `end`: the coordinates of the end point
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderLine")]
-    pub fn draw_line_with(self, start: PointF32, end: PointF32, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_line(start, end);
-        self.set_draw_color_f32(old);
-
-        ret
     }
 
     /// Draw a series of connected lines on the current rendering target at
@@ -626,46 +584,10 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         })
     }
 
-    /// Draw a series of connected lines on the current rendering target at
-    /// subpixel precision, temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `lines`: the points along the lines; `lines.len() - 1` lines are drawn
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderLines")]
-    pub fn draw_lines_with(self, lines: &[PointF32], col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_lines(lines);
-        self.set_draw_color_f32(old);
-
-        ret
-    }
-
     /// Draw a point on the current rendering target at subpixel precision.
     #[doc(alias = "SDL_RenderPoint")]
     pub fn draw_point(self, pos: PointF32) -> Result<()> {
         to_result(unsafe { SDL_RenderPoint(self.handle.as_ptr(), pos.x, pos.y) })
-    }
-
-    /// Draw a point on the current rendering target at subpixel precision,
-    /// temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `pos`: the coordinates of the point
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderPoint")]
-    pub fn draw_point_with(self, pos: PointF32, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_point(pos);
-        self.set_draw_color_f32(old);
-
-        ret
     }
 
     /// Draw multiple points on the current rendering target at subpixel
@@ -681,47 +603,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         })
     }
 
-    /// Draw multiple points on the current rendering target at subpixel
-    /// precision, temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `points`: the points to draw
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderPoints")]
-    pub fn draw_points_with(self, points: &[PointF32], col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_points(points);
-        self.set_draw_color_f32(old);
-
-        ret
-    }
-
     /// Draw a rectangle on the current rendering target at subpixel
     /// precision.
     #[doc(alias = "SDL_RenderRect")]
     pub fn draw_rect(self, rect: Option<&RectF32>) -> Result<()> {
         to_result(unsafe { SDL_RenderRect(self.handle.as_ptr(), opt2ptr(rect).cast()) })
-    }
-
-    /// Draw a rectangle on the current rendering target at subpixel
-    /// precision, temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `rect`: the rectangle to draw, or [`None`] for the entire rendering target
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderRect")]
-    pub fn draw_rect_with(self, rect: Option<&RectF32>, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let res = self.draw_rect(rect);
-        self.set_draw_color_f32(old);
-
-        res
     }
 
     /// Draw some number of rectangles on the current rendering target at
@@ -737,47 +623,11 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         })
     }
 
-    /// Draw some number of rectangles on the current rendering target at
-    /// subpixel precision, temporarily using `col` as the drawing color.
-    ///
-    /// # Parameters
-    ///
-    /// - `rects`: the rectangles to draw
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderRects")]
-    pub fn draw_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.draw_rects(rects);
-        self.set_draw_color_f32(old);
-
-        ret
-    }
-
     /// Fill a rectangle on the current rendering target with the drawing
     /// color at subpixel precision.
     #[doc(alias = "SDL_RenderFillRect")]
     pub fn fill_rect(self, rect: Option<&RectF32>) -> Result<()> {
         to_result(unsafe { SDL_RenderFillRect(self.handle.as_ptr(), opt2ptr(rect).cast()) })
-    }
-
-    /// Fill a rectangle on the current rendering target with `col` at
-    /// subpixel precision.
-    ///
-    /// # Parameters
-    ///
-    /// - `rect`: the rectangle to fill, or [`None`] for the entire rendering target
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderFillRect")]
-    pub fn fill_rect_with(self, rect: Option<&RectF32>, col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let res = self.fill_rect(rect);
-        self.set_draw_color_f32(old);
-
-        res
     }
 
     /// Fill some number of rectangles on the current rendering target with
@@ -791,24 +641,6 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
                 rects.len() as i32,
             )
         })
-    }
-
-    /// Fill some number of rectangles on the current rendering target with
-    /// `col` at subpixel precision.
-    ///
-    /// # Parameters
-    ///
-    /// - `rects`: the rectangles to fill
-    /// - `col`: the temporary drawing color
-    ///
-    /// The previous drawing color is restored afterwards.
-    #[doc(alias = "SDL_RenderFillRects")]
-    pub fn fill_rects_with(self, rects: &[RectF32], col: RgbaF32) -> Result<()> {
-        let old = self.xchg_draw_color_f32(col);
-        let ret = self.fill_rects(rects);
-        self.set_draw_color_f32(old);
-
-        ret
     }
 
     /// Set a texture as the current rendering target.
@@ -838,7 +670,7 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
         to_result(unsafe {
             SDL_SetRenderTarget(
                 self.handle.as_ptr(),
-                tgt.map_or(std::ptr::null_mut(), |t| t.as_raw()),
+                tgt.map_or(ptr::null_mut(), |t| t.as_raw()),
             )
         })
     }
@@ -966,11 +798,53 @@ impl<'ctx, 'vid, 'wnd> RendererHandle<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_SetGPURenderState")]
     pub fn set_render_state(self, rs: Option<Ref<RenderState>>) -> Result<()> {
         to_result(unsafe {
-            SDL_SetGPURenderState(
-                self.as_raw(),
-                rs.map_or(std::ptr::null_mut(), |r| r.as_raw()),
-            )
+            SDL_SetGPURenderState(self.as_raw(), rs.map_or(ptr::null_mut(), |r| r.as_raw()))
         })
+    }
+
+    /// Perform some operations with a given floating-point draw color.
+    ///
+    /// The old color is restored after `f` runs.
+    pub fn with_draw_color_f32<F: FnOnce(Ref<Renderer>) -> Result<()>>(
+        self,
+        col: RgbaF32,
+        f: F,
+    ) -> Result<()> {
+        let old = self.xchg_draw_color_f32(col);
+        let res = f(unsafe { Ref::from_handle(self) });
+        self.set_draw_color_f32(old);
+
+        res
+    }
+
+    /// Perform some operations with a given draw color.
+    ///
+    /// The old color is restored after `f` runs.
+    pub fn with_draw_color_u8<F: FnOnce(Ref<Renderer>) -> Result<()>>(
+        self,
+        col: RgbaU8,
+        f: F,
+    ) -> Result<()> {
+        let old = self.xchg_draw_color_u8(col);
+        let res = f(unsafe { Ref::from_handle(self) });
+        self.set_draw_color_u8(old);
+
+        res
+    }
+
+    /// Perform some operations with a given blend mode.
+    ///
+    /// The old blend mode is restored after `f` runs.
+    pub fn with_blend_mode<F: FnOnce(Ref<Renderer>) -> Result<()>>(
+        self,
+        bm: BlendMode,
+        f: F,
+    ) -> Result<()> {
+        let old = self.xchg_blend_mode(bm);
+        let res = f(unsafe { Ref::from_handle(self) });
+        self.set_blend_mode(old);
+
+        res
     }
 }
 
@@ -1037,7 +911,7 @@ impl<'ctx, 'vid, 'wnd> Renderer<'ctx, 'vid, 'wnd> {
     #[doc(alias = "SDL_CreateRenderer")]
     pub fn new(wnd: Ref<Window>, name: Option<&CStr>) -> Result<Self> {
         Self::from_raw(unsafe {
-            SDL_CreateRenderer(wnd.as_raw(), name.map_or(std::ptr::null(), CStr::as_ptr))
+            SDL_CreateRenderer(wnd.as_raw(), name.map_or(ptr::null(), CStr::as_ptr))
         })
     }
 
