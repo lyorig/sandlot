@@ -1,5 +1,7 @@
 set -e
 
+# These flags are set by default so that they can be output as part of the help text.
+# They're disabled later on if the debug flag is not present.
 DEBUGFLAGS=(-frecord-sources -gline-tables-only)
 
 if [[ $1 = "-h" || $1 = "--help" ]]; then
