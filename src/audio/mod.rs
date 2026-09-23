@@ -87,27 +87,27 @@
 //!
 //! # API coverage
 //!
-//! - [ ] SDL_AudioDevicePaused
+//! - [x] SDL_AudioDevicePaused
 //! - [ ] SDL_AudioStreamDevicePaused
 //! - [ ] SDL_BindAudioStream
 //! - [ ] SDL_BindAudioStreams
-//! - [ ] SDL_ClearAudioStream
-//! - [ ] SDL_CloseAudioDevice
+//! - [x] SDL_ClearAudioStream
+//! - [x] SDL_CloseAudioDevice
 //! - [ ] SDL_ConvertAudioSamples
 //! - [ ] SDL_CreateAudioStream
 //! - [x] SDL_DestroyAudioStream
 //! - [x] SDL_FlushAudioStream
 //! - [ ] SDL_GetAudioDeviceChannelMap
 //! - [ ] SDL_GetAudioDeviceFormat
-//! - [ ] SDL_GetAudioDeviceGain
-//! - [ ] SDL_GetAudioDeviceName
+//! - [x] SDL_GetAudioDeviceGain
+//! - [x] SDL_GetAudioDeviceName
 //! - [ ] SDL_GetAudioDeviceProperties
 //! - [x] SDL_GetAudioDriver
 //! - [ ] SDL_GetAudioFormatName
 //! - [ ] SDL_GetAudioPlaybackDevices
 //! - [ ] SDL_GetAudioRecordingDevices
 //! - [x] SDL_GetAudioStreamAvailable
-//! - [ ] SDL_GetAudioStreamData
+//! - [x] SDL_GetAudioStreamData
 //! - [ ] SDL_GetAudioStreamDevice
 //! - [ ] SDL_GetAudioStreamFormat
 //! - [ ] SDL_GetAudioStreamFrequencyRatio
@@ -119,22 +119,22 @@
 //! - [ ] SDL_GetCurrentAudioDriver
 //! - [x] SDL_GetNumAudioDrivers
 //! - [ ] SDL_GetSilenceValueForFormat
-//! - [ ] SDL_IsAudioDevicePhysical
-//! - [ ] SDL_IsAudioDevicePlayback
+//! - [x] SDL_IsAudioDevicePhysical
+//! - [x] SDL_IsAudioDevicePlayback
 //! - [ ] SDL_LoadWAV
 //! - [ ] SDL_LoadWAV_IO
 //! - [x] SDL_LockAudioStream
 //! - [ ] SDL_MixAudio
-//! - [ ] SDL_OpenAudioDevice
+//! - [x] SDL_OpenAudioDevice
 //! - [ ] SDL_OpenAudioDeviceStream
-//! - [ ] SDL_PauseAudioDevice
+//! - [x] SDL_PauseAudioDevice
 //! - [ ] SDL_PauseAudioStreamDevice
 //! - [ ] SDL_PutAudioStreamData
 //! - [ ] SDL_PutAudioStreamDataNoCopy
 //! - [ ] SDL_PutAudioStreamPlanarData
-//! - [ ] SDL_ResumeAudioDevice
+//! - [x] SDL_ResumeAudioDevice
 //! - [ ] SDL_ResumeAudioStreamDevice
-//! - [ ] SDL_SetAudioDeviceGain
+//! - [x] SDL_SetAudioDeviceGain
 //! - [ ] SDL_SetAudioPostmixCallback
 //! - [ ] SDL_SetAudioStreamFormat
 //! - [ ] SDL_SetAudioStreamFrequencyRatio
@@ -143,16 +143,22 @@
 //! - [ ] SDL_SetAudioStreamInputChannelMap
 //! - [ ] SDL_SetAudioStreamOutputChannelMap
 //! - [ ] SDL_SetAudioStreamPutCallback
-//! - [ ] SDL_UnbindAudioStream
-//! - [ ] SDL_UnbindAudioStreams
+//! - [x] SDL_UnbindAudioStream
+//! - [x] SDL_UnbindAudioStreams
 //! - [x] SDL_UnlockAudioStream
 //!
 
-use std::ptr::NonNull;
+use std::{num::NonZero, ptr::NonNull};
 
 use sdl3_sys::audio::*;
 
-use crate::{Result, error::Error, resource::resource_new, str::Str, util::to_result};
+use crate::{
+    Result,
+    error::Error,
+    resource::{Ref, resource_new},
+    str::Str,
+    util::{opt2ptr, to_result},
+};
 
 /// Get the amount of built-in audio drivers.
 ///
@@ -184,6 +190,81 @@ pub fn num_drivers() -> i32 {
 #[doc(alias = "SDL_GetAudioDriver")]
 pub fn driver(index: i32) -> Option<Str<'static>> {
     unsafe { NonNull::new(SDL_GetAudioDriver(index).cast_mut()).map(|nn| Str::from_non_null(nn)) }
+}
+
+resource_new! {
+    pub struct AudioDevice<> : SDL_AudioDevice {
+        raw: SDL_AudioDeviceID,
+        inner: NonZero<u32>,
+        marker: PhantomData<()>,
+    }
+
+    ~SDL_CloseAudioDevice
+}
+
+impl AudioDevice {
+    const DEFAULT_PLAYBACK: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
+    const DEFAULT_RECORDING: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_RECORDING;
+
+    #[doc(alias = "SDL_OpenAudioDevice")]
+    pub fn open(id: SDL_AudioDeviceID, spec: Option<&SDL_AudioSpec>) -> Result<Self> {
+        Self::from_raw(unsafe { SDL_OpenAudioDevice(id, opt2ptr(spec).cast()) })
+    }
+}
+
+impl AudioDeviceHandle {
+    #[doc(alias = "SDL_GetAudioDeviceGain")]
+    pub fn gain(self) -> Result<f32> {
+        let gain = unsafe { SDL_GetAudioDeviceGain(self.as_raw()) };
+        if gain == -1. {
+            Err(Error::current())
+        } else {
+            Ok(gain)
+        }
+    }
+
+    #[doc(alias = "SDL_SetAudioDeviceGain")]
+    pub fn set_gain(self, gain: f32) -> Result<()> {
+        to_result(unsafe { SDL_SetAudioDeviceGain(self.as_raw(), gain) })
+    }
+
+    /// Get the human-readable name of a specific audio device.
+    ///
+    /// WARNING: this function will work with [`AudioDevice::DEFAULT_PLAYBACK`] and [`AudioDevice::DEFAULT_RECORDING`],
+    /// returning the current default physical devices' names. However, as the default device may change at any time,
+    /// it is likely better to show a generic name to the user, like “System default audio device” or perhaps
+    /// “default [currently %s]”. Do not store this name to disk to reidentify the device in a later run of the program,
+    /// as the default might change in general, and the string will be the name of a specific device and not the abstract
+    /// system default.
+    #[doc(alias = "SDL_GetAudioDeviceName")]
+    pub fn name(self) -> Result<Str<'static>> {
+        unsafe { Str::from_ptr(SDL_GetAudioDeviceName(self.as_raw())) }.ok_or_else(Error::current)
+    }
+
+    #[doc(alias = "SDL_PauseAudioDevice")]
+    pub fn pause(self) -> Result<()> {
+        to_result(unsafe { SDL_PauseAudioDevice(self.as_raw()) })
+    }
+
+    #[doc(alias = "SDL_ResumeAudioDevice")]
+    pub fn resume(self) -> Result<()> {
+        to_result(unsafe { SDL_ResumeAudioDevice(self.as_raw()) })
+    }
+
+    #[doc(alias = "SDL_AudioDevicePaused")]
+    pub fn is_paused(self) -> bool {
+        unsafe { SDL_AudioDevicePaused(self.as_raw()) }
+    }
+
+    #[doc(alias = "SDL_IsAudioDevicePhysical")]
+    pub fn is_physical(self) -> bool {
+        SDL_IsAudioDevicePhysical(self.as_raw())
+    }
+
+    #[doc(alias = "SDL_IsAudioDevicePlayback")]
+    pub fn is_playback(self) -> bool {
+        SDL_IsAudioDevicePlayback(self.as_raw())
+    }
 }
 
 resource_new! {
@@ -226,7 +307,7 @@ resource_new! {
 impl AudioStream {
     // #[doc(alias = "SDL_OpenAudioDeviceStream")]
     // pub fn open() -> Result<Self> {
-    //     Self::from_raw(SDL_OpenAudioDeviceStream())
+    //     Self::from_raw(unsafe { SDL_OpenAudioDeviceStream() })
     // }
 }
 
@@ -269,5 +350,35 @@ impl AudioStreamHandle {
     #[doc(alias = "SDL_UnlockAudioStream")]
     fn unlock(self) -> Result<()> {
         to_result(unsafe { SDL_UnlockAudioStream(self.as_raw()) })
+    }
+
+    #[doc(alias = "SDL_AudioStreamDevicePaused")]
+    pub fn is_paused(self) -> bool {
+        unsafe { SDL_AudioStreamDevicePaused(self.as_raw()) }
+    }
+
+    #[doc(alias = "SDL_UnbindAudioStream")]
+    pub fn unbind_all(streams: &[Ref<AudioStream>]) {
+        unsafe {
+            SDL_UnbindAudioStreams(streams.as_ptr().cast(), streams.len() as _);
+        };
+    }
+
+    #[doc(alias = "SDL_UnbindAudioStream")]
+    pub fn unbind(self) {
+        unsafe { SDL_UnbindAudioStream(self.as_raw()) };
+    }
+
+    #[doc(alias = "SDL_GetAudioStreamData")]
+    pub fn data(self, buf: &mut [u8]) -> Result<i32> {
+        let n = unsafe {
+            SDL_GetAudioStreamData(self.as_raw(), buf.as_mut_ptr().cast(), buf.len() as _)
+        };
+
+        if n == -1 {
+            Err(Error::current())
+        } else {
+            Ok(n)
+        }
     }
 }
