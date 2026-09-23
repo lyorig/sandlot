@@ -92,104 +92,108 @@ use sdl3_sys::properties::*;
 use crate::{
     Result,
     error::Error,
-    resource::{Handle, Ref, RefMut, Resource},
-    util::{opt2res_map, to_result},
+    resource::{Ref, resource_new},
+    util::to_result,
 };
 
 #[expect(unused_imports)]
 use crate::init::ContextHandle;
 
-/// An ID that represents a properties set.
-///
-/// While this looks like an integer to the application, SDL properties are
-/// actually key/value stores that can manage sets of information with
-/// multiple datatypes.
-#[derive(Clone, Copy)]
-#[doc(alias = "SDL_PropertiesID")]
-pub struct PropertiesHandle {
-    pub(crate) handle: NonZero<u32>,
+resource_new! {
+    /// An ID that represents a properties set.
+    ///
+    /// While this looks like an integer to the application, SDL properties are
+    /// actually key/value stores that can manage sets of information with
+    /// multiple datatypes.
+    pub struct Properties<> : SDL_PropertiesID {
+        raw: SDL_PropertiesID,
+        inner: NonZero<u32>,
+        marker: PhantomData<()>,
+    }
+
+    /// Destroy a group of properties.
+    ///
+    /// All properties are deleted and their cleanup functions will be
+    /// called, if any.
+    ~SDL_DestroyProperties
 }
 
 impl PropertiesHandle {
-    pub(crate) fn from_id(handle: SDL_PropertiesID) -> Option<Self> {
-        NonZero::new(handle.0).map(|handle| Self { handle })
-    }
-
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_GetNumberProperty")]
     pub unsafe fn number(self, key: *const c_char, default: i64) -> i64 {
-        unsafe { SDL_GetNumberProperty(self.id(), key, default) }
+        unsafe { SDL_GetNumberProperty(self.as_raw(), key, default) }
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_GetFloatProperty")]
     pub unsafe fn float(self, key: *const c_char, default: f32) -> f32 {
-        unsafe { SDL_GetFloatProperty(self.id(), key, default) }
+        unsafe { SDL_GetFloatProperty(self.as_raw(), key, default) }
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_GetPointerProperty")]
     pub unsafe fn pointer(self, key: *const c_char, default: *mut c_void) -> *mut c_void {
-        unsafe { SDL_GetPointerProperty(self.id(), key, default) }
+        unsafe { SDL_GetPointerProperty(self.as_raw(), key, default) }
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_GetStringProperty")]
     pub unsafe fn string(self, key: *const c_char, default: *const c_char) -> *const c_char {
-        unsafe { SDL_GetStringProperty(self.id(), key, default) }
+        unsafe { SDL_GetStringProperty(self.as_raw(), key, default) }
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_GetBooleanProperty")]
     pub unsafe fn bool(self, key: *const c_char, default: bool) -> bool {
-        unsafe { SDL_GetBooleanProperty(self.id(), key, default) }
+        unsafe { SDL_GetBooleanProperty(self.as_raw(), key, default) }
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_SetNumberProperty")]
     pub unsafe fn set_number(self, key: *const c_char, value: i64) -> Result<()> {
-        to_result(unsafe { SDL_SetNumberProperty(self.id(), key, value) })
+        to_result(unsafe { SDL_SetNumberProperty(self.as_raw(), key, value) })
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_SetFloatProperty")]
     pub unsafe fn set_float(self, key: *const c_char, value: f32) -> Result<()> {
-        to_result(unsafe { SDL_SetFloatProperty(self.id(), key, value) })
+        to_result(unsafe { SDL_SetFloatProperty(self.as_raw(), key, value) })
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_SetPointerProperty")]
     pub unsafe fn set_pointer(self, key: *const c_char, value: *mut c_void) -> Result<()> {
-        to_result(unsafe { SDL_SetPointerProperty(self.id(), key, value) })
+        to_result(unsafe { SDL_SetPointerProperty(self.as_raw(), key, value) })
     }
 
     /// # Safety
     /// `key` and `value` must be valid, null-terminated C strings.
     #[doc(alias = "SDL_SetStringProperty")]
     pub unsafe fn set_string(self, key: *const c_char, value: *const c_char) -> Result<()> {
-        to_result(unsafe { SDL_SetStringProperty(self.id(), key, value) })
+        to_result(unsafe { SDL_SetStringProperty(self.as_raw(), key, value) })
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_SetBooleanProperty")]
     pub unsafe fn set_bool(self, key: *const c_char, value: bool) -> Result<()> {
-        to_result(unsafe { SDL_SetBooleanProperty(self.id(), key, value) })
+        to_result(unsafe { SDL_SetBooleanProperty(self.as_raw(), key, value) })
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_ClearProperty")]
     pub unsafe fn clear(self, key: *const c_char) -> Result<()> {
-        to_result(unsafe { SDL_ClearProperty(self.id(), key) })
+        to_result(unsafe { SDL_ClearProperty(self.as_raw(), key) })
     }
 
     /// Copy a group of properties.
@@ -200,14 +204,14 @@ impl PropertiesHandle {
     /// overwritten.
     #[doc(alias = "SDL_CopyProperties")]
     fn copy_to(self, dst: Ref<Properties>) -> Result<()> {
-        to_result(unsafe { SDL_CopyProperties(self.id(), dst.id()) })
+        to_result(unsafe { SDL_CopyProperties(self.as_raw(), dst.as_raw()) })
     }
 
     /// # Safety
     /// `key` must be a valid, null-terminated C string.
     #[doc(alias = "SDL_HasProperty")]
     pub unsafe fn has(self, key: *const c_char) -> bool {
-        unsafe { SDL_HasProperty(self.id(), key) }
+        unsafe { SDL_HasProperty(self.as_raw(), key) }
     }
 
     /// Get the type of a property in a group of properties.
@@ -215,39 +219,11 @@ impl PropertiesHandle {
     /// Returns the type of the property, or invalid if it is not set.
     #[doc(alias = "SDL_GetPropertyType")]
     unsafe fn type_of(self, key: *const c_char) -> SDL_PropertyType {
-        unsafe { SDL_GetPropertyType(self.id(), key) }
+        unsafe { SDL_GetPropertyType(self.as_raw(), key) }
     }
-
-    pub(crate) fn id(self) -> SDL_PropertiesID {
-        SDL_PropertiesID::new(self.handle.get())
-    }
-
-    pub fn as_raw(&self) -> u32 {
-        self.handle.get()
-    }
-
-    pub fn as_inner(&self) -> NonZero<u32> {
-        self.handle
-    }
-}
-
-/// An ID that represents a properties set.
-///
-/// While this looks like an integer to the application, SDL properties are
-/// actually key/value stores that can manage sets of information with
-/// multiple datatypes.
-#[doc(alias = "SDL_PropertiesID")]
-pub struct Properties {
-    pub(crate) inner: PropertiesHandle,
 }
 
 impl Properties {
-    pub(crate) fn from_id(handle: SDL_PropertiesID) -> Result<Self> {
-        opt2res_map(NonZero::new(handle.0), |handle| Self {
-            inner: PropertiesHandle { handle },
-        })
-    }
-
     /// Create a group of properties.
     ///
     /// # Remarks
@@ -256,63 +232,9 @@ impl Properties {
     #[doc(alias = "SDL_CreateProperties")]
     pub fn new() -> Result<Self> {
         let id = unsafe { SDL_CreateProperties() };
-        match PropertiesHandle::from_id(id) {
+        match PropertiesHandle::from_raw(id) {
             Some(inner) => Ok(Self { inner }),
             None => Err(Error::current()),
         }
-    }
-
-    /// Obtain a raw handle to this resource.
-    ///
-    /// Handles are essentially raw pointers to an underlying resource, having next to no lifetime guarantees.
-    /// Using them at the wrong time (i.e. after their resource has been destroyed) will break many invariants
-    /// that the API relies on.
-    ///
-    /// # Safety
-    ///
-    /// The caller must only use the returned handle within the lifetime of the backing resource.
-    pub unsafe fn as_handle(&self) -> PropertiesHandle {
-        self.inner
-    }
-
-    pub fn as_ref(&self) -> Ref<'_, Properties> {
-        unsafe { Ref::from_handle(self.as_handle()) }
-    }
-
-    pub fn as_mut(&mut self) -> RefMut<'_, Properties> {
-        unsafe { RefMut::from_handle(self.as_handle()) }
-    }
-}
-
-impl std::ops::Deref for Properties {
-    type Target = PropertiesHandle;
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-
-impl std::ops::DerefMut for Properties {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.inner
-    }
-}
-
-impl Handle for PropertiesHandle {
-    type Raw = u32;
-    type Inner = NonZero<Self::Raw>;
-}
-
-impl Resource for Properties {
-    type Handle = PropertiesHandle;
-}
-
-impl Drop for Properties {
-    /// Destroy a group of properties.
-    ///
-    /// All properties are deleted and their cleanup functions will be
-    /// called, if any.
-    #[doc(alias = "SDL_DestroyProperties")]
-    fn drop(&mut self) {
-        unsafe { SDL_DestroyProperties(self.id()) }
     }
 }

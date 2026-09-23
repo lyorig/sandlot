@@ -43,7 +43,7 @@ impl<'p> TransferBufferBuilder<'p> {
         device: Ref<Device>,
         mut create_info: TransferBufferCreateInfo,
     ) -> Result<TransferBuffer> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         TransferBuffer::new(device, &create_info)
     }
 

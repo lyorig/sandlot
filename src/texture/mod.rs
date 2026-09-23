@@ -319,7 +319,7 @@ impl<'ctx, 'vid, 'wnd, 'rnd> TextureHandle<'ctx, 'vid, 'wnd, 'rnd> {
     pub fn properties(&self) -> TextureProperties<'ctx, 'vid, 'wnd, 'rnd, '_> {
         unsafe {
             let id = SDL_GetTextureProperties(self.handle.as_ptr());
-            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+            let handle = PropertiesHandle::from_raw(id).unwrap_unchecked();
             let r = Ref::from_handle(handle);
 
             TextureProperties::new(r)

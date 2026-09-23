@@ -184,5 +184,5 @@ pub fn pixel_format_from_texture_format(format: TextureFormat) -> Option<PixelFo
 /// is supported.
 #[doc(alias = "SDL_GPUSupportsProperties")]
 pub fn supports_properties(props: Ref<Properties>) -> bool {
-    unsafe { SDL_GPUSupportsProperties(props.id()) }
+    unsafe { SDL_GPUSupportsProperties(props.as_raw()) }
 }

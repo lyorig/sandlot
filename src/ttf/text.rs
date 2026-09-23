@@ -404,7 +404,7 @@ impl<'ttf, 'font> TextHandle<'ttf, 'font> {
     #[doc(alias = "TTF_GetTextProperties")]
     pub fn properties(&self) -> Result<Ref<'_, Properties>> {
         let id = unsafe { TTF_GetTextProperties(self.as_raw()) };
-        let handle = PropertiesHandle::from_id(id).ok_or_else(Error::current)?;
+        let handle = PropertiesHandle::from_raw(id).ok_or_else(Error::current)?;
         Ok(unsafe { Ref::from_handle(handle) })
     }
 

@@ -42,7 +42,7 @@ impl<'p> GraphicsPipelineBuilder<'p> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: GraphicsPipelineCreateInfo,
     ) -> Result<GraphicsPipeline<'ctx, 'vid, 'dev>> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         GraphicsPipeline::new(device, &create_info)
     }
 

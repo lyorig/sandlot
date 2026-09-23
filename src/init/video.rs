@@ -70,7 +70,7 @@ impl<'ctx> VideoHandle<'ctx> {
     /// The numeric ID is what [`SDL_WindowEvent`] references, and is necessary
     /// to map these events to specific window objects.
     #[doc(alias = "SDL_GetWindowFromID")]
-    pub unsafe fn window_from_id(&self, id: WindowId) -> Option<WindowHandle<'ctx, '_>> {
+    pub unsafe fn window_from_raw(&self, id: WindowId) -> Option<WindowHandle<'ctx, '_>> {
         let ptr = unsafe { SDL_GetWindowFromID(id.as_raw()) };
         WindowHandle::from_raw(ptr)
     }

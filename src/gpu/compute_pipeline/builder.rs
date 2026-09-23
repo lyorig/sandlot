@@ -43,7 +43,7 @@ impl<'p> ComputePipelineBuilder<'p> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: ComputePipelineCreateInfo<'_, '_>,
     ) -> Result<ComputePipeline<'ctx, 'vid, 'dev>> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         ComputePipeline::new(device, &create_info)
     }
 

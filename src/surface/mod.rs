@@ -745,7 +745,7 @@ impl SurfaceHandle {
     pub fn properties(&self) -> SurfaceProperties<'_> {
         let r = unsafe {
             let id = SDL_GetSurfaceProperties(self.as_raw());
-            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+            let handle = PropertiesHandle::from_raw(id).unwrap_unchecked();
 
             Ref::from_handle(handle)
         };

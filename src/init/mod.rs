@@ -195,7 +195,7 @@ impl ContextHandle {
     #[doc(alias = "SDL_GetGlobalProperties")]
     pub fn global_properties(&self) -> Result<resource::Ref<'_, Properties>> {
         let id = unsafe { SDL_GetGlobalProperties() };
-        match PropertiesHandle::from_id(id) {
+        match PropertiesHandle::from_raw(id) {
             Some(p) => Ok(unsafe { resource::Ref::from_handle(p) }),
             None => Err(Error::current()),
         }

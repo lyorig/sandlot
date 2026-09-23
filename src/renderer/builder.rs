@@ -118,7 +118,7 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
     pub fn build(self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
-        Renderer::from_raw(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) })
+        Renderer::from_raw(unsafe { SDL_CreateRendererWithProperties(self.inner.as_raw()) })
     }
 
     /// Build the renderer, and cleanup all properties.
@@ -129,7 +129,8 @@ impl<'p, 'ctx, 'vid, 'wnd, 'surf> RendererBuilder<'p, 'ctx, 'vid, 'wnd, 'surf> {
     /// initialized.
     #[doc(alias = "SDL_CreateRendererWithProperties")]
     pub fn build_cleanup(self) -> Result<Renderer<'ctx, 'vid, 'wnd>> {
-        let res = Renderer::from_raw(unsafe { SDL_CreateRendererWithProperties(self.inner.id()) });
+        let res =
+            Renderer::from_raw(unsafe { SDL_CreateRendererWithProperties(self.inner.as_raw()) });
         Self::clear_from(self.inner);
         res
     }

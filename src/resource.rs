@@ -180,7 +180,7 @@ macro_rules! resource_new {
             $(#[$doc])*
             impl<$($lt),*> [<$owned Handle>]<$($lt),*> {
                 pub(crate) fn from_raw(raw: $raw) -> Option<Self> {
-                    <$inner>::new(raw).map(|nn| Self {
+                    <$inner>::new(raw.into()).map(|nn| Self {
                         handle: nn,
                         marker: ::std::marker::PhantomData,
                     })
@@ -190,7 +190,7 @@ macro_rules! resource_new {
                 /// i.e. `*mut SDL_Surface` for [`Surface`](crate::surface::Surface),
                 /// or `SDL_PropertiesID` for [`Properties`](crate::properties::Properties).
                 pub fn as_raw(self) -> $raw {
-                    self.handle.as_ptr()
+                    unsafe { ::std::mem::transmute(self) }
                 }
 
                 /// Get this type's "inner" representation,
@@ -208,8 +208,8 @@ macro_rules! resource_new {
             }
 
             impl<$($lt),*> $owned<$($lt),*> {
-                pub(crate) fn from_raw(handle: *mut $sdl) -> $crate::Result<Self> {
-                    match <$inner>::new(handle) {
+                pub(crate) fn from_raw(handle: $raw) -> $crate::Result<Self> {
+                    match <$inner>::new(handle.into()) {
                         Some(handle) => Ok(Self {
                             inner: [<$owned Handle>] {
                                 handle,
@@ -288,7 +288,7 @@ macro_rules! resource_new {
                 $(#[$doc_dtor])*
                 #[doc(alias = "" $dtor "")]
                 fn drop(&mut self) {
-                    unsafe { $dtor(self.inner.handle.as_ptr()) }
+                    unsafe { $dtor(self.as_raw()) }
                 }
             }
         }

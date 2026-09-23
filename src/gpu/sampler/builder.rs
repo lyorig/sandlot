@@ -41,7 +41,7 @@ impl<'p> SamplerBuilder<'p> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: SamplerCreateInfo,
     ) -> Result<Sampler<'ctx, 'vid, 'dev>> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         Sampler::new(device, &create_info)
     }
 

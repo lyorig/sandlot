@@ -100,7 +100,7 @@ impl<'p> TextureBuilder<'p> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: TextureCreateInfo,
     ) -> Result<Texture<'ctx, 'vid, 'dev>> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         Texture::new(device, &create_info)
     }
 

@@ -120,7 +120,9 @@ impl<'a> TextureBuilder<'a> {
         self,
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
     ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
-        Texture::from_raw(unsafe { SDL_CreateTextureWithProperties(rnd.as_raw(), self.inner.id()) })
+        Texture::from_raw(unsafe {
+            SDL_CreateTextureWithProperties(rnd.as_raw(), self.inner.as_raw())
+        })
     }
 
     /// Build the texture, and cleanup all properties.
@@ -131,7 +133,7 @@ impl<'a> TextureBuilder<'a> {
         rnd: Ref<'rnd, Renderer<'ctx, 'vid, 'wnd>>,
     ) -> Result<Texture<'ctx, 'vid, 'wnd, 'rnd>> {
         let res = Texture::from_raw(unsafe {
-            SDL_CreateTextureWithProperties(rnd.as_raw(), self.inner.id())
+            SDL_CreateTextureWithProperties(rnd.as_raw(), self.inner.as_raw())
         });
         Self::clear_from(self.inner);
         res

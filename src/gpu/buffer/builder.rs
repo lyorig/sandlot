@@ -41,7 +41,7 @@ impl<'p> BufferBuilder<'p> {
         device: Ref<'dev, Device<'ctx, 'vid>>,
         mut create_info: BufferCreateInfo,
     ) -> Result<Buffer<'ctx, 'vid, 'dev>> {
-        create_info.0.props = self.props.id();
+        create_info.0.props = self.props.as_raw();
         Buffer::new(device, &create_info)
     }
 

@@ -302,7 +302,7 @@ impl<'ctx, 'vid> Display<'ctx, 'vid> {
     pub fn properties(&self) -> DisplayProperties<'ctx, 'vid, '_> {
         let r = unsafe {
             let id = SDL_GetDisplayProperties(self.id());
-            let handle = PropertiesHandle::from_id(id).unwrap_unchecked();
+            let handle = PropertiesHandle::from_raw(id).unwrap_unchecked();
             Ref::from_handle(handle)
         };
 
