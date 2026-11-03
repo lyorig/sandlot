@@ -2,12 +2,19 @@
 
 ## v0.1.5
 
-- Improvements
+- Performance
   - `Error` went from 24 to 8 bytes
 - Fixes
   - `TryFrom<{&str, &CStr}> for Str` now correctly looks for the nul terminator
   - `TryFrom<&CStr>` returns correct nul terminator errors
   - Various naming unifications
+- API additions
+  - initial audio support
+- API changes
+  - `Renderer` has `with_{blend_mode,draw_color}` methods instead of per-method variants
+  - and other things which I cannot remember, since it's been 2 months since I worked on this
+- API removals
+  - removed `impl PartialEq<&[u8]>` for `Str`
 
 ## v0.1.4
 
