@@ -155,7 +155,7 @@ pub fn log(args: Arguments) {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
-        $crate::log::log(format_args!($($arg)*));
+        $crate::log::log(format_args!($($arg)*))
     };
 }
 
@@ -166,10 +166,10 @@ macro_rules! log_trace {
         $crate::log::trace(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::trace($cat, format_args!($($arg)*));
+        $crate::log::trace($cat, format_args!($($arg)*))
     };
 }
 
@@ -180,10 +180,10 @@ macro_rules! log_verbose {
         $crate::log::verbose(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::verbose($cat, format_args!($($arg)*));
+        $crate::log::verbose($cat, format_args!($($arg)*))
     };
 }
 
@@ -194,10 +194,10 @@ macro_rules! log_debug {
         $crate::log::debug(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::debug($cat, format_args!($($arg)*));
+        $crate::log::debug($cat, format_args!($($arg)*))
     };
 }
 
@@ -208,10 +208,10 @@ macro_rules! log_info {
         $crate::log::info(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::info($cat, format_args!($($arg)*));
+        $crate::log::info($cat, format_args!($($arg)*))
     };
 }
 
@@ -222,10 +222,10 @@ macro_rules! log_warn {
         $crate::log::warn(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::warn($cat, format_args!($($arg)*));
+        $crate::log::warn($cat, format_args!($($arg)*))
     };
 }
 
@@ -236,10 +236,10 @@ macro_rules! log_error {
         $crate::log::error(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::error($cat, format_args!($($arg)*));
+        $crate::log::error($cat, format_args!($($arg)*))
     };
 }
 
@@ -250,10 +250,10 @@ macro_rules! log_critical {
         $crate::log::critical(
             $crate::log::Category::Application,
             format_args!($fmt $(, $($arg)*)?),
-        );
+        )
     };
     ($cat:expr, $($arg:tt)*) => {
-        $crate::log::critical($cat, format_args!($($arg)*));
+        $crate::log::critical($cat, format_args!($($arg)*))
     };
 }
 
