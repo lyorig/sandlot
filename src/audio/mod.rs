@@ -155,6 +155,7 @@ use sdl3_sys::audio::*;
 use crate::{
     Result,
     error::Error,
+    init,
     resource::{Ref, resource_new},
     str::Str,
     util::{opt2ptr, to_result},
@@ -192,19 +193,36 @@ pub fn driver(index: i32) -> Option<Str<'static>> {
     unsafe { NonNull::new(SDL_GetAudioDriver(index).cast_mut()).map(|nn| Str::from_non_null(nn)) }
 }
 
+#[doc(alias = "SDL_MixAudio")]
+pub fn mix(src: &[u8], dst: &mut [u8], fmt: SDL_AudioFormat, volume: f32) {
+    // FIXME(doc): mention this extra assertion
+    assert_eq!(dst.len(), src.len());
+
+    // Only fails if `fmt` is an invalid format, which ain't gonna happen.
+    unsafe {
+        SDL_MixAudio(
+            dst.as_mut_ptr(),
+            src.as_ptr(),
+            fmt,
+            src.len() as u32,
+            volume,
+        )
+    };
+}
+
 resource_new! {
-    pub struct AudioDevice<> : SDL_AudioDevice {
+    pub struct AudioDevice<'ctx, 'aud> : SDL_AudioDevice {
         raw: SDL_AudioDeviceID,
         inner: NonZero<u32>,
-        marker: PhantomData<()>,
+        marker: PhantomData<(init::Ref<'aud, init::Audio<'ctx>>)>,
     }
 
     ~SDL_CloseAudioDevice
 }
 
-impl AudioDevice {
-    const DEFAULT_PLAYBACK: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
-    const DEFAULT_RECORDING: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_RECORDING;
+impl<'ctx, 'aud> AudioDevice<'ctx, 'aud> {
+    pub const DEFAULT_PLAYBACK: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK;
+    pub const DEFAULT_RECORDING: SDL_AudioDeviceID = SDL_AUDIO_DEVICE_DEFAULT_RECORDING;
 
     #[doc(alias = "SDL_OpenAudioDevice")]
     pub fn open(id: SDL_AudioDeviceID, spec: Option<&SDL_AudioSpec>) -> Result<Self> {
@@ -212,7 +230,7 @@ impl AudioDevice {
     }
 }
 
-impl AudioDeviceHandle {
+impl<'ctx, 'aud> AudioDeviceHandle<'ctx, 'aud> {
     #[doc(alias = "SDL_GetAudioDeviceGain")]
     pub fn gain(self) -> Result<f32> {
         let gain = unsafe { SDL_GetAudioDeviceGain(self.as_raw()) };
@@ -287,10 +305,10 @@ resource_new! {
     ///
     /// Audio streams are the core of the SDL3 audio interface. You create one or more of them,
     /// bind them to an opened audio device, and feed data to them (or for recording, consume data from them).
-    pub struct AudioStream<> : SDL_AudioStream {
+    pub struct AudioStream<'ctx, 'aud, 'dev> : SDL_AudioStream {
         raw: *mut SDL_AudioStream,
         inner: NonNull<SDL_AudioStream>,
-        marker: PhantomData<()>,
+        marker: PhantomData<(Ref<'dev, AudioDevice<'ctx, 'aud>>)>,
     }
 
     /// Free an audio stream.
@@ -304,14 +322,14 @@ resource_new! {
     ~SDL_DestroyAudioStream
 }
 
-impl AudioStream {
+impl<'ctx, 'aud, 'dev> AudioStream<'ctx, 'aud, 'dev> {
     // #[doc(alias = "SDL_OpenAudioDeviceStream")]
     // pub fn open() -> Result<Self> {
     //     Self::from_raw(unsafe { SDL_OpenAudioDeviceStream() })
     // }
 }
 
-impl AudioStreamHandle {
+impl<'ctx, 'aud, 'dev> AudioStreamHandle<'ctx, 'aud, 'dev> {
     #[doc(alias = "SDL_FlushAudioStream")]
     pub fn flush(self) -> Result<()> {
         to_result(unsafe { SDL_FlushAudioStream(self.as_raw()) })
