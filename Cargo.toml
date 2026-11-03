@@ -27,7 +27,7 @@ tobj = "4.0.5"
 [profile.fast]
 inherits = "release"
 panic = "abort"
-lto = "fat"
+lto = true
 codegen-units = 1
 strip = true
 
