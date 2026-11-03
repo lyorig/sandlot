@@ -24,6 +24,13 @@ cfg_select! {
     }
 }
 
+fn should_debug() -> bool {
+    // We don't use command-line args for anything else,
+    // so this dirty way of iterating over all of them
+    // just to search for a single value is acceptable.
+    std::env::args().any(|arg| arg == "--debug")
+}
+
 fn run() -> Result<()> {
     let ctx = Context::builder()
         .name(s!("Sandlot GPU Compute Shader Demo"))
@@ -38,7 +45,7 @@ fn run() -> Result<()> {
     let props = ctx.global_properties()?;
 
     let device = Device::builder(props)
-        .debug_mode(false)
+        .debug_mode(should_debug())
         .shaders_metallib(true)
         .shaders_dxil(true)
         .shaders_spirv(true)
